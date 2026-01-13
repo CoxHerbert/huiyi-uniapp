@@ -64,7 +64,7 @@ export default defineManifestConfig({
     optimization: {
       subPackages: true,
     },
-    appid: '',
+    appid: 'wx197a077f65940ce3',
     setting: {
       urlCheck: false,
     },
