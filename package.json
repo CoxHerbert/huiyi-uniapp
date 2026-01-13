@@ -92,7 +92,14 @@
     "vue": "~3.4.38",
     "vue-i18n": "^9.14.0",
     "wot-design-uni": "^1.14.0",
-    "sm-crypto": "^0.3.13"
+    "sm-crypto": "^0.3.13",
+    "axios": "^1.7.7",
+    "nprogress": "^0.2.0",
+    "js-base64": "^3.7.7",
+    "js-cookie": "^3.0.5",
+    "crypto-js": "^4.2.0",
+    "weixin-js-sdk": "^1.6.5",
+    "wework-js-sdk": "^1.1.1"
   },
   "devDependencies": {
     "@alova/wormhole": "^1.1.2",
