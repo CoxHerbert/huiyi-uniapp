@@ -1,11 +1,19 @@
 import { defineStore } from 'pinia'
 import { KEYS } from '@/constants/keys'
 import { extractLoginInfo } from '@/utils/login-info'
+import { encrypt } from '@/utils/sm2'
+import { h5Apis } from '@/api'
 import { useUserStore } from './user'
 
 interface LoginForm {
   username: string
   password: string
+  tenantId?: string
+  deptId?: string
+  roleId?: string
+  type?: string
+  key?: string
+  code?: string
 }
 
 const readStorage = <T>(key: string, fallback: T) => {
@@ -19,10 +27,16 @@ const readStorage = <T>(key: string, fallback: T) => {
   }
 }
 
+const toCsv = (value?: string | string[] | null) => {
+  if (Array.isArray(value)) return value.join(',')
+  return value || ''
+}
+
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     token: readStorage<string | null>(KEYS.ACCESS_TOKEN, null),
     refreshToken: readStorage<string | null>(KEYS.REFRESH_TOKEN, null),
+    refreshingPromise: null as Promise<string | null> | null,
   }),
 
   getters: {
@@ -56,36 +70,82 @@ export const useAuthStore = defineStore('auth', {
       this.clearRefreshToken()
       const userStore = useUserStore()
       userStore.reset()
+      this.refreshingPromise = null
     },
 
     async loginByUsername(form: LoginForm) {
-      const response = await Apis.user.loginUser({
-        params: {
-          username: form.username,
-          password: form.password,
-        },
-      }).send()
+      const response = await h5Apis.auth.loginByUsername(
+        form.tenantId || '000000',
+        form.deptId || '',
+        form.roleId || '',
+        form.username,
+        encrypt(form.password),
+        form.type,
+        form.key,
+        form.code,
+      )
 
-      const payload = (response as Record<string, any>) || {}
-      const accessToken = payload.access_token || payload.accessToken || payload.token
-      const refreshToken = payload.refresh_token || payload.refreshToken
+      const payload = (response as UniApp.RequestSuccessCallbackResult)?.data || {}
+      const accessToken = (payload as Record<string, any>).access_token || (payload as Record<string, any>).accessToken
+      const refreshToken = (payload as Record<string, any>).refresh_token || (payload as Record<string, any>).refreshToken
 
       this.setTokenPair({ accessToken, refreshToken })
 
       const userStore = useUserStore()
-      if (payload.user) {
-        userStore.setUserInfo(payload.user)
-      }
-
       const loginInfo = extractLoginInfo(payload) || {
         access_token: accessToken,
         refresh_token: refreshToken,
-        user: payload.user,
+        user: (payload as Record<string, any>).user,
       }
 
       userStore.mergeLoginInfo(loginInfo)
+      await userStore.refreshPermissionData()
 
       return payload
+    },
+
+    async refresh() {
+      if (this.refreshingPromise) {
+        await this.refreshingPromise
+        return this.token
+      }
+      if (!this.refreshToken) {
+        this.logout()
+        throw new Error('No refresh token')
+      }
+
+      const userStore = useUserStore()
+      const userInfo = userStore.userInfo || {}
+      const tenantId = (userInfo as Record<string, any>).tenantId || '000000'
+      const deptId = toCsv((userInfo as Record<string, any>).depts) || (userInfo as Record<string, any>).deptId || ''
+      const roleId = toCsv((userInfo as Record<string, any>).roleIds) || (userInfo as Record<string, any>).roleId || ''
+
+      this.refreshingPromise = (async () => {
+        try {
+          const response = await h5Apis.auth.refreshToken(this.refreshToken, tenantId, deptId, roleId)
+          const payload = (response as UniApp.RequestSuccessCallbackResult)?.data || {}
+          const accessToken = (payload as Record<string, any>).access_token || (payload as Record<string, any>).accessToken || (payload as Record<string, any>).token
+          const nextRefreshToken =
+            (payload as Record<string, any>).refresh_token || (payload as Record<string, any>).refreshToken || this.refreshToken
+
+          if (!accessToken) {
+            throw new Error('Refresh response missing access_token')
+          }
+
+          this.setTokenPair({ accessToken, refreshToken: nextRefreshToken })
+          return accessToken
+        }
+        catch (error) {
+          this.logout()
+          throw error
+        }
+        finally {
+          this.refreshingPromise = null
+        }
+      })()
+
+      await this.refreshingPromise
+      return this.token
     },
   },
 })
