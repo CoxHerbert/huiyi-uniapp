@@ -5,7 +5,7 @@ import mockAdapter from '../mock/mockAdapter'
 import { handleAlovaError, handleAlovaResponse } from './handlers'
 
 export const alovaInstance = createAlova({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'https://petstore3.swagger.io/api/v3',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://192.168.32.15/api',
   ...AdapterUniapp({
     mockRequest: mockAdapter,
   }),
