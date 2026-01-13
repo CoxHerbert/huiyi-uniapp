@@ -1,7 +1,6 @@
 ---
 title: 全局反馈组件
 iframe: true
-url: subPages/feedback/index
 ---
 
 # 全局反馈组件

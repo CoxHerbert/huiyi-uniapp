@@ -1,7 +1,6 @@
 ---
 title: UnoCSS 样式
 iframe: true
-url: subPages/styles/index
 ---
 
 # 样式

@@ -1,7 +1,6 @@
 ---
 title: uni-echarts
 iframe: true
-url: subEcharts/echarts/index
 ---
 # Echarts
 
@@ -162,116 +161,6 @@ const option = ref({
 更多图表类型见 [Echarts](https://echarts.apache.org/examples/zh/index.html) 和 [Uni ECharts](https://uni-echarts.xiaohe.ink/examples/basic)，当然你也可以使用 AI 工具帮助你编写想要的图表配置，它非常善于处理这个事情。
 
 
-## 高级功能：分包优化与异步加载
-
-引入 `Echarts` 后，体积暴增 800KB ，怎么办？
-
-有办法，我们曾在 [Vue3 uni-app 主包 2 MB 危机？1 个插件 10 分钟瘦身](https://mp.weixin.qq.com/s/nnmu91kclQHnE-1TAn11Tg) 一文中介绍过 `@uni-ku/bundle-optimizer`，它是解决微信小程序超包的利器，我们现在使用它的分包优化和分包异步化能力，来优化引入 `Echarts` 后暴增的小程序体积。
-
-这是我们的项目结构，在 `subEcharts` 分包中实现 `Echarts` 相关组件，在 `subAsyncEcharts` 分包中演示分包异步化效果：
-
-```text
-src/
-├── pages/           # 主包页面
-├── subEcharts/      # ECharts 组件分包
-│   └── echarts/
-│       └── components/
-├── subAsyncEcharts/ # 异步 ECharts 演示分包
-│   └── asyncEcharts/
-└── subPages/        # 其他功能分包
-```
-
-### 安装和配置
-
-#### 1. 安装依赖
-
-```bash
-pnpm add -D @uni-ku/bundle-optimizer
-# 或者
-npm install -D @uni-ku/bundle-optimizer
-```
-
-在我们的项目中，`package.json` 已经包含了这个依赖：
-
-```json
-{
-  "devDependencies": {
-    "@uni-ku/bundle-optimizer": "1.3.15-beta.2"
-  }
-}
-```
-
-#### 2. Vite 配置
-
-在 `vite.config.ts` 中配置插件：
-
-```typescript
-import { defineConfig } from 'vite'
-import Uni from '@dcloudio/vite-plugin-uni'
-import Optimization from '@uni-ku/bundle-optimizer'
-
-export default defineConfig({
-  plugins: [
-    Uni(),
-    // 分包优化插件
-    Optimization({
-      logger: true,  // 开启日志输出
-    }),
-  ],
-})
-```
-
-#### 3. 小程序分包配置
-
-在 `manifest.json` 中开启分包优化：
-
-```json
-{
-  "mp-weixin": {
-    "optimization": {
-      "subPackages": true
-    }
-  }
-}
-```
-如果你使用了 `@uni-helper/vite-plugin-uni-manifest` 插件，那么需要在 `manifest.config.ts` 中开启分包优化：
-```ts
-export default defineManifestConfig({
-  'mp-weixin': {
-    optimization: {
-      subPackages: true,
-    },
-  },
-})
-```
-配置完成后，重新构建，我们会发现主包少了 200+KB ，还剩 500KB 在主包中，可以期待 `@uni-ku/bundle-optimizer` 未来可以传送组件到分包中，到时会把大部分构建产物都打包进入分包中。
-> 这里配合 lime-echart 的话，应该可以将 echarts.min.js 完全放入分包，各位可以自行探索。
-
-### 跨分包异步组件引用
-
-在我们的项目中，`subAsyncEcharts` 分包可以异步引用 `subEcharts` 分包中的组件：
-
-```vue
-<!-- src/subAsyncEcharts/asyncEcharts/index.vue -->
-<script setup lang="ts">
-// 跨分包异步导入组件
-import BarChart from '@/subEcharts/echarts/components/BarChart.vue?async'
-import DonutChart from '@/subEcharts/echarts/components/DonutChart.vue?async'
-import FunnelChart from '@/subEcharts/echarts/components/FunnelChart.vue?async'
-import GaugeChart from '@/subEcharts/echarts/components/GaugeChart.vue?async'
-import LineChart from '@/subEcharts/echarts/components/LineChart.vue?async'
-import LiquidFillChart from '@/subEcharts/echarts/components/LiquidFillChart.vue?async'
-import MiniLineChart from '@/subEcharts/echarts/components/MiniLineChart.vue?async'
-import PieChart from '@/subEcharts/echarts/components/PieChart.vue?async'
-import RadarChart from '@/subEcharts/echarts/components/RadarChart.vue?async'
-import ScatterChart from '@/subEcharts/echarts/components/ScatterChart.vue?async'
-import StackedBarChart from '@/subEcharts/echarts/components/StackedBarChart.vue?async'
-</script>
-```
-
-
-更多信息参见 [@uni-ku/bundle-optimizer](https://github.com/uni-ku/bundle-optimizer)。
-
 ## 注意事项和最佳实践
 
 ### 1. 使用 npm 方式安装必须调用 provideEcharts
@@ -393,9 +282,7 @@ export default async () => {
       UniHelperManifest(),
       UniHelperPages({
         dts: 'src/uni-pages.d.ts',
-        subPackages: [
-          'src/subPages',
-        ],
+        subPackages: [],
         exclude: ['**/components/**/*.*'],
       }),
       UniHelperLayouts(),
@@ -432,21 +319,6 @@ export default async () => {
   })
 }
 ```
-
-### 3. 删除相关文件和目录
-
-删除项目中与 ECharts 相关的文件和目录：
-
-```bash
-# 删除 ECharts 组件分包目录
-rm -rf src/subEcharts/
-
-# 删除异步 ECharts 演示分包目录
-rm -rf src/subAsyncEcharts/
-
-```
-
-完成以上步骤后，你的项目就完全移除了 ECharts 相关的依赖和配置，项目体积也会相应减小。
 
 ## 总结
 

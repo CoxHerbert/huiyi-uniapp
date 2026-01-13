@@ -1,7 +1,6 @@
 ---
 title: uni-ku/root
 iframe: true
-url: subPages/uni-ku-root/index
 ---
 # @uni-ku/root
 
@@ -55,9 +54,7 @@ export default async () => {
       // https://github.com/uni-helper/vite-plugin-uni-pages
       UniHelperPages({
         dts: 'src/uni-pages.d.ts',
-        subPackages: [
-          'src/subPages',
-        ],
+        subPackages: [],
         /**
          * 排除的页面，相对于 dir 和 subPackages
          * @default []

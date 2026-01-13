@@ -25,11 +25,7 @@ export default defineConfig({
     // https://github.com/uni-helper/vite-plugin-uni-pages
     UniHelperPages({
       dts: 'src/uni-pages.d.ts',
-      subPackages: [
-        'src/subPages',
-        'src/subEcharts',
-        'src/subAsyncEcharts',
-      ],
+      subPackages: [],
       /**
        * 排除的页面，相对于 dir 和 subPackages
        * @default []
