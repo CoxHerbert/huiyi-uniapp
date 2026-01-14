@@ -37,23 +37,25 @@ const isPlaceholder = (value: string) => !value
         </view>
       </view>
 
-      <view class="border-b border-#f0f1f2 px-4 py-4">
-        <view class="flex items-center justify-between">
-          <view class="flex items-center gap-6">
-            <view class="text-center">
-              <text class="block text-5 font-600 text-#2f2f2f">{{ meeting.startTime }}</text>
-              <text class="text-2.5 text-#9aa0a6">{{ meeting.date }}</text>
-            </view>
-            <view class="text-center">
-              <text class="block text-2.5 text-#9aa0a6">{{ meeting.duration }}</text>
-            </view>
-            <view class="text-center">
-              <text class="block text-5 font-600 text-#2f2f2f">{{ meeting.endTime }}</text>
-              <text class="text-2.5 text-#9aa0a6">{{ meeting.date }}</text>
+      <slot name="time">
+        <view class="border-b border-#f0f1f2 px-4 py-4">
+          <view class="flex items-center justify-between">
+            <view class="flex items-center gap-6">
+              <view class="text-center">
+                <text class="block text-5 font-600 text-#2f2f2f">{{ meeting.startTime }}</text>
+                <text class="text-2.5 text-#9aa0a6">{{ meeting.date }}</text>
+              </view>
+              <view class="text-center">
+                <text class="block text-2.5 text-#9aa0a6">{{ meeting.duration }}</text>
+              </view>
+              <view class="text-center">
+                <text class="block text-5 font-600 text-#2f2f2f">{{ meeting.endTime }}</text>
+                <text class="text-2.5 text-#9aa0a6">{{ meeting.date }}</text>
+              </view>
             </view>
           </view>
         </view>
-      </view>
+      </slot>
 
       <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-4">
         <text class="text-3 text-#8a8f99">参会人</text>
