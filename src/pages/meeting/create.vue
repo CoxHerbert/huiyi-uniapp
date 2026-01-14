@@ -22,8 +22,29 @@ const meetingInfo = {
   attachment: '',
   description: '',
 }
+
+const createMeetingPayload = {
+  admin_userid: 'EW-M1',
+  title: 'TEST',
+  meeting_start: 1767789614,
+  meeting_duration: 300,
+  invitees: {
+    userid: ['EW-7223', 'EW-M1'],
+  },
+}
+
+const handleCreate = () => {
+  // TODO: POST /blade-bip/wx/create
+  // 当前仅保留接口字段示例，等待后端联调时接入。
+  console.log('create meeting payload', createMeetingPayload)
+}
 </script>
 
 <template>
-  <MeetingForm title="创建会议" submit-text="预约会议" :meeting="meetingInfo" />
+  <MeetingForm
+    title="创建会议"
+    submit-text="预约会议"
+    :meeting="meetingInfo"
+    @submit="handleCreate"
+  />
 </template>

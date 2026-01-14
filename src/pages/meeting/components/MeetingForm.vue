@@ -15,6 +15,7 @@ interface MeetingInfo {
 }
 
 const props = defineProps<{ title: string; submitText: string; meeting: MeetingInfo }>()
+const emit = defineEmits<{ (event: 'submit'): void }>()
 
 const displayText = (value: string, placeholder: string) => value || placeholder
 const isPlaceholder = (value: string) => !value
@@ -109,7 +110,7 @@ const isPlaceholder = (value: string) => !value
     </view>
 
     <view class="mx-4 mt-6">
-      <wd-button type="primary" block>{{ submitText }}</wd-button>
+      <wd-button type="primary" block @click="emit('submit')">{{ submitText }}</wd-button>
     </view>
   </view>
 </template>

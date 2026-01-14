@@ -22,6 +22,12 @@ const meetingDetail = {
 const goToEdit = () => {
   uni.navigateTo({ url: '/pages/meeting/edit' })
 }
+
+const cancelMeeting = () => {
+  // TODO: GET /blade-bip/wx/cancel?meetingId=meetingId
+  // 当前仅保留接口说明，等待后端联调时接入。
+  console.log('cancel meeting', { meetingId: 'meetingId' })
+}
 </script>
 
 <template>
@@ -82,7 +88,7 @@ const goToEdit = () => {
     </view>
 
     <view class="mx-4 mt-8 flex gap-3">
-      <wd-button type="default" plain block>取消会议</wd-button>
+      <wd-button type="default" plain block @click="cancelMeeting">取消会议</wd-button>
       <wd-button type="primary" block @click="goToEdit">编辑会议</wd-button>
     </view>
   </view>
