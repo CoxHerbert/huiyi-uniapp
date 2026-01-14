@@ -22,6 +22,20 @@ const meetingForm = reactive({
   password: '',
   attachment: '',
   description: '',
+  agentid: '1000014',
+  calId: '',
+  hosts: '',
+  ringUsers: '',
+  remindScope: '1',
+  remindBefore: '0,900',
+  isRepeat: false,
+  repeatType: '0',
+  repeatUntil: '',
+  repeatInterval: '1',
+  enableWaitingRoom: false,
+  allowEnterBeforeHost: true,
+  enableEnterMute: false,
+  enableScreenWatermark: false,
 })
 
 function parseTime(time: string) {
@@ -77,11 +91,19 @@ watchEffect(() => {
   meetingForm.duration = durationLabel.value
 })
 
-const invitees = computed(() =>
-  meetingForm.participants
+const parseUserIds = (value: string) =>
+  value
     .split(/[、,，]/)
     .map((item) => item.trim())
-    .filter(Boolean),
+    .filter(Boolean)
+
+const invitees = computed(() => parseUserIds(meetingForm.participants))
+
+const remindBefore = computed(() =>
+  meetingForm.remindBefore
+    .split(/[、,，]/)
+    .map((item) => Number(item.trim()))
+    .filter((value) => !Number.isNaN(value)),
 )
 
 const createMeetingPayload = computed(() => ({
@@ -89,13 +111,33 @@ const createMeetingPayload = computed(() => ({
   title: meetingForm.name,
   meeting_start: meetingStartTimestamp.value,
   meeting_duration: meetingDurationSeconds.value,
-  meeting_type: meetingForm.type,
-  meeting_password: meetingForm.password,
-  meeting_room: meetingForm.room,
-  meeting_location: meetingForm.location,
-  meeting_desc: meetingForm.description,
+  description: meetingForm.description,
+  location: meetingForm.location,
+  agentid: Number(meetingForm.agentid) || undefined,
   invitees: {
     userid: invitees.value.length ? invitees.value : ['EW-7223'],
+  },
+  settings: {
+    remind_scope: Number(meetingForm.remindScope) || 1,
+    password: meetingForm.password,
+    enable_waiting_room: meetingForm.enableWaitingRoom,
+    allow_enter_before_host: meetingForm.allowEnterBeforeHost,
+    enable_enter_mute: meetingForm.enableEnterMute ? 1 : 0,
+    enable_screen_watermark: meetingForm.enableScreenWatermark,
+    hosts: {
+      userid: parseUserIds(meetingForm.hosts),
+    },
+    ring_users: {
+      userid: parseUserIds(meetingForm.ringUsers),
+    },
+  },
+  cal_id: meetingForm.calId || undefined,
+  reminders: {
+    is_repeat: meetingForm.isRepeat ? 1 : 0,
+    repeat_type: Number(meetingForm.repeatType) || 0,
+    repeat_until: Number(meetingForm.repeatUntil) || undefined,
+    repeat_interval: Number(meetingForm.repeatInterval) || 1,
+    remind_before: remindBefore.value,
   },
 }))
 
