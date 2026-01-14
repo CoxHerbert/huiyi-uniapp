@@ -7,6 +7,7 @@ type _LocationUrl =
   "/pages/index/index" |
   "/pages/about/index" |
   "/pages/login/account" |
+  "/pages/meeting/edit" |
   "/pages/meeting/index";
 
 interface NavigateToOptions {

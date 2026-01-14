@@ -2,9 +2,9 @@
 import MeetingForm from './components/MeetingForm.vue'
 
 definePage({
-  name: 'meeting',
+  name: 'meeting-edit',
   style: {
-    navigationBarTitleText: '创建会议',
+    navigationBarTitleText: '编辑会议',
   },
 })
 
@@ -16,14 +16,14 @@ const meetingInfo = {
   date: '2026/01/09',
   duration: '60分钟',
   participants: '张浩',
-  room: '',
-  location: '',
-  password: '',
+  room: 'XX会议室',
+  location: 'XXXX地点',
+  password: '333333',
   attachment: '',
-  description: '',
+  description: 'XXXXXXXX',
 }
 </script>
 
 <template>
-  <MeetingForm title="创建会议" submit-text="预约会议" :meeting="meetingInfo" />
+  <MeetingForm title="编辑会议" submit-text="保存" :meeting="meetingInfo" />
 </template>
