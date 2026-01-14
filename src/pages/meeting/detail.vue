@@ -6,6 +6,8 @@ definePage({
   },
 })
 
+import { cancelMeeting, getMeetingInfo } from '@/api/meeting'
+
 const meetingDetail = {
   title: '张浩预定的会议',
   startTime: '14:00',
@@ -21,10 +23,13 @@ const meetingDetail = {
 
 const meetingId = ref('meetingId')
 
-const loadMeetingDetail = () => {
-  // TODO: GET /blade-bip/wx/info?meetingId=meetingId
-  // 当前仅保留接口说明，等待后端联调时接入。
-  console.log('fetch meeting detail', { meetingId: meetingId.value })
+const loadMeetingDetail = async () => {
+  try {
+    await getMeetingInfo(meetingId.value)
+  }
+  catch (error) {
+    console.error('fetch meeting detail failed', error)
+  }
 }
 
 onLoad((options) => {
@@ -38,10 +43,13 @@ const goToEdit = () => {
   uni.navigateTo({ url: '/pages/meeting/edit' })
 }
 
-const cancelMeeting = () => {
-  // TODO: GET /blade-bip/wx/cancel?meetingId=meetingId
-  // 当前仅保留接口说明，等待后端联调时接入。
-  console.log('cancel meeting', { meetingId: meetingId.value })
+const handleCancelMeeting = async () => {
+  try {
+    await cancelMeeting(meetingId.value)
+  }
+  catch (error) {
+    console.error('cancel meeting failed', error)
+  }
 }
 </script>
 
@@ -103,7 +111,7 @@ const cancelMeeting = () => {
     </view>
 
     <view class="mx-4 mt-8 flex gap-3">
-      <wd-button type="default" plain block @click="cancelMeeting">取消会议</wd-button>
+      <wd-button type="default" plain block @click="handleCancelMeeting">取消会议</wd-button>
       <wd-button type="primary" block @click="goToEdit">编辑会议</wd-button>
     </view>
   </view>

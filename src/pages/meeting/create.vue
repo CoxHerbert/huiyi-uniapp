@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { createMeeting } from '@/api/meeting'
 import MeetingForm from './components/MeetingForm.vue'
 
 definePage({
@@ -33,10 +34,13 @@ const createMeetingPayload = {
   },
 }
 
-const handleCreate = () => {
-  // TODO: POST /blade-bip/wx/create
-  // 当前仅保留接口字段示例，等待后端联调时接入。
-  console.log('create meeting payload', createMeetingPayload)
+const handleCreate = async () => {
+  try {
+    await createMeeting(createMeetingPayload)
+  }
+  catch (error) {
+    console.error('create meeting failed', error)
+  }
 }
 </script>
 
