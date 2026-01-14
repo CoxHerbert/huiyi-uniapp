@@ -13,6 +13,32 @@ const meetingDate = ref('2026/01/09')
 const startTime = ref('14:00')
 const endTime = ref('15:00')
 
+const parseTime = (time: string) => {
+  const [hour, minute] = time.split(':').map(Number)
+  return {
+    hour: Number.isNaN(hour) ? 0 : hour,
+    minute: Number.isNaN(minute) ? 0 : minute,
+  }
+}
+
+const toMinutes = (time: string) => {
+  const { hour, minute } = parseTime(time)
+  return hour * 60 + minute
+}
+
+const minEndTime = computed(() => {
+  const { hour, minute } = parseTime(startTime.value)
+  return { hour, minute }
+})
+
+const ensureEndAfterStart = () => {
+  if (toMinutes(endTime.value) < toMinutes(startTime.value)) {
+    endTime.value = startTime.value
+  }
+}
+
+watch([startTime, endTime], ensureEndAfterStart, { immediate: true })
+
 const meetingStartTimestamp = computed(() => {
   const startAt = new Date(`${meetingDate.value} ${startTime.value}`)
   return Number.isNaN(startAt.getTime()) ? 0 : Math.floor(startAt.getTime() / 1000)
@@ -90,7 +116,13 @@ const handleCreate = async () => {
               <text class="block text-2.5 text-#9aa0a6">{{ durationLabel }}</text>
             </view>
             <view class="text-center">
-              <wd-datetime-picker v-model="endTime" type="time" :use-second="false">
+              <wd-datetime-picker
+                v-model="endTime"
+                type="time"
+                :use-second="false"
+                :min-hour="minEndTime.hour"
+                :min-minute="minEndTime.minute"
+              >
                 <view class="text-center">
                   <text class="block text-5 font-600 text-#2f2f2f">{{ endTime }}</text>
                   <text class="text-2.5 text-#9aa0a6">{{ meetingDate }}</text>
