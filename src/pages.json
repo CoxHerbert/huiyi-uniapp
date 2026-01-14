@@ -71,6 +71,22 @@
       "style": {
         "navigationBarTitleText": "会议详情"
       }
+    },
+    {
+      "path": "pages/meeting/history",
+      "type": "page",
+      "name": "meeting-history",
+      "style": {
+        "navigationBarTitleText": "历史会议"
+      }
+    },
+    {
+      "path": "pages/meeting/history-detail",
+      "type": "page",
+      "name": "meeting-history-detail",
+      "style": {
+        "navigationBarTitleText": "历史会议详情"
+      }
     }
   ],
   "subPackages": [],

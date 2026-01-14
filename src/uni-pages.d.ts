@@ -10,6 +10,8 @@ type _LocationUrl =
   "/pages/meeting/create" |
   "/pages/meeting/detail" |
   "/pages/meeting/edit" |
+  "/pages/meeting/history-detail" |
+  "/pages/meeting/history" |
   "/pages/meeting/index";
 
 interface NavigateToOptions {

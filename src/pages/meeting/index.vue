@@ -63,8 +63,8 @@ const goToCreate = () => {
   uni.navigateTo({ url: '/pages/meeting/create' })
 }
 
-const goToEdit = () => {
-  uni.navigateTo({ url: '/pages/meeting/edit' })
+const goToHistory = () => {
+  uni.navigateTo({ url: '/pages/meeting/history' })
 }
 
 const goToDetail = (meetingId: number) => {
@@ -89,7 +89,7 @@ const goToDetail = (meetingId: number) => {
         </view>
         <view
           class="flex flex-1 flex-col items-center gap-2 rounded-3 bg-#f5f7ff py-3"
-          @click="goToEdit"
+          @click="goToHistory"
         >
           <view
             class="flex h-9 w-9 items-center justify-center rounded-3 bg-#e7edff text-#3f5fff"
