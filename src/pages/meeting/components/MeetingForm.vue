@@ -22,12 +22,6 @@ const isPlaceholder = (value: string) => !value
 
 <template>
   <view class="min-h-screen bg-#f5f6f8 pb-6">
-    <view class="flex items-center justify-between px-4 pt-4">
-      <wd-icon name="arrow-left" size="20px" color="#333" />
-      <text class="text-4 font-600 text-#2f2f2f">{{ title }}</text>
-      <wd-icon name="close" size="18px" color="#c4c7cc" />
-    </view>
-
     <view class="mx-4 mt-4 rounded-4 bg-white">
       <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-4">
         <text class="text-3.5 text-#2f2f2f">{{ meeting.name }}</text>
