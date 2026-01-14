@@ -1,4 +1,4 @@
-import request from '@/api/h5/request';
+import request from '@/utils/https';
 
 const prefix = '/blade-bip/dc-wms-warehouse';
 

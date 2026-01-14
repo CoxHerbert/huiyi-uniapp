@@ -1,4 +1,4 @@
-import request from '@/utils/http';
+import request from '@/utils/https';
 
 export default {
   // 列表

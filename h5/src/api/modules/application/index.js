@@ -1,5 +1,5 @@
 // src/modules/inventory.js
-import request from '@/utils/http';
+import request from '@/utils/https';
 import planSheep from './planSheep';
 import workReport from './workReport';
 import materialMaintenance from './materialMaintenance';

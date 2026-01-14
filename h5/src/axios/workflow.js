@@ -1,4 +1,4 @@
-import request from '@/utils/http';
+import request from '@/utils/https';
 
 const requestWorkFlow = (option) => {
   return new Promise((resolve, reject) => {

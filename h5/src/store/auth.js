@@ -67,6 +67,14 @@ export const useAuthStore = defineStore('auth', {
         form.key,
         form.code
       );
+      console.log(form.tenantId,
+        form.deptId,
+        form.roleId,
+        form.username,
+        password, // 若需要 SM2，加密放到调用处
+        form.type,
+        form.key,
+        form.code)
       const payload = res?.data || {};
       const accessToken = payload.access_token;
       const refreshToken = payload.refresh_token;

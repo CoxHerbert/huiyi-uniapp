@@ -1,4 +1,4 @@
-import request from '@/api/h5/request';
+import request from '@/utils/https';
 
 export default {
   // 提交入职信息

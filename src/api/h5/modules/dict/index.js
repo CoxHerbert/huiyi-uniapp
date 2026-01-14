@@ -1,4 +1,4 @@
-import request from '@/api/h5/request';
+import request from '@/utils/https'
 
 export default {
   getDict(params) {
@@ -6,6 +6,6 @@ export default {
       url: '/blade-system/dict-biz/dictionary',
       method: 'get',
       params,
-    });
+    })
   },
-};
+}

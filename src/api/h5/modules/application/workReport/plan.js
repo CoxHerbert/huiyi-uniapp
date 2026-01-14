@@ -1,9 +1,9 @@
-import request from '@/api/h5/request';
+import request from '@/utils/https'
 
-const unwrap = (res) => {
-  const { code, data, msg, message } = res?.data || {};
-  return { code, data, msg, message: message ?? msg };
-};
+function unwrap(res) {
+  const { code, data, msg, message } = res?.data || {}
+  return { code, data, msg, message: message ?? msg }
+}
 
 export default {
   // 明细列表
@@ -12,7 +12,7 @@ export default {
       url: '/blade-bip/plan/find-plan-id-by-sn',
       method: 'get',
       params,
-    }).then(unwrap);
+    }).then(unwrap)
   },
   // 详情
   getPlanDetail(params) {
@@ -20,6 +20,6 @@ export default {
       url: '/blade-bip/plan/find-plan-id-by-plan',
       method: 'get',
       params,
-    }).then(unwrap);
+    }).then(unwrap)
   },
-};
+}

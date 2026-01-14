@@ -1,4 +1,4 @@
-import request from '@/utils/http';
+import request from '@/utils/https';
 
 const unwrap = (res) => {
   const { code, data, msg, message } = res?.data || {};

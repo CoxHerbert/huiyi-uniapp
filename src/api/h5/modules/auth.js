@@ -1,6 +1,6 @@
-import request from '@/api/h5/request';
+import website from '@/config/website'
 
-import website from '@/api/h5/config/website';
+import request from '@/utils/https'
 
 export default {
   // 微信或者企业微信授权
@@ -9,7 +9,7 @@ export default {
       url: '/blade-bip/wechat/public-account/authorize',
       method: 'GET',
       params,
-    });
+    })
   },
   // 微信或者企业微信授权
   authRender(params, source) {
@@ -17,7 +17,7 @@ export default {
       url: `/blade-auth/social/skip-url/oauth/render/${source}`,
       method: 'GET',
       params,
-    });
+    })
   },
   // 微信登录
   loginBySocial(data) {
@@ -33,9 +33,10 @@ export default {
         grant_type: 'social',
         scope: 'all',
       },
-    });
+    })
   },
   loginByUsername(tenantId, deptId, roleId, username, password, type, key, code) {
+    console.log(tenantId, deptId, roleId, username, password, type, key, code)
     return request({
       url: '/blade-auth/oauth/token',
       method: 'post',
@@ -54,7 +55,7 @@ export default {
         scope: 'all',
         type,
       },
-    });
+    })
   },
   // 刷新token
   refreshToken(refresh_token, tenantId = '000000', deptId, roleId) {
@@ -73,7 +74,7 @@ export default {
         grant_type: 'refresh_token',
         scope: 'all',
       },
-    });
+    })
   },
   // 根据uuid获取用户信息
   consumeTicket(params) {
@@ -81,6 +82,6 @@ export default {
       url: '/blade-message/url-match-ticket/skip-url/consume-ticket',
       method: 'GET',
       params,
-    });
+    })
   },
-};
+}

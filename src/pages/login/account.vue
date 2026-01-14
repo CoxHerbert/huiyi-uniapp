@@ -18,8 +18,9 @@ const loading = ref(false)
 const redirectPath = ref('')
 
 const formData = reactive({
-  username: '',
-  password: '',
+  username: 'EW-6504',
+  password: '123456',
+  type: 'account',
 })
 
 onLoad((option) => {
@@ -50,7 +51,8 @@ async function onSubmit() {
     return
   }
 
-  if (loading.value) return
+  if (loading.value)
+    return
   loading.value = true
 
   try {
@@ -78,8 +80,12 @@ async function onSubmit() {
     <view class="login-card">
       <view class="brand">
         <image class="logo" :src="logoUrl" mode="aspectFit" />
-        <text class="title">慧医登录</text>
-        <text class="subtitle">请输入账号密码继续</text>
+        <text class="title">
+          慧医登录
+        </text>
+        <text class="subtitle">
+          请输入账号密码继续
+        </text>
       </view>
 
       <view class="form">
