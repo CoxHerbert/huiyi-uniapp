@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
+import h5Apis from '@/api/h5'
 import { KEYS } from '@/constants/keys'
 import { extractLoginInfo } from '@/utils/login-info'
 import { encrypt } from '@/utils/sm2'
-import h5Apis from '@/api/h5'
 import { useUserStore } from './user'
 
 interface LoginForm {
@@ -16,7 +16,7 @@ interface LoginForm {
   code?: string
 }
 
-const readStorage = <T>(key: string, fallback: T) => {
+function readStorage<T>(key: string, fallback: T) {
   try {
     const value = uni.getStorageSync(key)
     return (value || fallback) as T
@@ -27,8 +27,9 @@ const readStorage = <T>(key: string, fallback: T) => {
   }
 }
 
-const toCsv = (value?: string | string[] | null) => {
-  if (Array.isArray(value)) return value.join(',')
+function toCsv(value?: string | string[] | null) {
+  if (Array.isArray(value))
+    return value.join(',')
   return value || ''
 }
 
@@ -45,6 +46,7 @@ export const useAuthStore = defineStore('auth', {
 
   actions: {
     setTokenPair({ accessToken, refreshToken }: { accessToken?: string | null, refreshToken?: string | null }) {
+      console.log(accessToken, refreshToken)
       if (accessToken) {
         this.token = accessToken
         uni.setStorageSync(KEYS.ACCESS_TOKEN, accessToken)
@@ -84,10 +86,9 @@ export const useAuthStore = defineStore('auth', {
         form.key,
         form.code,
       )
-
       const payload = (response as UniApp.RequestSuccessCallbackResult)?.data || {}
-      const accessToken = (payload as Record<string, any>).access_token || (payload as Record<string, any>).accessToken
-      const refreshToken = (payload as Record<string, any>).refresh_token || (payload as Record<string, any>).refreshToken
+      const accessToken = (payload as Record<string, any>).access_token || (payload as Record<string, any>).access_token
+      const refreshToken = (payload as Record<string, any>).refresh_token || (payload as Record<string, any>).refresh_token
 
       this.setTokenPair({ accessToken, refreshToken })
 
@@ -125,8 +126,8 @@ export const useAuthStore = defineStore('auth', {
           const response = await h5Apis.auth.refreshToken(this.refreshToken, tenantId, deptId, roleId)
           const payload = (response as UniApp.RequestSuccessCallbackResult)?.data || {}
           const accessToken = (payload as Record<string, any>).access_token || (payload as Record<string, any>).accessToken || (payload as Record<string, any>).token
-          const nextRefreshToken =
-            (payload as Record<string, any>).refresh_token || (payload as Record<string, any>).refreshToken || this.refreshToken
+          const nextRefreshToken
+            = (payload as Record<string, any>).refresh_token || (payload as Record<string, any>).refreshToken || this.refreshToken
 
           if (!accessToken) {
             throw new Error('Refresh response missing access_token')
