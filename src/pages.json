@@ -45,6 +45,14 @@
       "type": "page",
       "name": "meeting",
       "style": {
+        "navigationBarTitleText": "会议"
+      }
+    },
+    {
+      "path": "pages/meeting/create",
+      "type": "page",
+      "name": "meeting-create",
+      "style": {
         "navigationBarTitleText": "创建会议"
       }
     },
