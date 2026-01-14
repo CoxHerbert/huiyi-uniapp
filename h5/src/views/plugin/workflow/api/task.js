@@ -1,4 +1,4 @@
-import request from '@/utils/http';
+import request from '@/utils/https';
 
 const prefix = '/blade-workflow/app/task';
 const processPrefix = '/blade-workflow/process';

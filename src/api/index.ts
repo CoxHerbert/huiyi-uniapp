@@ -3,6 +3,7 @@ import alovaInstance from './core/instance'
 
 // Export the global Apis object from the generated code
 import { createApis, withConfigType } from './createApis'
+import h5Apis from './h5'
 
 // Export the alova instance for direct use if needed
 export { alovaInstance }
@@ -15,4 +16,4 @@ const Apis = createApis(alovaInstance, $$userConfigMap)
 
 // Export both default and named export for AutoImport
 export default Apis
-export { Apis }
+export { Apis, h5Apis }

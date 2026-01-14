@@ -6,25 +6,7 @@
 type _LocationUrl =
   "/pages/index/index" |
   "/pages/about/index" |
-  "/pages/login/account" |
-  "/subPages/ci/index" |
-  "/subPages/create-uni/index" |
-  "/subPages/feedback/index" |
-  "/subPages/icon/index" |
-  "/subPages/pinia/index" |
-  "/subPages/request/index" |
-  "/subPages/router/demo-aftereach" |
-  "/subPages/router/demo-guard" |
-  "/subPages/router/demo-object" |
-  "/subPages/router/demo-params" |
-  "/subPages/router/demo-protected" |
-  "/subPages/router/demo-query" |
-  "/subPages/router/demo-string" |
-  "/subPages/router/index" |
-  "/subPages/styles/index" |
-  "/subPages/uni-ku-root/index" |
-  "/subEcharts/echarts/index" |
-  "/subAsyncEcharts/asyncEcharts/index";
+  "/pages/login/account";
 
 interface NavigateToOptions {
   url: _LocationUrl;

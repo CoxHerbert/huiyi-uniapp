@@ -1,4 +1,4 @@
-import request from '@/utils/http';
+import request from '@/utils/https';
 
 export default {
   // 企微推送卡片消息

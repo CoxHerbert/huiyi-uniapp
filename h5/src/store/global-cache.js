@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import request from '@/utils/http';
+import request from '@/utils/https';
 
 const toKey = (id) => (id == null ? '' : String(id));
 

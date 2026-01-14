@@ -15,6 +15,8 @@ declare global {
   const apiDefinitions: typeof import('./api/apiDefinitions')['default']
   const asyncComputed: typeof import('@vueuse/core')['asyncComputed']
   const autoResetRef: typeof import('@vueuse/core')['autoResetRef']
+  const blobValidate: typeof import('./utils/util.js')['blobValidate']
+  const cardid: typeof import('./utils/validate.js')['cardid']
   const computed: typeof import('vue')['computed']
   const computedAsync: typeof import('@vueuse/core')['computedAsync']
   const computedEager: typeof import('@vueuse/core')['computedEager']
@@ -22,6 +24,7 @@ declare global {
   const computedWithControl: typeof import('@vueuse/core')['computedWithControl']
   const controlledComputed: typeof import('@vueuse/core')['controlledComputed']
   const controlledRef: typeof import('@vueuse/core')['controlledRef']
+  const convertTime: typeof import('./utils/util.js')['convertTime']
   const createApis: typeof import('./api/createApis')['createApis']
   const createApp: typeof import('vue')['createApp']
   const createEventHook: typeof import('@vueuse/core')['createEventHook']
@@ -34,29 +37,66 @@ declare global {
   const createSharedComposable: typeof import('@vueuse/core')['createSharedComposable']
   const createTemplatePromise: typeof import('@vueuse/core')['createTemplatePromise']
   const createUnrefFn: typeof import('@vueuse/core')['createUnrefFn']
+  const crypto: typeof import('./utils/crypto.js')['default']
   const customRef: typeof import('vue')['customRef']
   const debouncedRef: typeof import('@vueuse/core')['debouncedRef']
   const debouncedWatch: typeof import('@vueuse/core')['debouncedWatch']
+  const deepClone: typeof import('./utils/util.js')['deepClone']
   const defineAsyncComponent: typeof import('vue')['defineAsyncComponent']
   const defineComponent: typeof import('vue')['defineComponent']
   const defineStore: typeof import('pinia')['defineStore']
+  const diff: typeof import('./utils/util.js')['diff']
+  const downloadFile: typeof import('./utils/util.js')['downloadFile']
+  const downloadFileBase64: typeof import('./utils/util.js')['downloadFileBase64']
+  const downloadFileBlob: typeof import('./utils/util.js')['downloadFileBlob']
+  const downloadFileBlobPromise: typeof import('./utils/util.js')['downloadFileBlobPromise']
+  const downloadPdf: typeof import('./utils/util.js')['downloadPdf']
+  const downloadXls: typeof import('./utils/util.js')['downloadXls']
   const eagerComputed: typeof import('@vueuse/core')['eagerComputed']
   const effectScope: typeof import('vue')['effectScope']
+  const encrypt: typeof import('./utils/sm2.js')['encrypt']
+  const encryption: typeof import('./utils/util.js')['encryption']
+  const exitFullScreen: typeof import('./utils/util.js')['exitFullScreen']
   const extendRef: typeof import('@vueuse/core')['extendRef']
   const extractLoginInfo: typeof import('./utils/login-info')['extractLoginInfo']
+  const findArray: typeof import('./utils/util.js')['findArray']
+  const findParent: typeof import('./utils/util.js')['findParent']
+  const fullscreenEnable: typeof import('./utils/util.js')['fullscreenEnable']
+  const fullscreenToggel: typeof import('./utils/util.js')['fullscreenToggel']
   const getActivePinia: typeof import('pinia')['getActivePinia']
   const getCurrentInstance: typeof import('vue')['getCurrentInstance']
   const getCurrentPath: typeof import('./utils/index')['getCurrentPath']
   const getCurrentScope: typeof import('vue')['getCurrentScope']
+  const getFileExtension: typeof import('./utils/util.js')['getFileExtension']
+  const getNormalPath: typeof import('./utils/util.js')['getNormalPath']
+  const getObjType: typeof import('./utils/util.js')['getObjType']
+  const getQueryString: typeof import('./utils/util.js')['getQueryString']
+  const getRefreshToken: typeof import('./utils/auth.js')['getRefreshToken']
+  const getScreen: typeof import('./utils/util.js')['getScreen']
+  const getToken: typeof import('./utils/auth.js')['getToken']
+  const getTopUrl: typeof import('./utils/util.js')['getTopUrl']
+  const getUrlCode: typeof import('./utils/util.js')['getUrlCode']
   const h: typeof import('vue')['h']
+  const h5Apis: typeof import('./api/index')['h5Apis']
+  const handleTree: typeof import('./utils/util.js')['handleTree']
+  const https: typeof import('./utils/https.js')['default']
   const ignorableWatch: typeof import('@vueuse/core')['ignorableWatch']
   const inject: typeof import('vue')['inject']
   const injectLocal: typeof import('@vueuse/core')['injectLocal']
   const isDefined: typeof import('@vueuse/core')['isDefined']
+  const isEmail: typeof import('./utils/validate.js')['isEmail']
+  const isExternalUrl: typeof import('./utils/util.js')['isExternalUrl']
+  const isMobile: typeof import('./utils/validate.js')['isMobile']
+  const isPhone: typeof import('./utils/validate.js')['isPhone']
   const isProxy: typeof import('vue')['isProxy']
   const isReactive: typeof import('vue')['isReactive']
   const isReadonly: typeof import('vue')['isReadonly']
   const isRef: typeof import('vue')['isRef']
+  const isURL: typeof import('./utils/validate.js')['isURL']
+  const isvalidUsername: typeof import('./utils/validate.js')['isvalidUsername']
+  const isvalidatemobile: typeof import('./utils/validate.js')['isvalidatemobile']
+  const listenfullscreen: typeof import('./utils/util.js')['listenfullscreen']
+  const loadStyle: typeof import('./utils/util.js')['loadStyle']
   const makeDestructurable: typeof import('@vueuse/core')['makeDestructurable']
   const mapActions: typeof import('pinia')['mapActions']
   const mapGetters: typeof import('pinia')['mapGetters']
@@ -64,6 +104,7 @@ declare global {
   const mapStores: typeof import('pinia')['mapStores']
   const mapWritableState: typeof import('pinia')['mapWritableState']
   const markRaw: typeof import('vue')['markRaw']
+  const mergeRecursive: typeof import('./utils/util.js')['mergeRecursive']
   const mountApis: typeof import('./api/createApis')['mountApis']
   const nextTick: typeof import('vue')['nextTick']
   const onActivated: typeof import('vue')['onActivated']
@@ -108,10 +149,13 @@ declare global {
   const onUnmounted: typeof import('vue')['onUnmounted']
   const onUpdated: typeof import('vue')['onUpdated']
   const onWatcherCleanup: typeof import('vue')['onWatcherCleanup']
+  const openWindow: typeof import('./utils/util.js')['openWindow']
+  const parseStrEmpty: typeof import('./utils/util.js')['parseStrEmpty']
   const pausableWatch: typeof import('@vueuse/core')['pausableWatch']
   const persistPlugin: typeof import('./store/persist')['persistPlugin']
   const provide: typeof import('vue')['provide']
   const provideLocal: typeof import('@vueuse/core')['provideLocal']
+  const randomLenNum: typeof import('./utils/util.js')['randomLenNum']
   const reactify: typeof import('@vueuse/core')['reactify']
   const reactifyObject: typeof import('@vueuse/core')['reactifyObject']
   const reactive: typeof import('vue')['reactive']
@@ -125,26 +169,39 @@ declare global {
   const refDefault: typeof import('@vueuse/core')['refDefault']
   const refThrottled: typeof import('@vueuse/core')['refThrottled']
   const refWithControl: typeof import('@vueuse/core')['refWithControl']
+  const removeEmptyValues: typeof import('./utils/util.js')['removeEmptyValues']
+  const removeRefreshToken: typeof import('./utils/auth.js')['removeRefreshToken']
+  const removeToken: typeof import('./utils/auth.js')['removeToken']
+  const reqFullScreen: typeof import('./utils/util.js')['reqFullScreen']
+  const request: typeof import('./utils/https.js')['request']
   const resolveComponent: typeof import('vue')['resolveComponent']
   const resolveRef: typeof import('@vueuse/core')['resolveRef']
   const resolveUnref: typeof import('@vueuse/core')['resolveUnref']
+  const serialize: typeof import('./utils/util.js')['serialize']
   const setActivePinia: typeof import('pinia')['setActivePinia']
   const setMapStoreSuffix: typeof import('pinia')['setMapStoreSuffix']
+  const setRefreshToken: typeof import('./utils/auth.js')['setRefreshToken']
+  const setTheme: typeof import('./utils/util.js')['setTheme']
+  const setToken: typeof import('./utils/auth.js')['setToken']
   const shallowReactive: typeof import('vue')['shallowReactive']
   const shallowReadonly: typeof import('vue')['shallowReadonly']
   const shallowRef: typeof import('vue')['shallowRef']
+  const sprintf: typeof import('./utils/util.js')['sprintf']
   const storeToRefs: typeof import('pinia')['storeToRefs']
   const syncRef: typeof import('@vueuse/core')['syncRef']
   const syncRefs: typeof import('@vueuse/core')['syncRefs']
+  const tansParams: typeof import('./utils/util.js')['tansParams']
   const templateRef: typeof import('@vueuse/core')['templateRef']
   const themeColorOptions: typeof import('./composables/useManualTheme')['themeColorOptions']
   const throttledRef: typeof import('@vueuse/core')['throttledRef']
   const throttledWatch: typeof import('@vueuse/core')['throttledWatch']
+  const toLocaleString: typeof import('./utils/util.js')['toLocaleString']
   const toRaw: typeof import('vue')['toRaw']
   const toReactive: typeof import('@vueuse/core')['toReactive']
   const toRef: typeof import('vue')['toRef']
   const toRefs: typeof import('vue')['toRefs']
   const toValue: typeof import('vue')['toValue']
+  const toggleGrayMode: typeof import('./utils/util.js')['toggleGrayMode']
   const triggerRef: typeof import('vue')['triggerRef']
   const tryOnBeforeMount: typeof import('@vueuse/core')['tryOnBeforeMount']
   const tryOnBeforeUnmount: typeof import('@vueuse/core')['tryOnBeforeUnmount']
@@ -332,6 +389,17 @@ declare global {
   const useWindowFocus: typeof import('@vueuse/core')['useWindowFocus']
   const useWindowScroll: typeof import('@vueuse/core')['useWindowScroll']
   const useWindowSize: typeof import('@vueuse/core')['useWindowSize']
+  const vaildatePc: typeof import('./utils/validate.js')['vaildatePc']
+  const validatAlphabets: typeof import('./utils/validate.js')['validatAlphabets']
+  const validateEmail: typeof import('./utils/validate.js')['validateEmail']
+  const validateLowerCase: typeof import('./utils/validate.js')['validateLowerCase']
+  const validateURL: typeof import('./utils/validate.js')['validateURL']
+  const validateUpperCase: typeof import('./utils/validate.js')['validateUpperCase']
+  const validatejson: typeof import('./utils/validate.js')['validatejson']
+  const validatename: typeof import('./utils/validate.js')['validatename']
+  const validatenull: typeof import('./utils/validate.js')['validatenull']
+  const validatenum: typeof import('./utils/validate.js')['validatenum']
+  const validatenumord: typeof import('./utils/validate.js')['validatenumord']
   const watch: typeof import('vue')['watch']
   const watchArray: typeof import('@vueuse/core')['watchArray']
   const watchAtMost: typeof import('@vueuse/core')['watchAtMost']
@@ -348,6 +416,7 @@ declare global {
   const watchTriggerable: typeof import('@vueuse/core')['watchTriggerable']
   const watchWithFilter: typeof import('@vueuse/core')['watchWithFilter']
   const whenever: typeof import('@vueuse/core')['whenever']
+  const withBase: typeof import('./utils/util.js')['withBase']
   const withConfigType: typeof import('./api/createApis')['withConfigType']
 }
 // for type re-export
@@ -371,6 +440,8 @@ declare module 'vue' {
     readonly apiDefinitions: UnwrapRef<typeof import('./api/apiDefinitions')['default']>
     readonly asyncComputed: UnwrapRef<typeof import('@vueuse/core')['asyncComputed']>
     readonly autoResetRef: UnwrapRef<typeof import('@vueuse/core')['autoResetRef']>
+    readonly blobValidate: UnwrapRef<typeof import('./utils/util.js')['blobValidate']>
+    readonly cardid: UnwrapRef<typeof import('./utils/validate.js')['cardid']>
     readonly computed: UnwrapRef<typeof import('vue')['computed']>
     readonly computedAsync: UnwrapRef<typeof import('@vueuse/core')['computedAsync']>
     readonly computedEager: UnwrapRef<typeof import('@vueuse/core')['computedEager']>
@@ -378,6 +449,7 @@ declare module 'vue' {
     readonly computedWithControl: UnwrapRef<typeof import('@vueuse/core')['computedWithControl']>
     readonly controlledComputed: UnwrapRef<typeof import('@vueuse/core')['controlledComputed']>
     readonly controlledRef: UnwrapRef<typeof import('@vueuse/core')['controlledRef']>
+    readonly convertTime: UnwrapRef<typeof import('./utils/util.js')['convertTime']>
     readonly createApis: UnwrapRef<typeof import('./api/createApis')['createApis']>
     readonly createApp: UnwrapRef<typeof import('vue')['createApp']>
     readonly createEventHook: UnwrapRef<typeof import('@vueuse/core')['createEventHook']>
@@ -390,29 +462,66 @@ declare module 'vue' {
     readonly createSharedComposable: UnwrapRef<typeof import('@vueuse/core')['createSharedComposable']>
     readonly createTemplatePromise: UnwrapRef<typeof import('@vueuse/core')['createTemplatePromise']>
     readonly createUnrefFn: UnwrapRef<typeof import('@vueuse/core')['createUnrefFn']>
+    readonly crypto: UnwrapRef<typeof import('./utils/crypto.js')['default']>
     readonly customRef: UnwrapRef<typeof import('vue')['customRef']>
     readonly debouncedRef: UnwrapRef<typeof import('@vueuse/core')['debouncedRef']>
     readonly debouncedWatch: UnwrapRef<typeof import('@vueuse/core')['debouncedWatch']>
+    readonly deepClone: UnwrapRef<typeof import('./utils/util.js')['deepClone']>
     readonly defineAsyncComponent: UnwrapRef<typeof import('vue')['defineAsyncComponent']>
     readonly defineComponent: UnwrapRef<typeof import('vue')['defineComponent']>
     readonly defineStore: UnwrapRef<typeof import('pinia')['defineStore']>
+    readonly diff: UnwrapRef<typeof import('./utils/util.js')['diff']>
+    readonly downloadFile: UnwrapRef<typeof import('./utils/util.js')['downloadFile']>
+    readonly downloadFileBase64: UnwrapRef<typeof import('./utils/util.js')['downloadFileBase64']>
+    readonly downloadFileBlob: UnwrapRef<typeof import('./utils/util.js')['downloadFileBlob']>
+    readonly downloadFileBlobPromise: UnwrapRef<typeof import('./utils/util.js')['downloadFileBlobPromise']>
+    readonly downloadPdf: UnwrapRef<typeof import('./utils/util.js')['downloadPdf']>
+    readonly downloadXls: UnwrapRef<typeof import('./utils/util.js')['downloadXls']>
     readonly eagerComputed: UnwrapRef<typeof import('@vueuse/core')['eagerComputed']>
     readonly effectScope: UnwrapRef<typeof import('vue')['effectScope']>
+    readonly encrypt: UnwrapRef<typeof import('./utils/sm2.js')['encrypt']>
+    readonly encryption: UnwrapRef<typeof import('./utils/util.js')['encryption']>
+    readonly exitFullScreen: UnwrapRef<typeof import('./utils/util.js')['exitFullScreen']>
     readonly extendRef: UnwrapRef<typeof import('@vueuse/core')['extendRef']>
     readonly extractLoginInfo: UnwrapRef<typeof import('./utils/login-info')['extractLoginInfo']>
+    readonly findArray: UnwrapRef<typeof import('./utils/util.js')['findArray']>
+    readonly findParent: UnwrapRef<typeof import('./utils/util.js')['findParent']>
+    readonly fullscreenEnable: UnwrapRef<typeof import('./utils/util.js')['fullscreenEnable']>
+    readonly fullscreenToggel: UnwrapRef<typeof import('./utils/util.js')['fullscreenToggel']>
     readonly getActivePinia: UnwrapRef<typeof import('pinia')['getActivePinia']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>
     readonly getCurrentPath: UnwrapRef<typeof import('./utils/index')['getCurrentPath']>
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
+    readonly getFileExtension: UnwrapRef<typeof import('./utils/util.js')['getFileExtension']>
+    readonly getNormalPath: UnwrapRef<typeof import('./utils/util.js')['getNormalPath']>
+    readonly getObjType: UnwrapRef<typeof import('./utils/util.js')['getObjType']>
+    readonly getQueryString: UnwrapRef<typeof import('./utils/util.js')['getQueryString']>
+    readonly getRefreshToken: UnwrapRef<typeof import('./utils/auth.js')['getRefreshToken']>
+    readonly getScreen: UnwrapRef<typeof import('./utils/util.js')['getScreen']>
+    readonly getToken: UnwrapRef<typeof import('./utils/auth.js')['getToken']>
+    readonly getTopUrl: UnwrapRef<typeof import('./utils/util.js')['getTopUrl']>
+    readonly getUrlCode: UnwrapRef<typeof import('./utils/util.js')['getUrlCode']>
+    readonly h5Apis: UnwrapRef<typeof import('./api/index')['h5Apis']>
     readonly h: UnwrapRef<typeof import('vue')['h']>
+    readonly handleTree: UnwrapRef<typeof import('./utils/util.js')['handleTree']>
+    readonly https: UnwrapRef<typeof import('./utils/https.js')['default']>
     readonly ignorableWatch: UnwrapRef<typeof import('@vueuse/core')['ignorableWatch']>
     readonly inject: UnwrapRef<typeof import('vue')['inject']>
     readonly injectLocal: UnwrapRef<typeof import('@vueuse/core')['injectLocal']>
     readonly isDefined: UnwrapRef<typeof import('@vueuse/core')['isDefined']>
+    readonly isEmail: UnwrapRef<typeof import('./utils/validate.js')['isEmail']>
+    readonly isExternalUrl: UnwrapRef<typeof import('./utils/util.js')['isExternalUrl']>
+    readonly isMobile: UnwrapRef<typeof import('./utils/validate.js')['isMobile']>
+    readonly isPhone: UnwrapRef<typeof import('./utils/validate.js')['isPhone']>
     readonly isProxy: UnwrapRef<typeof import('vue')['isProxy']>
     readonly isReactive: UnwrapRef<typeof import('vue')['isReactive']>
     readonly isReadonly: UnwrapRef<typeof import('vue')['isReadonly']>
     readonly isRef: UnwrapRef<typeof import('vue')['isRef']>
+    readonly isURL: UnwrapRef<typeof import('./utils/validate.js')['isURL']>
+    readonly isvalidUsername: UnwrapRef<typeof import('./utils/validate.js')['isvalidUsername']>
+    readonly isvalidatemobile: UnwrapRef<typeof import('./utils/validate.js')['isvalidatemobile']>
+    readonly listenfullscreen: UnwrapRef<typeof import('./utils/util.js')['listenfullscreen']>
+    readonly loadStyle: UnwrapRef<typeof import('./utils/util.js')['loadStyle']>
     readonly makeDestructurable: UnwrapRef<typeof import('@vueuse/core')['makeDestructurable']>
     readonly mapActions: UnwrapRef<typeof import('pinia')['mapActions']>
     readonly mapGetters: UnwrapRef<typeof import('pinia')['mapGetters']>
@@ -420,6 +529,7 @@ declare module 'vue' {
     readonly mapStores: UnwrapRef<typeof import('pinia')['mapStores']>
     readonly mapWritableState: UnwrapRef<typeof import('pinia')['mapWritableState']>
     readonly markRaw: UnwrapRef<typeof import('vue')['markRaw']>
+    readonly mergeRecursive: UnwrapRef<typeof import('./utils/util.js')['mergeRecursive']>
     readonly mountApis: UnwrapRef<typeof import('./api/createApis')['mountApis']>
     readonly nextTick: UnwrapRef<typeof import('vue')['nextTick']>
     readonly onActivated: UnwrapRef<typeof import('vue')['onActivated']>
@@ -463,10 +573,13 @@ declare module 'vue' {
     readonly onUnload: UnwrapRef<typeof import('@dcloudio/uni-app')['onUnload']>
     readonly onUnmounted: UnwrapRef<typeof import('vue')['onUnmounted']>
     readonly onUpdated: UnwrapRef<typeof import('vue')['onUpdated']>
+    readonly openWindow: UnwrapRef<typeof import('./utils/util.js')['openWindow']>
+    readonly parseStrEmpty: UnwrapRef<typeof import('./utils/util.js')['parseStrEmpty']>
     readonly pausableWatch: UnwrapRef<typeof import('@vueuse/core')['pausableWatch']>
     readonly persistPlugin: UnwrapRef<typeof import('./store/persist')['persistPlugin']>
     readonly provide: UnwrapRef<typeof import('vue')['provide']>
     readonly provideLocal: UnwrapRef<typeof import('@vueuse/core')['provideLocal']>
+    readonly randomLenNum: UnwrapRef<typeof import('./utils/util.js')['randomLenNum']>
     readonly reactify: UnwrapRef<typeof import('@vueuse/core')['reactify']>
     readonly reactifyObject: UnwrapRef<typeof import('@vueuse/core')['reactifyObject']>
     readonly reactive: UnwrapRef<typeof import('vue')['reactive']>
@@ -480,26 +593,39 @@ declare module 'vue' {
     readonly refDefault: UnwrapRef<typeof import('@vueuse/core')['refDefault']>
     readonly refThrottled: UnwrapRef<typeof import('@vueuse/core')['refThrottled']>
     readonly refWithControl: UnwrapRef<typeof import('@vueuse/core')['refWithControl']>
+    readonly removeEmptyValues: UnwrapRef<typeof import('./utils/util.js')['removeEmptyValues']>
+    readonly removeRefreshToken: UnwrapRef<typeof import('./utils/auth.js')['removeRefreshToken']>
+    readonly removeToken: UnwrapRef<typeof import('./utils/auth.js')['removeToken']>
+    readonly reqFullScreen: UnwrapRef<typeof import('./utils/util.js')['reqFullScreen']>
+    readonly request: UnwrapRef<typeof import('./utils/https.js')['request']>
     readonly resolveComponent: UnwrapRef<typeof import('vue')['resolveComponent']>
     readonly resolveRef: UnwrapRef<typeof import('@vueuse/core')['resolveRef']>
     readonly resolveUnref: UnwrapRef<typeof import('@vueuse/core')['resolveUnref']>
+    readonly serialize: UnwrapRef<typeof import('./utils/util.js')['serialize']>
     readonly setActivePinia: UnwrapRef<typeof import('pinia')['setActivePinia']>
     readonly setMapStoreSuffix: UnwrapRef<typeof import('pinia')['setMapStoreSuffix']>
+    readonly setRefreshToken: UnwrapRef<typeof import('./utils/auth.js')['setRefreshToken']>
+    readonly setTheme: UnwrapRef<typeof import('./utils/util.js')['setTheme']>
+    readonly setToken: UnwrapRef<typeof import('./utils/auth.js')['setToken']>
     readonly shallowReactive: UnwrapRef<typeof import('vue')['shallowReactive']>
     readonly shallowReadonly: UnwrapRef<typeof import('vue')['shallowReadonly']>
     readonly shallowRef: UnwrapRef<typeof import('vue')['shallowRef']>
+    readonly sprintf: UnwrapRef<typeof import('./utils/util.js')['sprintf']>
     readonly storeToRefs: UnwrapRef<typeof import('pinia')['storeToRefs']>
     readonly syncRef: UnwrapRef<typeof import('@vueuse/core')['syncRef']>
     readonly syncRefs: UnwrapRef<typeof import('@vueuse/core')['syncRefs']>
+    readonly tansParams: UnwrapRef<typeof import('./utils/util.js')['tansParams']>
     readonly templateRef: UnwrapRef<typeof import('@vueuse/core')['templateRef']>
     readonly themeColorOptions: UnwrapRef<typeof import('./composables/useManualTheme')['themeColorOptions']>
     readonly throttledRef: UnwrapRef<typeof import('@vueuse/core')['throttledRef']>
     readonly throttledWatch: UnwrapRef<typeof import('@vueuse/core')['throttledWatch']>
+    readonly toLocaleString: UnwrapRef<typeof import('./utils/util.js')['toLocaleString']>
     readonly toRaw: UnwrapRef<typeof import('vue')['toRaw']>
     readonly toReactive: UnwrapRef<typeof import('@vueuse/core')['toReactive']>
     readonly toRef: UnwrapRef<typeof import('vue')['toRef']>
     readonly toRefs: UnwrapRef<typeof import('vue')['toRefs']>
     readonly toValue: UnwrapRef<typeof import('vue')['toValue']>
+    readonly toggleGrayMode: UnwrapRef<typeof import('./utils/util.js')['toggleGrayMode']>
     readonly triggerRef: UnwrapRef<typeof import('vue')['triggerRef']>
     readonly tryOnBeforeMount: UnwrapRef<typeof import('@vueuse/core')['tryOnBeforeMount']>
     readonly tryOnBeforeUnmount: UnwrapRef<typeof import('@vueuse/core')['tryOnBeforeUnmount']>
@@ -684,6 +810,17 @@ declare module 'vue' {
     readonly useWindowFocus: UnwrapRef<typeof import('@vueuse/core')['useWindowFocus']>
     readonly useWindowScroll: UnwrapRef<typeof import('@vueuse/core')['useWindowScroll']>
     readonly useWindowSize: UnwrapRef<typeof import('@vueuse/core')['useWindowSize']>
+    readonly vaildatePc: UnwrapRef<typeof import('./utils/validate.js')['vaildatePc']>
+    readonly validatAlphabets: UnwrapRef<typeof import('./utils/validate.js')['validatAlphabets']>
+    readonly validateEmail: UnwrapRef<typeof import('./utils/validate.js')['validateEmail']>
+    readonly validateLowerCase: UnwrapRef<typeof import('./utils/validate.js')['validateLowerCase']>
+    readonly validateURL: UnwrapRef<typeof import('./utils/validate.js')['validateURL']>
+    readonly validateUpperCase: UnwrapRef<typeof import('./utils/validate.js')['validateUpperCase']>
+    readonly validatejson: UnwrapRef<typeof import('./utils/validate.js')['validatejson']>
+    readonly validatename: UnwrapRef<typeof import('./utils/validate.js')['validatename']>
+    readonly validatenull: UnwrapRef<typeof import('./utils/validate.js')['validatenull']>
+    readonly validatenum: UnwrapRef<typeof import('./utils/validate.js')['validatenum']>
+    readonly validatenumord: UnwrapRef<typeof import('./utils/validate.js')['validatenumord']>
     readonly watch: UnwrapRef<typeof import('vue')['watch']>
     readonly watchArray: UnwrapRef<typeof import('@vueuse/core')['watchArray']>
     readonly watchAtMost: UnwrapRef<typeof import('@vueuse/core')['watchAtMost']>
@@ -700,6 +837,7 @@ declare module 'vue' {
     readonly watchTriggerable: UnwrapRef<typeof import('@vueuse/core')['watchTriggerable']>
     readonly watchWithFilter: UnwrapRef<typeof import('@vueuse/core')['watchWithFilter']>
     readonly whenever: UnwrapRef<typeof import('@vueuse/core')['whenever']>
+    readonly withBase: UnwrapRef<typeof import('./utils/util.js')['withBase']>
     readonly withConfigType: UnwrapRef<typeof import('./api/createApis')['withConfigType']>
   }
 }

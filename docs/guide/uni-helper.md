@@ -64,9 +64,7 @@ Uni Helper 是一个旨在增强 uni-app 系列产品的开发体验为爱发电
 ...
 UniHelperPages({
   dts: 'src/uni-pages.d.ts',
-  subPackages: [
-    'src/subPages',
-  ],
+  subPackages: [],
   /**
    * 排除的页面，相对于 dir 和 subPackages
    * @default []

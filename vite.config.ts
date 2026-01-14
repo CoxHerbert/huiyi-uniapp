@@ -25,11 +25,7 @@ export default defineConfig({
     // https://github.com/uni-helper/vite-plugin-uni-pages
     UniHelperPages({
       dts: 'src/uni-pages.d.ts',
-      subPackages: [
-        'src/subPages',
-        'src/subEcharts',
-        'src/subAsyncEcharts',
-      ],
+      subPackages: [],
       /**
        * 排除的页面，相对于 dir 和 subPackages
        * @default []
@@ -76,4 +72,16 @@ export default defineConfig({
     // see unocss.config.ts for config
     UnoCSS(),
   ],
+  server: {
+    proxy: {
+      // 你代码里一般会写 /api/xxx
+      '/api': {
+        target: 'http://192.168.32.15', // 后端地址
+        changeOrigin: true,
+        secure: false,
+        // 如果后端本身没有 /api 前缀可重写
+        // rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+    },
+  },
 })

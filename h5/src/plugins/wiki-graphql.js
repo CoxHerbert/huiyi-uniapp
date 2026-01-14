@@ -1,6 +1,6 @@
 import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client/core';
 import { KEYS } from '@/constants/keys';
-import request from '@/utils/http';
+import request from '@/utils/https';
 
 const getToken = () => {
   return request({
