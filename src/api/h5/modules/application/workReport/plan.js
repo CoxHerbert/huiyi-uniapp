@@ -1,8 +1,9 @@
 import request from '@/utils/https'
 
 function unwrap(res) {
-  const { code, data, msg, message } = res?.data || {}
-  return { code, data, msg, message: message ?? msg }
+  const payload = (res && res.data) || {}
+  const { code, data, msg, message } = payload
+  return { code, data, msg, message: message != null ? message : msg }
 }
 
 export default {
