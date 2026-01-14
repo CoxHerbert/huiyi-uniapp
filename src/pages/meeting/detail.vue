@@ -19,6 +19,21 @@ const meetingDetail = {
   tipContent: '此小程序仅作会议预约，请从企业微信“会议”功能进入会议。',
 }
 
+const meetingId = ref('meetingId')
+
+const loadMeetingDetail = () => {
+  // TODO: GET /blade-bip/wx/info?meetingId=meetingId
+  // 当前仅保留接口说明，等待后端联调时接入。
+  console.log('fetch meeting detail', { meetingId: meetingId.value })
+}
+
+onLoad((options) => {
+  if (options?.meetingId) {
+    meetingId.value = options.meetingId
+  }
+  loadMeetingDetail()
+})
+
 const goToEdit = () => {
   uni.navigateTo({ url: '/pages/meeting/edit' })
 }
@@ -26,7 +41,7 @@ const goToEdit = () => {
 const cancelMeeting = () => {
   // TODO: GET /blade-bip/wx/cancel?meetingId=meetingId
   // 当前仅保留接口说明，等待后端联调时接入。
-  console.log('cancel meeting', { meetingId: 'meetingId' })
+  console.log('cancel meeting', { meetingId: meetingId.value })
 }
 </script>
 
