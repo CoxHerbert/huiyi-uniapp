@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { KEYS } from '@/constants/keys'
-import { h5Apis } from '@/api'
+import h5Apis from '@/api/h5'
 
 const isObject = (val: unknown): val is Record<string, any> => Boolean(val) && typeof val === 'object' && !Array.isArray(val)
 

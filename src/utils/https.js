@@ -7,7 +7,7 @@ import { serialize, tansParams } from '@/utils/util'
 import { isURL, validatenull } from '@/utils/validate'
 
 const baseUrl
-  = ''
+  = 'https://www.eastwinbip.com/api'
 function toastError(message, cfg) {
   if (cfg?.noErrorMsg)
     return
@@ -29,7 +29,6 @@ function mergeHeaders(base = {}, extra = {}) {
 function normalizeConfig(config = {}) {
   const cfg = { ...config }
   cfg.method = (cfg.method || 'GET').toUpperCase()
-  console.log(cfg, 'cfg')
   cfg.headers = mergeHeaders(cfg.headers, cfg.header) // 兼容 header / headers
   cfg.meta = cfg.meta || {}
   return cfg
@@ -61,7 +60,6 @@ async function uniRequestOnce(rawConfig) {
       config.url
       && !isURL(config.url)
       && !config.url.startsWith(baseUrl)
-      && !noBaseUrlPrefixList.some(p => config.url.startsWith(p))
     ) {
       config.url = baseUrl + config.url
     }
@@ -71,21 +69,11 @@ async function uniRequestOnce(rawConfig) {
 
     // 3) Basic（除非显式关闭）
     const authorization = config.authorization === false
-    console.log(authorization, 'authorization')
     if (!authorization) {
       config.headers.Authorization = `Basic ${Base64.encode(
         `${website.clientId}:${website.clientSecret}`,
       )}`
     }
-
-    // 4) Dev 头（兼容 uniapp-vite / hbuilder）
-    const appEnv
-      = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_APP_ENV)
-        || process.env.VUE_APP_ENV
-        || ''
-    const isProd = ['test', 'production'].includes(appEnv)
-    if (!isProd)
-      config.headers['X-Dev-ID'] = '6176'
 
     // 5) Token（尊重 meta.isToken === false 与 cryptoToken）
     const isToken = config.meta.isToken === false
@@ -167,7 +155,7 @@ async function uniRequestOnce(rawConfig) {
 async function handleResponse(res) {
   const status = res.data?.error_code ?? res.data?.code ?? res.status
   const statusWhiteList = website.statusWhiteList || []
-  const message = res.data?.msg || res.data?.error_description || getSystemErrorMessage()
+  const message = res.data?.msg || res.data?.error_description
   const config = res.config
   const cryptoData = config.cryptoData === true
 
@@ -194,7 +182,7 @@ async function handleResponse(res) {
       catch (e) {
         if (!isErrorShown) {
           isErrorShown = true
-          toastError(getTokenExpiredMessage(), config)
+          toastError(e, config)
         }
         const auth = useAuthStore()
         auth.logout?.()
@@ -204,8 +192,7 @@ async function handleResponse(res) {
         if (!isRedirecting401) {
           isRedirecting401 = true
           try {
-            const intended = resolveIntendedForRedirect()
-            gotoLogin(intended)
+            console.log('401无权限之后的处理')
           }
           finally {
             setTimeout(() => (isRedirecting401 = false), 200)
@@ -276,14 +263,8 @@ async function request(config) {
 }
 
 // （可选）暴露 get/post/put/delete
-request.get = (url, cfg = {}) => {
-  console.log('GET', url, ...cfg)
-  return request({ url, method: 'GET', ...cfg })
-}
-request.post = (url, data, cfg = {}) => {
-  console.log('POST', url, data, ...cfg)
-  return request({ url, method: 'POST', data, ...cfg })
-}
+request.get = (url, cfg = {}) => request({ url, method: 'GET', ...cfg })
+request.post = (url, data, cfg = {}) => request({ url, method: 'POST', data, ...cfg })
 request.put = (url, data, cfg = {}) => request({ url, method: 'PUT', data, ...cfg })
 request.delete = (url, cfg = {}) => request({ url, method: 'DELETE', ...cfg })
 
