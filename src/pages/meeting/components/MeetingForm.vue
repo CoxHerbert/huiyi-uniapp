@@ -24,10 +24,12 @@ const isPlaceholder = (value: string) => !value
 <template>
   <view class="min-h-screen bg-#f5f6f8 pb-6">
     <view class="mx-4 mt-4 rounded-4 bg-white">
-      <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-4">
-        <text class="text-3.5 text-#2f2f2f">{{ meeting.name }}</text>
-        <wd-icon name="close" size="16px" color="#c4c7cc" />
-      </view>
+      <slot name="title">
+        <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-4">
+          <text class="text-3.5 text-#2f2f2f">{{ meeting.name }}</text>
+          <wd-icon name="close" size="16px" color="#c4c7cc" />
+        </view>
+      </slot>
 
       <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-4">
         <text class="text-3 text-#8a8f99">会议类型</text>

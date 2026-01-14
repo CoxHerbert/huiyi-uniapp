@@ -9,6 +9,7 @@ definePage({
   },
 })
 
+const title = ref('张浩预定的会议')
 const meetingDate = ref('2026/01/09')
 const startTime = ref('14:00')
 const endTime = ref('15:00')
@@ -59,7 +60,7 @@ const durationLabel = computed(() => {
 })
 
 const meetingInfo = computed(() => ({
-  name: '张浩预定的会议',
+  name: title.value,
   type: '线下会议',
   startTime: startTime.value,
   endTime: endTime.value,
@@ -75,7 +76,7 @@ const meetingInfo = computed(() => ({
 
 const createMeetingPayload = computed(() => ({
   admin_userid: 'EW-M1',
-  title: 'TEST',
+  title: title.value,
   meeting_start: meetingStartTimestamp.value,
   meeting_duration: meetingDurationSeconds.value,
   invitees: {
@@ -100,6 +101,17 @@ const handleCreate = async () => {
     :meeting="meetingInfo"
     @submit="handleCreate"
   >
+    <template #title>
+      <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-2">
+        <wd-input
+          v-model="title"
+          placeholder="请输入会议名称"
+          clearable
+          custom-class="flex-1"
+        />
+        <wd-icon name="close" size="16px" color="#c4c7cc" />
+      </view>
+    </template>
     <template #time>
       <view class="border-b border-#f0f1f2 px-4 py-4">
         <view class="flex items-center justify-between">
