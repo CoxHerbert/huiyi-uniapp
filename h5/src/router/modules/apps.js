@@ -178,5 +178,11 @@ export default {
       meta: { title: '铭牌绑定', requiresAuth: true },
       component: () => import('@/views/apps/NameplateBinding/index.vue'),
     },
+    {
+      path: 'meeting',
+      name: 'appsMeeting',
+      meta: { title: '会议', requiresAuth: true },
+      component: () => import('@/views/apps/Meeting/index.vue'),
+    },
   ],
 };
