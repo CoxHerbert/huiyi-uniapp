@@ -6,7 +6,9 @@ definePage({
   },
 })
 
-const meetingSections = [
+import { getMeetingList } from '@/api/meeting'
+
+const meetingSections = ref([
   {
     date: '今天 1月8日',
     items: [
@@ -57,7 +59,24 @@ const meetingSections = [
       },
     ],
   },
-]
+])
+
+const loadMeetingList = async () => {
+  try {
+    const response = await getMeetingList()
+    const list = response?.data?.data?.records || response?.data?.data || []
+    if (Array.isArray(list) && list.length > 0) {
+      meetingSections.value = list
+    }
+  }
+  catch (error) {
+    console.error('fetch meeting list failed', error)
+  }
+}
+
+onLoad(() => {
+  loadMeetingList()
+})
 
 const goToCreate = () => {
   uni.navigateTo({ url: '/pages/meeting/create' })

@@ -30,3 +30,9 @@ export const cancelMeeting = (meetingId: string) =>
     method: 'get',
     params: { meetingId },
   })
+
+export const getMeetingList = () =>
+  request({
+    url: '/blade-bip/wx/list',
+    method: 'get',
+  })
