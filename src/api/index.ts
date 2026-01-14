@@ -4,6 +4,7 @@ import alovaInstance from './core/instance'
 // Export the global Apis object from the generated code
 import { createApis, withConfigType } from './createApis'
 import h5Apis from './h5'
+export * from './meeting'
 
 // Export the alova instance for direct use if needed
 export { alovaInstance }
