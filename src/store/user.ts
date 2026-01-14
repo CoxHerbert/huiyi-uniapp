@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia'
-import { KEYS } from '@/constants/keys'
 import h5Apis from '@/api/h5'
+import { KEYS } from '@/constants/keys'
 
 const isObject = (val: unknown): val is Record<string, any> => Boolean(val) && typeof val === 'object' && !Array.isArray(val)
 
-const readStorage = <T>(key: string, fallback: T) => {
+function readStorage<T>(key: string, fallback: T) {
   try {
     const value = uni.getStorageSync(key)
     return (value || fallback) as T
@@ -15,7 +15,7 @@ const readStorage = <T>(key: string, fallback: T) => {
   }
 }
 
-const transformBtnAuths = (data: Record<string, any> = {}) => {
+function transformBtnAuths(data: Record<string, any> = {}) {
   const result: Record<string, any> = {}
   Object.keys(data).forEach((key) => {
     const item = data[key] || {}
@@ -29,9 +29,10 @@ const transformBtnAuths = (data: Record<string, any> = {}) => {
   return result
 }
 
-const flattenPermissionCodes = (list: Record<string, any>[] = [], result: string[] = []) => {
+function flattenPermissionCodes(list: Record<string, any>[] = [], result: string[] = []) {
   list.forEach((item) => {
-    if (!isObject(item)) return
+    if (!isObject(item))
+      return
     const children = item.children
     const code = item.code
     if (Array.isArray(children) && children.length > 0) {

@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import h5Apis from '@/api/h5'
 import { KEYS } from '@/constants/keys'
+import { setRefreshToken, setToken } from '@/utils/auth' // 你已改成 uni.getStorageSync 的版本也没问题
 import { extractLoginInfo } from '@/utils/login-info'
 import { encrypt } from '@/utils/sm2'
 import { useUserStore } from './user'
@@ -46,14 +47,13 @@ export const useAuthStore = defineStore('auth', {
 
   actions: {
     setTokenPair({ accessToken, refreshToken }: { accessToken?: string | null, refreshToken?: string | null }) {
-      console.log(accessToken, refreshToken)
       if (accessToken) {
         this.token = accessToken
-        uni.setStorageSync(KEYS.ACCESS_TOKEN, accessToken)
+        setToken(accessToken)
       }
       if (refreshToken) {
         this.refreshToken = refreshToken
-        uni.setStorageSync(KEYS.REFRESH_TOKEN, refreshToken)
+        setRefreshToken(refreshToken)
       }
     },
 
