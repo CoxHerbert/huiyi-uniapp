@@ -14,7 +14,7 @@ const meetingDate = ref('2026/01/09')
 const startTime = ref('14:00')
 const endTime = ref('15:00')
 
-const parseTime = (time: string) => {
+function parseTime(time: string) {
   const [hour, minute] = time.split(':').map(Number)
   return {
     hour: Number.isNaN(hour) ? 0 : hour,
@@ -22,7 +22,7 @@ const parseTime = (time: string) => {
   }
 }
 
-const toMinutes = (time: string) => {
+function toMinutes(time: string) {
   const { hour, minute } = parseTime(time)
   return hour * 60 + minute
 }
@@ -32,7 +32,7 @@ const minEndTime = computed(() => {
   return { hour, minute }
 })
 
-const ensureEndAfterStart = () => {
+function ensureEndAfterStart() {
   if (toMinutes(endTime.value) < toMinutes(startTime.value)) {
     endTime.value = startTime.value
   }
@@ -75,16 +75,16 @@ const meetingInfo = computed(() => ({
 }))
 
 const createMeetingPayload = computed(() => ({
-  admin_userid: 'EW-M1',
+  admin_userid: 'EW-6504',
   title: title.value,
   meeting_start: meetingStartTimestamp.value,
   meeting_duration: meetingDurationSeconds.value,
   invitees: {
-    userid: ['EW-7223', 'EW-M1'],
+    userid: ['EW-7223'],
   },
 }))
 
-const handleCreate = async () => {
+async function handleCreate() {
   try {
     await createMeeting(createMeetingPayload.value)
   }
@@ -119,13 +119,19 @@ const handleCreate = async () => {
             <view class="text-center">
               <wd-datetime-picker v-model="startTime" type="time" :use-second="false">
                 <view class="text-center">
-                  <text class="block text-5 font-600 text-#2f2f2f">{{ startTime }}</text>
-                  <text class="text-2.5 text-#9aa0a6">{{ meetingDate }}</text>
+                  <text class="block text-5 text-#2f2f2f font-600">
+                    {{ startTime }}
+                  </text>
+                  <text class="text-2.5 text-#9aa0a6">
+                    {{ meetingDate }}
+                  </text>
                 </view>
               </wd-datetime-picker>
             </view>
             <view class="text-center">
-              <text class="block text-2.5 text-#9aa0a6">{{ durationLabel }}</text>
+              <text class="block text-2.5 text-#9aa0a6">
+                {{ durationLabel }}
+              </text>
             </view>
             <view class="text-center">
               <wd-datetime-picker
@@ -136,8 +142,12 @@ const handleCreate = async () => {
                 :min-minute="minEndTime.minute"
               >
                 <view class="text-center">
-                  <text class="block text-5 font-600 text-#2f2f2f">{{ endTime }}</text>
-                  <text class="text-2.5 text-#9aa0a6">{{ meetingDate }}</text>
+                  <text class="block text-5 text-#2f2f2f font-600">
+                    {{ endTime }}
+                  </text>
+                  <text class="text-2.5 text-#9aa0a6">
+                    {{ meetingDate }}
+                  </text>
                 </view>
               </wd-datetime-picker>
             </view>

@@ -16,6 +16,7 @@ declare global {
   const asyncComputed: typeof import('@vueuse/core')['asyncComputed']
   const autoResetRef: typeof import('@vueuse/core')['autoResetRef']
   const blobValidate: typeof import('./utils/util.js')['blobValidate']
+  const cancelMeeting: typeof import('./api/meeting')['cancelMeeting']
   const cardid: typeof import('./utils/validate.js')['cardid']
   const computed: typeof import('vue')['computed']
   const computedAsync: typeof import('@vueuse/core')['computedAsync']
@@ -30,6 +31,7 @@ declare global {
   const createEventHook: typeof import('@vueuse/core')['createEventHook']
   const createGlobalState: typeof import('@vueuse/core')['createGlobalState']
   const createInjectionState: typeof import('@vueuse/core')['createInjectionState']
+  const createMeeting: typeof import('./api/meeting')['createMeeting']
   const createPinia: typeof import('pinia')['createPinia']
   const createReactiveFn: typeof import('@vueuse/core')['createReactiveFn']
   const createReusableTemplate: typeof import('@vueuse/core')['createReusableTemplate']
@@ -68,6 +70,8 @@ declare global {
   const getCurrentPath: typeof import('./utils/index')['getCurrentPath']
   const getCurrentScope: typeof import('vue')['getCurrentScope']
   const getFileExtension: typeof import('./utils/util.js')['getFileExtension']
+  const getMeetingInfo: typeof import('./api/meeting')['getMeetingInfo']
+  const getMeetingList: typeof import('./api/meeting')['getMeetingList']
   const getNormalPath: typeof import('./utils/util.js')['getNormalPath']
   const getObjType: typeof import('./utils/util.js')['getObjType']
   const getQueryString: typeof import('./utils/util.js')['getQueryString']
@@ -441,6 +445,7 @@ declare module 'vue' {
     readonly asyncComputed: UnwrapRef<typeof import('@vueuse/core')['asyncComputed']>
     readonly autoResetRef: UnwrapRef<typeof import('@vueuse/core')['autoResetRef']>
     readonly blobValidate: UnwrapRef<typeof import('./utils/util.js')['blobValidate']>
+    readonly cancelMeeting: UnwrapRef<typeof import('./api/meeting')['cancelMeeting']>
     readonly cardid: UnwrapRef<typeof import('./utils/validate.js')['cardid']>
     readonly computed: UnwrapRef<typeof import('vue')['computed']>
     readonly computedAsync: UnwrapRef<typeof import('@vueuse/core')['computedAsync']>
@@ -455,6 +460,7 @@ declare module 'vue' {
     readonly createEventHook: UnwrapRef<typeof import('@vueuse/core')['createEventHook']>
     readonly createGlobalState: UnwrapRef<typeof import('@vueuse/core')['createGlobalState']>
     readonly createInjectionState: UnwrapRef<typeof import('@vueuse/core')['createInjectionState']>
+    readonly createMeeting: UnwrapRef<typeof import('./api/meeting')['createMeeting']>
     readonly createPinia: UnwrapRef<typeof import('pinia')['createPinia']>
     readonly createReactiveFn: UnwrapRef<typeof import('@vueuse/core')['createReactiveFn']>
     readonly createReusableTemplate: UnwrapRef<typeof import('@vueuse/core')['createReusableTemplate']>
@@ -493,6 +499,8 @@ declare module 'vue' {
     readonly getCurrentPath: UnwrapRef<typeof import('./utils/index')['getCurrentPath']>
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
     readonly getFileExtension: UnwrapRef<typeof import('./utils/util.js')['getFileExtension']>
+    readonly getMeetingInfo: UnwrapRef<typeof import('./api/meeting')['getMeetingInfo']>
+    readonly getMeetingList: UnwrapRef<typeof import('./api/meeting')['getMeetingList']>
     readonly getNormalPath: UnwrapRef<typeof import('./utils/util.js')['getNormalPath']>
     readonly getObjType: UnwrapRef<typeof import('./utils/util.js')['getObjType']>
     readonly getQueryString: UnwrapRef<typeof import('./utils/util.js')['getQueryString']>

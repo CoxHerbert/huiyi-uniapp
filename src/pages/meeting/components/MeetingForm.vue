@@ -14,7 +14,7 @@ interface MeetingInfo {
   description: string
 }
 
-const props = defineProps<{ title: string; submitText: string; meeting: MeetingInfo }>()
+const props = defineProps<{ title: string, submitText: string, meeting: MeetingInfo }>()
 const emit = defineEmits<{ (event: 'submit'): void }>()
 
 const displayText = (value: string, placeholder: string) => value || placeholder
@@ -26,15 +26,21 @@ const isPlaceholder = (value: string) => !value
     <view class="mx-4 mt-4 rounded-4 bg-white">
       <slot name="title">
         <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-4">
-          <text class="text-3.5 text-#2f2f2f">{{ meeting.name }}</text>
+          <text class="text-3.5 text-#2f2f2f">
+            {{ meeting.name }}
+          </text>
           <wd-icon name="close" size="16px" color="#c4c7cc" />
         </view>
       </slot>
 
       <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-4">
-        <text class="text-3 text-#8a8f99">会议类型</text>
+        <text class="text-3 text-#8a8f99">
+          会议类型
+        </text>
         <view class="flex items-center gap-2">
-          <text class="text-3 text-#2f2f2f">{{ meeting.type }}</text>
+          <text class="text-3 text-#2f2f2f">
+            {{ meeting.type }}
+          </text>
           <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
         </view>
       </view>
@@ -44,15 +50,25 @@ const isPlaceholder = (value: string) => !value
           <view class="flex items-center justify-between">
             <view class="flex items-center gap-6">
               <view class="text-center">
-                <text class="block text-5 font-600 text-#2f2f2f">{{ meeting.startTime }}</text>
-                <text class="text-2.5 text-#9aa0a6">{{ meeting.date }}</text>
+                <text class="block text-5 text-#2f2f2f font-600">
+                  {{ meeting.startTime }}
+                </text>
+                <text class="text-2.5 text-#9aa0a6">
+                  {{ meeting.date }}
+                </text>
               </view>
               <view class="text-center">
-                <text class="block text-2.5 text-#9aa0a6">{{ meeting.duration }}</text>
+                <text class="block text-2.5 text-#9aa0a6">
+                  {{ meeting.duration }}
+                </text>
               </view>
               <view class="text-center">
-                <text class="block text-5 font-600 text-#2f2f2f">{{ meeting.endTime }}</text>
-                <text class="text-2.5 text-#9aa0a6">{{ meeting.date }}</text>
+                <text class="block text-5 text-#2f2f2f font-600">
+                  {{ meeting.endTime }}
+                </text>
+                <text class="text-2.5 text-#9aa0a6">
+                  {{ meeting.date }}
+                </text>
               </view>
             </view>
           </view>
@@ -60,16 +76,22 @@ const isPlaceholder = (value: string) => !value
       </slot>
 
       <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-4">
-        <text class="text-3 text-#8a8f99">参会人</text>
+        <text class="text-3 text-#8a8f99">
+          参会人
+        </text>
         <view class="flex items-center gap-2">
           <view class="h-6 w-6 rounded-full bg-#d9dce1" />
-          <text class="text-3 text-#2f2f2f">{{ meeting.participants }}</text>
+          <text class="text-3 text-#2f2f2f">
+            {{ meeting.participants }}
+          </text>
           <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
         </view>
       </view>
 
       <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-4">
-        <text class="text-3 text-#8a8f99">会议室</text>
+        <text class="text-3 text-#8a8f99">
+          会议室
+        </text>
         <text
           class="text-3"
           :class="isPlaceholder(meeting.room) ? 'text-#c4c7cc' : 'text-#2f2f2f'"
@@ -79,7 +101,9 @@ const isPlaceholder = (value: string) => !value
       </view>
 
       <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-4">
-        <text class="text-3 text-#8a8f99">地点</text>
+        <text class="text-3 text-#8a8f99">
+          地点
+        </text>
         <text
           class="text-3"
           :class="isPlaceholder(meeting.location) ? 'text-#c4c7cc' : 'text-#2f2f2f'"
@@ -89,7 +113,9 @@ const isPlaceholder = (value: string) => !value
       </view>
 
       <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-4">
-        <text class="text-3 text-#8a8f99">会议密码</text>
+        <text class="text-3 text-#8a8f99">
+          会议密码
+        </text>
         <text
           class="text-3"
           :class="isPlaceholder(meeting.password) ? 'text-#c4c7cc' : 'text-#2f2f2f'"
@@ -99,7 +125,9 @@ const isPlaceholder = (value: string) => !value
       </view>
 
       <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-4">
-        <text class="text-3 text-#8a8f99">添加会议附件</text>
+        <text class="text-3 text-#8a8f99">
+          添加会议附件
+        </text>
         <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
       </view>
 
@@ -114,7 +142,9 @@ const isPlaceholder = (value: string) => !value
     </view>
 
     <view class="mx-4 mt-6">
-      <wd-button type="primary" block @click="emit('submit')">{{ submitText }}</wd-button>
+      <wd-button type="primary" block @click="emit('submit')">
+        {{ submitText }}
+      </wd-button>
     </view>
   </view>
 </template>
