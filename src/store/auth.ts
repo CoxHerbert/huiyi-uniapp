@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { KEYS } from '@/constants/keys'
 import { extractLoginInfo } from '@/utils/login-info'
 import { encrypt } from '@/utils/sm2'
-import { h5Apis } from '@/api'
+import h5Apis from '@/api/h5'
 import { useUserStore } from './user'
 
 interface LoginForm {
