@@ -5,6 +5,11 @@ export interface CreateMeetingPayload {
   title: string
   meeting_start: number
   meeting_duration: number
+  meeting_type?: string
+  meeting_password?: string
+  meeting_room?: string
+  meeting_location?: string
+  meeting_desc?: string
   invitees: {
     userid: string[]
   }
