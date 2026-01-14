@@ -8,6 +8,7 @@ type _LocationUrl =
   "/pages/about/index" |
   "/pages/login/account" |
   "/pages/meeting/create" |
+  "/pages/meeting/detail" |
   "/pages/meeting/edit" |
   "/pages/meeting/index";
 

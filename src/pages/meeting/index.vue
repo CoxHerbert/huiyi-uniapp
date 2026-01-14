@@ -66,6 +66,10 @@ const goToCreate = () => {
 const goToEdit = () => {
   uni.navigateTo({ url: '/pages/meeting/edit' })
 }
+
+const goToDetail = (meetingId: number) => {
+  uni.navigateTo({ url: `/pages/meeting/detail?meetingId=${meetingId}` })
+}
 </script>
 
 <template>
@@ -105,6 +109,7 @@ const goToEdit = () => {
           v-for="item in section.items"
           :key="item.id"
           class="mb-3 rounded-3 bg-white p-3 shadow-[0_4px_12px_rgba(31,35,41,0.04)]"
+          @click="goToDetail(item.id)"
         >
           <view class="flex items-center gap-2">
             <view

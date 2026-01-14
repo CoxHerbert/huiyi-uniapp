@@ -63,6 +63,14 @@
       "style": {
         "navigationBarTitleText": "编辑会议"
       }
+    },
+    {
+      "path": "pages/meeting/detail",
+      "type": "page",
+      "name": "meeting-detail",
+      "style": {
+        "navigationBarTitleText": "会议详情"
+      }
     }
   ],
   "subPackages": [],
