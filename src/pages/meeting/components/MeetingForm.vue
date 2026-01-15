@@ -60,7 +60,7 @@ const handleAdminSelect = (option: { label: string, value: string }) => {
 </script>
 
 <template>
-  <view class="min-h-screen bg-#f5f6f8 pb-6">
+  <view class="min-h-screen bg-#f5f6f8 pb-24">
     <view class="mx-4 mt-4 rounded-4 bg-white">
       <slot name="title">
         <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-2">
@@ -209,7 +209,7 @@ const handleAdminSelect = (option: { label: string, value: string }) => {
       </view>
     </view>
 
-    <view class="mx-4 mt-6">
+    <view class="fixed bottom-0 left-0 right-0 z-10 border-t border-#f0f1f2 bg-white px-4 py-3 pb-[calc(12px+env(safe-area-inset-bottom))]">
       <wd-button type="primary" block @click="emit('submit')">
         {{ submitText }}
       </wd-button>
