@@ -21,6 +21,9 @@ interface MeetingItem {
   participants?: string
   location?: string
   meetingNo?: string
+  meetingStart?: number
+  meetingDuration?: number
+  isCreator?: boolean
 }
 
 interface MeetingSection {
@@ -107,15 +110,25 @@ const statusMeta = new Map<number, { label: string, className: string }>([
   [3, { label: '已结束', className: 'bg-#f1f2f4 text-#8a8f99' }],
   [4, { label: '已取消', className: 'bg-#fdeaea text-#ff4d4f' }],
 ])
+const statusLabelClass = new Map<string, string>([
+  ['待开始', 'bg-#fff4e5 text-#ff9f1a'],
+  ['待进入', 'bg-#e7edff text-#3f5fff'],
+])
 
 function getStatusMeta(status?: string | number) {
   if (typeof status === 'number') {
     return statusMeta.get(status)
   }
   const parsed = Number(status)
-  if (Number.isNaN(parsed))
-    return null
-  return statusMeta.get(parsed)
+  if (!Number.isNaN(parsed)) {
+    return statusMeta.get(parsed)
+  }
+  if (typeof status === 'string') {
+    const className = statusLabelClass.get(status)
+    if (className)
+      return { label: status, className }
+  }
+  return null
 }
 
 function padTime(value: number) {
@@ -124,15 +137,19 @@ function padTime(value: number) {
 
 function formatDateLabel(value: Date) {
   const today = new Date()
+  const dayAfterTomorrow = new Date()
   const tomorrow = new Date()
   tomorrow.setDate(today.getDate() + 1)
+  dayAfterTomorrow.setDate(today.getDate() + 2)
   const dateLabel = `${value.getMonth() + 1}月${value.getDate()}日`
   const valueKey = value.toDateString()
   if (valueKey === today.toDateString())
     return `今天 ${dateLabel}`
   if (valueKey === tomorrow.toDateString())
     return `明天 ${dateLabel}`
-  return `${value.getFullYear()}年${dateLabel}`
+  if (valueKey === dayAfterTomorrow.toDateString())
+    return `后天 ${dateLabel}`
+  return dateLabel
 }
 
 function formatTimeRange(start: number, duration: number) {
@@ -150,6 +167,35 @@ function parseDate(value?: string) {
   return Number.isNaN(parsed.getTime()) ? null : parsed
 }
 
+function buildTimeLabel(startTimestamp?: number, durationSeconds?: number, fallback?: string) {
+  if (typeof startTimestamp === 'number' && typeof durationSeconds === 'number') {
+    return formatTimeRange(startTimestamp, durationSeconds)
+  }
+  return fallback || ''
+}
+
+function deriveTip(startTimestamp?: number) {
+  if (typeof startTimestamp !== 'number')
+    return null
+  const nowSeconds = Math.floor(Date.now() / 1000)
+  const diffSeconds = startTimestamp - nowSeconds
+  if (diffSeconds > 0 && diffSeconds <= 30 * 60)
+    return '30分钟后开始'
+  return null
+}
+
+function deriveStatus(record: any, startTimestamp?: number) {
+  if (record?.status !== undefined && record?.status !== null)
+    return record.status
+  if (typeof startTimestamp !== 'number')
+    return null
+  const nowSeconds = Math.floor(Date.now() / 1000)
+  if (startTimestamp > nowSeconds)
+    return null
+  const isCreator = Boolean(record?.is_creator ?? record?.isCreator ?? record?.role === 'creator')
+  return isCreator ? '待开始' : '待进入'
+}
+
 function normalizeMeetingSections(list: any[]): MeetingSection[] {
   if (!Array.isArray(list))
     return []
@@ -164,28 +210,31 @@ function normalizeMeetingSections(list: any[]): MeetingSection[] {
       ? new Date(startTimestamp * 1000)
       : parseDate(record?.date)
     const dateLabel = startDate ? formatDateLabel(startDate) : '未安排'
-    const timeLabel = record?.time
-      || record?.timeRange
-      || (typeof startTimestamp === 'number' && duration
-        ? formatTimeRange(startTimestamp, duration)
-        : '')
+    const timeLabel = buildTimeLabel(
+      typeof startTimestamp === 'number' ? startTimestamp : undefined,
+      typeof duration === 'number' ? duration : undefined,
+      record?.time || record?.timeRange,
+    )
     const durationLabel = duration ? `${Math.max(Math.round(duration / 60), 1)}分钟` : record?.duration
     const participants = Array.isArray(record?.invitees?.userid)
       ? record.invitees.userid.join(' ')
       : record?.participants
     const item: MeetingItem = {
       id: record?.id ?? record?.meetingId ?? record?.meeting_id ?? `${dateLabel}-${Math.random()}`,
-      status: record?.status,
+      status: deriveStatus(record, typeof startTimestamp === 'number' ? startTimestamp : undefined),
       statusClass: record?.statusClass,
       title: record?.title ?? record?.name ?? '未命名会议',
       time: timeLabel,
       duration: durationLabel,
-      tip: record?.tip,
+      tip: record?.tip ?? deriveTip(typeof startTimestamp === 'number' ? startTimestamp : undefined),
       creator: record?.creator ?? record?.host,
       adminUserid: record?.admin_userid ?? record?.adminUserid,
       participants,
       location: record?.location ?? record?.room,
       meetingNo: record?.meetingNo ?? record?.meeting_no,
+      meetingStart: typeof startTimestamp === 'number' ? startTimestamp : undefined,
+      meetingDuration: typeof duration === 'number' ? duration : undefined,
+      isCreator: Boolean(record?.is_creator ?? record?.isCreator ?? record?.role === 'creator'),
     }
     const derivedStatus = getStatusMeta(item.status)
     if (derivedStatus) {
@@ -269,9 +318,12 @@ function goToDetail(meetingId: number) {
         预约会议列表
       </text>
       <view v-for="section in meetingSections" :key="section.date" class="mb-4">
-        <text class="mb-2 block text-3 text-#9aa0a6">
-          {{ section.date }}
-        </text>
+        <view class="mb-2 flex items-center gap-2 text-3 text-#9aa0a6">
+          <wd-icon name="time" size="14px" />
+          <text>
+            {{ section.date }}
+          </text>
+        </view>
         <view
           v-for="item in section.items"
           :key="item.id"
