@@ -54,7 +54,7 @@ const handleCancelMeeting = async () => {
 </script>
 
 <template>
-  <view class="min-h-screen bg-#f6f7f9 pb-8">
+  <view class="min-h-screen bg-#f6f7f9 pb-24">
     <view class="mx-4 mt-4 rounded-4 bg-white px-4 pt-4">
       <text class="block text-3.5 text-#2f2f2f">{{ meetingDetail.title }}</text>
 
@@ -110,9 +110,11 @@ const handleCancelMeeting = async () => {
       <text class="mt-2 block text-2.5 text-#c2c6cc">{{ meetingDetail.tipContent }}</text>
     </view>
 
-    <view class="mx-4 mt-8 flex gap-3">
-      <wd-button type="default" plain block @click="handleCancelMeeting">取消会议</wd-button>
-      <wd-button type="primary" block @click="goToEdit">编辑会议</wd-button>
+    <view class="fixed bottom-0 left-0 right-0 z-10 border-t border-#f0f1f2 bg-white px-4 py-3 pb-[calc(12px+env(safe-area-inset-bottom))]">
+      <view class="flex gap-3">
+        <wd-button type="default" plain block @click="handleCancelMeeting">取消会议</wd-button>
+        <wd-button type="primary" block @click="goToEdit">编辑会议</wd-button>
+      </view>
     </view>
   </view>
 </template>
