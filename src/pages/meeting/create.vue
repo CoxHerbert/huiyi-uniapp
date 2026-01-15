@@ -14,9 +14,9 @@ const meetingForm = reactive({
   type: '线上会议',
   startTime: '14:00',
   endTime: '15:00',
-  date: '2026/01/09',
+  date: '2026/01/15',
   duration: '60分钟',
-  participants: '张浩',
+  participants: 'EW-M1,EW-6504',
   room: '',
   location: '',
   password: '',
@@ -77,26 +77,28 @@ watchEffect(() => {
   meetingForm.duration = durationLabel.value
 })
 
-const parseUserIds = (value: string) =>
-  value
+function parseUserIds(value: string) {
+  return value
     .split(/[、,，]/)
-    .map((item) => item.trim())
+    .map(item => item.trim())
     .filter(Boolean)
+}
 
 const invitees = computed(() => parseUserIds(meetingForm.participants))
 
 const createMeetingPayload = computed(() => ({
-  admin_userid: 'EW-6504',
+  admin_userid: 'EW-M1',
   title: meetingForm.name,
   meeting_start: meetingStartTimestamp.value,
   meeting_duration: meetingDurationSeconds.value,
   description: meetingForm.description,
   location: meetingForm.location,
   invitees: {
-    userid: invitees.value.length ? invitees.value : ['EW-7223'],
+    userid: invitees.value.length ? invitees.value : ['EW-M1'],
   },
   settings: {
     password: meetingForm.password,
+    remind_scope: 1,
   },
 }))
 
@@ -126,7 +128,9 @@ async function handleCreate() {
           </text>
           <wd-datetime-picker v-model="meetingForm.date" type="date">
             <view class="flex items-center gap-2">
-              <text class="text-3 text-#2f2f2f">{{ meetingForm.date }}</text>
+              <text class="text-3 text-#2f2f2f">
+                {{ meetingForm.date }}
+              </text>
               <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
             </view>
           </wd-datetime-picker>
