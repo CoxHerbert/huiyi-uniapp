@@ -61,14 +61,14 @@ const handleAdminSelect = (option: { label: string, value: string }) => {
 
 <template>
   <view class="min-h-screen bg-#f5f6f8 pb-24">
-    <view class="mx-4 mt-4 rounded-4 bg-white">
+    <view class="mx-4 mt-4 space-y-2 rounded-4 bg-white">
       <slot name="title">
         <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-2">
           <wd-input
             :model-value="meeting.name"
             placeholder="请输入会议名称"
             clearable
-            custom-class="flex-1"
+            custom-class="flex-1 w-full"
             @update:model-value="(value) => updateField('name', value)"
           />
           <wd-icon name="close" size="16px" color="#c4c7cc" />
@@ -150,7 +150,7 @@ const handleAdminSelect = (option: { label: string, value: string }) => {
         <wd-input
           :model-value="meeting.participants"
           placeholder="请输入参会人，逗号分隔"
-          custom-class="flex-1 text-right"
+          custom-class="flex-1 w-full text-right"
           @update:model-value="(value) => updateField('participants', value)"
         />
       </view>
@@ -162,7 +162,7 @@ const handleAdminSelect = (option: { label: string, value: string }) => {
         <wd-input
           :model-value="meeting.room"
           placeholder="选择会议室"
-          custom-class="flex-1 text-right"
+          custom-class="flex-1 w-full text-right"
           @update:model-value="(value) => updateField('room', value)"
         />
       </view>
@@ -174,7 +174,7 @@ const handleAdminSelect = (option: { label: string, value: string }) => {
         <wd-input
           :model-value="meeting.location"
           placeholder="添加地点"
-          custom-class="flex-1 text-right"
+          custom-class="flex-1 w-full text-right"
           @update:model-value="(value) => updateField('location', value)"
         />
       </view>
@@ -186,7 +186,7 @@ const handleAdminSelect = (option: { label: string, value: string }) => {
         <wd-input
           :model-value="meeting.password"
           placeholder="请设置会议密码"
-          custom-class="flex-1 text-right"
+          custom-class="flex-1 w-full text-right"
           @update:model-value="(value) => updateField('password', value)"
         />
       </view>
@@ -204,6 +204,7 @@ const handleAdminSelect = (option: { label: string, value: string }) => {
           placeholder="请输入会议描述..."
           type="textarea"
           auto-height
+          custom-class="w-full"
           @update:model-value="(value) => updateField('description', value)"
         />
       </view>
