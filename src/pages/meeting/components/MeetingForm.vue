@@ -2,6 +2,7 @@
 interface MeetingInfo {
   name: string
   type: string
+  adminUserid: string
   startTime: string
   endTime: string
   date: string
@@ -21,9 +22,18 @@ const emit = defineEmits<{
 }>()
 
 const showTypeSheet = ref(false)
+const showAdminSheet = ref(false)
 const meetingTypeOptions = [
   { label: '线上会议', value: '线上会议' },
   { label: '线下会议', value: '线下会议' },
+]
+const adminUserOptions = [
+  { label: 'EW-M1', value: 'EW-M1' },
+  { label: 'EW-M2', value: 'EW-M2' },
+  { label: 'EW-M3', value: 'EW-M3' },
+  { label: 'EW-M4', value: 'EW-M4' },
+  { label: 'EW-M5', value: 'EW-M5' },
+  { label: 'EW-M6', value: 'EW-M6' },
 ]
 
 const updateField = <K extends keyof MeetingInfo>(key: K, value: MeetingInfo[K]) => {
@@ -34,9 +44,18 @@ const openTypeSheet = () => {
   showTypeSheet.value = true
 }
 
+const openAdminSheet = () => {
+  showAdminSheet.value = true
+}
+
 const handleTypeSelect = (option: { label: string, value: string }) => {
   updateField('type', option.value)
   showTypeSheet.value = false
+}
+
+const handleAdminSelect = (option: { label: string, value: string }) => {
+  updateField('adminUserid', option.value)
+  showAdminSheet.value = false
 }
 </script>
 
@@ -66,6 +85,29 @@ const handleTypeSelect = (option: { label: string, value: string }) => {
         <view class="flex items-center gap-2">
           <text class="text-3 text-#2f2f2f">
             {{ meeting.type }}
+          </text>
+          <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
+        </view>
+      </view>
+
+      <view
+        class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-4"
+        @click="openAdminSheet"
+      >
+        <view class="flex items-center gap-1">
+          <text class="text-3 text-#8a8f99">
+            管理员
+          </text>
+          <text class="text-3 text-#ff4d4f">
+            *
+          </text>
+        </view>
+        <view class="flex items-center gap-2">
+          <text
+            class="text-3"
+            :class="meeting.adminUserid ? 'text-#2f2f2f' : 'text-#c2c6cc'"
+          >
+            {{ meeting.adminUserid || '请选择管理员' }}
           </text>
           <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
         </view>
@@ -184,6 +226,26 @@ const handleTypeSelect = (option: { label: string, value: string }) => {
           <text class="text-3 text-#2f2f2f">{{ option.label }}</text>
           <wd-icon
             v-if="meeting.type === option.value"
+            name="check"
+            size="18px"
+            color="#4f7bff"
+          />
+        </view>
+      </view>
+      <wd-gap :height="50" />
+    </wd-action-sheet>
+
+    <wd-action-sheet v-model="showAdminSheet" title="选择管理员" :close-on-click-action="true">
+      <view class="px-4 pb-4">
+        <view
+          v-for="option in adminUserOptions"
+          :key="option.value"
+          class="flex items-center justify-between border-b border-#f0f1f2 py-3 last:border-b-0"
+          @click="handleAdminSelect(option)"
+        >
+          <text class="text-3 text-#2f2f2f">{{ option.label }}</text>
+          <wd-icon
+            v-if="meeting.adminUserid === option.value"
             name="check"
             size="18px"
             color="#4f7bff"

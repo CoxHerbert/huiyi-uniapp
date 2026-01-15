@@ -12,9 +12,10 @@ definePage({
 const meetingForm = reactive({
   name: '张浩预定的会议',
   type: '线上会议',
-  startTime: '14:00',
-  endTime: '15:00',
-  date: '2026/01/15',
+  adminUserid: 'EW-M1',
+  startTime: '',
+  endTime: '',
+  date: '',
   duration: '60分钟',
   participants: 'EW-M1,EW-6504',
   room: '',
@@ -23,6 +24,30 @@ const meetingForm = reactive({
   attachment: '',
   description: '',
 })
+
+const MIN_DURATION_MINUTES = 5
+
+function padTime(value: number) {
+  return String(value).padStart(2, '0')
+}
+
+function formatDate(value: Date) {
+  const year = value.getFullYear()
+  const month = padTime(value.getMonth() + 1)
+  const day = padTime(value.getDate())
+  return `${year}/${month}/${day}`
+}
+
+function formatTime(value: Date) {
+  return `${padTime(value.getHours())}:${padTime(value.getMinutes())}`
+}
+
+function formatTimeFromMinutes(totalMinutes: number) {
+  const clamped = Math.min(Math.max(totalMinutes, 0), 23 * 60 + 59)
+  const hour = Math.floor(clamped / 60)
+  const minute = clamped % 60
+  return `${padTime(hour)}:${padTime(minute)}`
+}
 
 function parseTime(time: string) {
   const [hour, minute] = time.split(':').map(Number)
@@ -37,20 +62,68 @@ function toMinutes(time: string) {
   return hour * 60 + minute
 }
 
+function addMinutesToTime(time: string, minutes: number) {
+  return formatTimeFromMinutes(toMinutes(time) + minutes)
+}
+
+function initDefaultDateTime() {
+  const now = new Date()
+  meetingForm.date = formatDate(now)
+  meetingForm.startTime = formatTime(now)
+  meetingForm.endTime = addMinutesToTime(meetingForm.startTime, 30)
+}
+
+initDefaultDateTime()
+
 const minEndTime = computed(() => {
-  const { hour, minute } = parseTime(meetingForm.startTime)
+  const minTime = addMinutesToTime(meetingForm.startTime, MIN_DURATION_MINUTES)
+  const { hour, minute } = parseTime(minTime)
   return { hour, minute }
 })
 
-function ensureEndAfterStart() {
-  if (toMinutes(meetingForm.endTime) < toMinutes(meetingForm.startTime)) {
-    meetingForm.endTime = meetingForm.startTime
+function parseDate(value: string) {
+  const normalized = value.replace(/-/g, '/')
+  const parsed = new Date(normalized)
+  return Number.isNaN(parsed.getTime()) ? null : parsed
+}
+
+function ensureDateNotPast() {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const selected = parseDate(meetingForm.date)
+  if (!selected || selected.getTime() < today.getTime()) {
+    meetingForm.date = formatDate(today)
+  }
+}
+
+function ensureStartNotPast() {
+  const now = new Date()
+  const todayLabel = formatDate(now)
+  if (meetingForm.date !== todayLabel)
+    return
+  const nowMinutes = now.getHours() * 60 + now.getMinutes()
+  if (toMinutes(meetingForm.startTime) < nowMinutes) {
+    meetingForm.startTime = formatTime(now)
+  }
+}
+
+function ensureMinimumDuration() {
+  const minEndMinutes = Math.min(
+    toMinutes(meetingForm.startTime) + MIN_DURATION_MINUTES,
+    23 * 60 + 59,
+  )
+  if (toMinutes(meetingForm.endTime) < minEndMinutes) {
+    meetingForm.endTime = formatTimeFromMinutes(minEndMinutes)
   }
 }
 
 watch(
-  () => [meetingForm.startTime, meetingForm.endTime],
-  ensureEndAfterStart,
+  () => [meetingForm.date, meetingForm.startTime, meetingForm.endTime],
+  () => {
+    ensureDateNotPast()
+    ensureStartNotPast()
+    ensureMinimumDuration()
+  },
   { immediate: true },
 )
 
@@ -87,14 +160,14 @@ function parseUserIds(value: string) {
 const invitees = computed(() => parseUserIds(meetingForm.participants))
 
 const createMeetingPayload = computed(() => ({
-  admin_userid: 'EW-M1',
+  admin_userid: meetingForm.adminUserid,
   title: meetingForm.name,
   meeting_start: meetingStartTimestamp.value,
   meeting_duration: meetingDurationSeconds.value,
   description: meetingForm.description,
   location: meetingForm.location,
   invitees: {
-    userid: invitees.value.length ? invitees.value : ['EW-M1'],
+    userid: invitees.value.length ? invitees.value : [meetingForm.adminUserid],
   },
   settings: {
     password: meetingForm.password,
@@ -104,6 +177,10 @@ const createMeetingPayload = computed(() => ({
 
 async function handleCreate() {
   try {
+    if (!meetingForm.adminUserid) {
+      uni.showToast({ title: '请选择管理员', icon: 'none' })
+      return
+    }
     await createMeeting(createMeetingPayload.value)
   }
   catch (error) {
