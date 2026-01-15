@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive, watch, watchEffect } from 'vue'
-import { createMeeting } from '@/api/meeting'
+import { updateMeeting } from '@/api/meeting'
 import MeetingForm from './components/MeetingForm.vue'
 
 definePage({
@@ -212,7 +212,7 @@ async function handleSave() {
     meetingForm.participants = participantsWithAdmin.value.join(',')
 
     // ✅ 再按服务端接收格式提交
-    await createMeeting(updateMeetingPayload.value)
+    await updateMeeting(updateMeetingPayload.value)
   }
   catch (error) {
     console.error('update meeting failed', error)
