@@ -7,31 +7,11 @@ export interface CreateMeetingPayload {
   meeting_duration: number
   description?: string
   location?: string
-  agentid?: number
   invitees: {
     userid: string[]
   }
   settings?: {
-    remind_scope?: number
     password?: string
-    enable_waiting_room?: boolean
-    allow_enter_before_host?: boolean
-    enable_enter_mute?: number
-    enable_screen_watermark?: boolean
-    hosts?: {
-      userid: string[]
-    }
-    ring_users?: {
-      userid: string[]
-    }
-  }
-  cal_id?: string
-  reminders?: {
-    is_repeat?: number
-    repeat_type?: number
-    repeat_until?: number
-    repeat_interval?: number
-    remind_before?: number[]
   }
 }
 

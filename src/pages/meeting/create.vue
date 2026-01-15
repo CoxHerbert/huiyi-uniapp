@@ -22,20 +22,6 @@ const meetingForm = reactive({
   password: '',
   attachment: '',
   description: '',
-  agentid: '1000014',
-  calId: '',
-  hosts: '',
-  ringUsers: '',
-  remindScope: '1',
-  remindBefore: '0,900',
-  isRepeat: false,
-  repeatType: '0',
-  repeatUntil: '',
-  repeatInterval: '1',
-  enableWaitingRoom: false,
-  allowEnterBeforeHost: true,
-  enableEnterMute: false,
-  enableScreenWatermark: false,
 })
 
 function parseTime(time: string) {
@@ -99,13 +85,6 @@ const parseUserIds = (value: string) =>
 
 const invitees = computed(() => parseUserIds(meetingForm.participants))
 
-const remindBefore = computed(() =>
-  meetingForm.remindBefore
-    .split(/[、,，]/)
-    .map((item) => Number(item.trim()))
-    .filter((value) => !Number.isNaN(value)),
-)
-
 const createMeetingPayload = computed(() => ({
   admin_userid: 'EW-6504',
   title: meetingForm.name,
@@ -113,31 +92,11 @@ const createMeetingPayload = computed(() => ({
   meeting_duration: meetingDurationSeconds.value,
   description: meetingForm.description,
   location: meetingForm.location,
-  agentid: Number(meetingForm.agentid) || undefined,
   invitees: {
     userid: invitees.value.length ? invitees.value : ['EW-7223'],
   },
   settings: {
-    remind_scope: Number(meetingForm.remindScope) || 1,
     password: meetingForm.password,
-    enable_waiting_room: meetingForm.enableWaitingRoom,
-    allow_enter_before_host: meetingForm.allowEnterBeforeHost,
-    enable_enter_mute: meetingForm.enableEnterMute ? 1 : 0,
-    enable_screen_watermark: meetingForm.enableScreenWatermark,
-    hosts: {
-      userid: parseUserIds(meetingForm.hosts),
-    },
-    ring_users: {
-      userid: parseUserIds(meetingForm.ringUsers),
-    },
-  },
-  cal_id: meetingForm.calId || undefined,
-  reminders: {
-    is_repeat: meetingForm.isRepeat ? 1 : 0,
-    repeat_type: Number(meetingForm.repeatType) || 0,
-    repeat_until: Number(meetingForm.repeatUntil) || undefined,
-    repeat_interval: Number(meetingForm.repeatInterval) || 1,
-    remind_before: remindBefore.value,
   },
 }))
 
