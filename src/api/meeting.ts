@@ -15,29 +15,41 @@ export interface CreateMeetingPayload {
   }
 }
 
-export const createMeeting = (data: CreateMeetingPayload) =>
-  request({
+export function createMeeting(data: CreateMeetingPayload) {
+  return request({
     url: '/blade-bip/wx/create',
     method: 'post',
     data,
   })
+}
 
-export const getMeetingInfo = (meetingId: string) =>
-  request({
+export function updateMeeting(data: CreateMeetingPayload) {
+  return request({
+    url: '/blade-bip/wx/update',
+    method: 'post',
+    data,
+  })
+}
+
+export function getMeetingInfo(meetingId: string) {
+  return request({
     url: '/blade-bip/wx/info',
     method: 'get',
     params: { meetingId },
   })
+}
 
-export const cancelMeeting = (meetingId: string) =>
-  request({
+export function cancelMeeting(meetingId: string) {
+  return request({
     url: '/blade-bip/wx/cancel',
     method: 'get',
     params: { meetingId },
   })
+}
 
-export const getMeetingList = () =>
-  request({
+export function getMeetingList() {
+  return request({
     url: '/blade-bip/wx/list',
     method: 'get',
   })
+}

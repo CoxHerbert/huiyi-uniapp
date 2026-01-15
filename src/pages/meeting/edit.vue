@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed, reactive, watch, watchEffect } from 'vue'
 import { createMeeting } from '@/api/meeting'
 import MeetingForm from './components/MeetingForm.vue'
 
@@ -150,28 +151,55 @@ watchEffect(() => {
   meetingForm.duration = durationLabel.value
 })
 
-const parseUserIds = (value: string) =>
-  value
+/** 解析参与人字符串（支持 、 , ，） */
+function parseUserIds(value: string) {
+  return value
     .split(/[、,，]/)
-    .map((item) => item.trim())
+    .map(item => item.trim())
     .filter(Boolean)
+}
 
-const invitees = computed(() => parseUserIds(meetingForm.participants))
+/** 参与人 + 管理员合并，管理员强制存在，且去重（保持顺序） */
+function mergeParticipantsWithAdmin(participants: string, adminUserid: string) {
+  const list = parseUserIds(participants)
+  const merged = [adminUserid, ...list].filter(Boolean)
 
-const updateMeetingPayload = computed(() => ({
-  admin_userid: meetingForm.adminUserid,
-  title: meetingForm.name,
-  meeting_start: meetingStartTimestamp.value,
-  meeting_duration: meetingDurationSeconds.value,
-  description: meetingForm.description,
-  location: meetingForm.location,
-  invitees: {
-    userid: invitees.value.length ? invitees.value : [meetingForm.adminUserid],
-  },
-  settings: {
-    password: meetingForm.password,
-  },
-}))
+  const uniq: string[] = []
+  for (const id of merged) {
+    if (!uniq.includes(id))
+      uniq.push(id)
+  }
+  return uniq
+}
+
+/** 最终参与人（保证包含管理员、去重） */
+const participantsWithAdmin = computed(() => {
+  return mergeParticipantsWithAdmin(meetingForm.participants, meetingForm.adminUserid)
+})
+
+/** 转成服务端接收格式（统一在这里维护字段映射） */
+function toServerPayload() {
+  const ids = participantsWithAdmin.value.length
+    ? participantsWithAdmin.value
+    : [meetingForm.adminUserid].filter(Boolean)
+
+  return {
+    admin_userid: meetingForm.adminUserid,
+    title: meetingForm.name,
+    meeting_start: meetingStartTimestamp.value,
+    meeting_duration: meetingDurationSeconds.value,
+    description: meetingForm.description,
+    location: meetingForm.location,
+    invitees: {
+      userid: ids,
+    },
+    settings: {
+      password: meetingForm.password,
+    },
+  }
+}
+
+const updateMeetingPayload = computed(() => toServerPayload())
 
 async function handleSave() {
   try {
@@ -179,6 +207,11 @@ async function handleSave() {
       uni.showToast({ title: '请选择管理员', icon: 'none' })
       return
     }
+
+    // ✅ 提交前：把 adminUserid 拼进 participants（去重后回写）
+    meetingForm.participants = participantsWithAdmin.value.join(',')
+
+    // ✅ 再按服务端接收格式提交
     await createMeeting(updateMeetingPayload.value)
   }
   catch (error) {
@@ -196,19 +229,21 @@ async function handleSave() {
     @submit="handleSave"
   >
     <template #time>
-      <view class="border-b border-#f0f1f2 px-4 py-4">
+      <view class="mb-2 border-#f0f1f2 px-4 py-3">
         <view class="mb-4 flex items-center justify-between">
           <text class="text-3 text-#8a8f99">
             会议日期
           </text>
           <wd-datetime-picker v-model="meetingForm.date" type="date">
             <view class="flex items-center gap-2">
-              <text class="text-3 text-#2f2f2f">{{ meetingForm.date }}</text>
+              <text class="text-3 text-#2f2f2f">
+                {{ meetingForm.date }}
+              </text>
               <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
             </view>
           </wd-datetime-picker>
         </view>
-        <view class="flex items-center justify-between">
+        <view class="flex items-center justify-center">
           <view class="flex items-center gap-6">
             <view class="text-center">
               <wd-datetime-picker v-model="meetingForm.startTime" type="time" :use-second="false">
@@ -223,7 +258,7 @@ async function handleSave() {
               </wd-datetime-picker>
             </view>
             <view class="text-center">
-              <text class="block text-2.5 text-#9aa0a6">
+              <text class="block bg-#F6F8FA px-1 py-2 text-2.5 text-#9aa0a6">
                 {{ durationLabel }}
               </text>
             </view>

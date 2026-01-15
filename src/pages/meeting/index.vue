@@ -9,14 +9,13 @@ definePage({
 })
 
 interface MeetingItem {
-  id: number | string
-  status?: string | number
+  id: string
+  status?: number | string
   statusClass?: string
   title: string
   time?: string
   duration?: string
   tip?: string
-  creator?: string
   adminUserid?: string
   participants?: string
   location?: string
@@ -24,6 +23,9 @@ interface MeetingItem {
   meetingStart?: number
   meetingDuration?: number
   isCreator?: boolean
+  userName?: string
+  meetingId?: string
+  createUserName?: string
 }
 
 interface MeetingSection {
@@ -31,78 +33,7 @@ interface MeetingSection {
   items: MeetingItem[]
 }
 
-const meetingSections = ref<MeetingSection[]>([
-  {
-    date: '今天 1月8日',
-    items: [
-      {
-        id: 1,
-        status: '待开始',
-        statusClass: 'bg-#fff4e5 text-#ff9f1a',
-        title: '会议名称超过十二个字就为...',
-        time: '下午14:00-15:00',
-        duration: '60分钟',
-        creator: '张浩',
-        adminUserid: 'EW-M1',
-        participants: '张浩 张浩 张浩 张浩 张浩 ...等共20人',
-        location: '会议室A',
-        meetingNo: '668 153 256',
-      },
-      {
-        id: 2,
-        status: '待进入',
-        statusClass: 'bg-#e7edff text-#3f5fff',
-        title: '会议名称超过十二个字就为...',
-        time: '下午14:00-15:00',
-        duration: '30分钟',
-        creator: '张浩',
-        adminUserid: 'EW-M2',
-        participants: '张浩 张浩 张浩 张浩 张浩 ...等共20人',
-        location: '线上会议室',
-        meetingNo: '668 153 257',
-      },
-      {
-        id: 3,
-        title: '会议名称超过十二个字就为...',
-        time: '下午14:00-15:00',
-        duration: '45分钟',
-        tip: '30分钟后开始',
-        creator: '张浩',
-        adminUserid: 'EW-M3',
-        participants: '张浩 张浩 张浩 张浩 张浩 ...等共20人',
-        location: '会议室C',
-        meetingNo: '668 153 258',
-      },
-      {
-        id: 4,
-        title: '会议名称超过十二个字就为...',
-        time: '下午14:00-15:00',
-        duration: '20分钟',
-        creator: '张浩',
-        adminUserid: 'EW-M4',
-        participants: '张浩 张浩 张浩 张浩 张浩 ...等共20人',
-        location: '会议室B',
-        meetingNo: '668 153 259',
-      },
-    ],
-  },
-  {
-    date: '明天 1月9日',
-    items: [
-      {
-        id: 5,
-        title: '会议名称超过十二个字就为...',
-        time: '下午14:00-15:00',
-        duration: '40分钟',
-        creator: '张浩',
-        adminUserid: 'EW-M5',
-        participants: '张浩 张浩 张浩 张浩 张浩 ...等共20人',
-        location: '线上会议室',
-        meetingNo: '668 153 260',
-      },
-    ],
-  },
-])
+const meetingSections = ref<MeetingSection[]>([])
 
 const statusMeta = new Map<number, { label: string, className: string }>([
   [1, { label: '已创建', className: 'bg-#e7edff text-#3f5fff' }],
@@ -196,6 +127,22 @@ function deriveStatus(record: any, startTimestamp?: number) {
   return isCreator ? '待开始' : '待进入'
 }
 
+/** 根据开始时间判断 上午/下午（12:00 及以后算下午） */
+function getAmPmLabel(item: MeetingItem) {
+  const ts = item.meetingStart
+  if (typeof ts === 'number') {
+    const d = new Date(ts * 1000)
+    return d.getHours() >= 12 ? '下午' : '上午'
+  }
+  const start = item.time?.split('-')?.[0]?.trim()
+  if (start) {
+    const hour = Number(start.split(':')?.[0])
+    if (!Number.isNaN(hour))
+      return hour >= 12 ? '下午' : '上午'
+  }
+  return ''
+}
+
 function normalizeMeetingSections(list: any[]): MeetingSection[] {
   if (!Array.isArray(list))
     return []
@@ -219,22 +166,36 @@ function normalizeMeetingSections(list: any[]): MeetingSection[] {
     const participants = Array.isArray(record?.invitees?.userid)
       ? record.invitees.userid.join(' ')
       : record?.participants
+    const userName = record?.userName
+      ? (() => {
+          try {
+            const arr = JSON.parse(record.userName)
+            return Array.isArray(arr) ? arr.join(',') : ''
+          }
+          catch (e) {
+            return ''
+          }
+        })()
+      : ''
+
     const item: MeetingItem = {
-      id: record?.id ?? record?.meetingId ?? record?.meeting_id ?? `${dateLabel}-${Math.random()}`,
+      id: record?.id,
       status: deriveStatus(record, typeof startTimestamp === 'number' ? startTimestamp : undefined),
       statusClass: record?.statusClass,
-      title: record?.title ?? record?.name ?? '未命名会议',
+      title: record?.title ?? '未命名会议',
       time: timeLabel,
       duration: durationLabel,
       tip: record?.tip ?? deriveTip(typeof startTimestamp === 'number' ? startTimestamp : undefined),
-      creator: record?.creator ?? record?.host,
-      adminUserid: record?.admin_userid ?? record?.adminUserid,
+      createUserName: record?.createUserName,
+      adminUserid: record?.adminUserid,
       participants,
-      location: record?.location ?? record?.room,
-      meetingNo: record?.meetingNo ?? record?.meeting_no,
+      location: record?.location,
+      meetingNo: record?.meetingNo,
       meetingStart: typeof startTimestamp === 'number' ? startTimestamp : undefined,
       meetingDuration: typeof duration === 'number' ? duration : undefined,
       isCreator: Boolean(record?.is_creator ?? record?.isCreator ?? record?.role === 'creator'),
+      meetingId: record?.meetingId,
+      userName,
     }
     const derivedStatus = getStatusMeta(item.status)
     if (derivedStatus) {
@@ -257,11 +218,22 @@ async function loadMeetingList() {
     if (Array.isArray(list) && list.length > 0) {
       meetingSections.value = normalizeMeetingSections(list)
     }
+    else {
+      meetingSections.value = []
+    }
   }
   catch (error) {
     console.error('fetch meeting list failed', error)
+    meetingSections.value = []
   }
 }
+
+/** ✅ 是否有数据：任意分组 items 有长度即可 */
+const hasMeetingData = computed(() => {
+  if (!Array.isArray(meetingSections.value) || meetingSections.value.length === 0)
+    return false
+  return meetingSections.value.some(s => Array.isArray(s.items) && s.items.length > 0)
+})
 
 onLoad(() => {
   loadMeetingList()
@@ -284,89 +256,100 @@ function goToDetail(meetingId: number) {
   <view class="min-h-screen bg-#f6f7f9">
     <view class="bg-white px-4 pb-2 pt-3">
       <view class="flex gap-4">
-        <view
-          class="flex flex-1 flex-col items-center gap-2 rounded-3 bg-#f5f7ff py-3"
-          @click="goToCreate"
-        >
-          <view
-            class="h-9 w-9 flex items-center justify-center rounded-3 bg-#e7edff text-#3f5fff"
-          >
-            <wd-icon name="video" size="18px" />
+        <view class="flex flex-col items-center gap-2 rounded-3 py-3" @click="goToCreate">
+          <view class="h-12 w-12 flex items-center justify-center rounded-3 text-#3f5fff">
+            <image src="@/static/预约会议.svg" />
           </view>
-          <text class="text-3 text-#3f5fff">
+          <text class="text-3 text-#333333">
             预约会议
           </text>
         </view>
-        <view
-          class="flex flex-1 flex-col items-center gap-2 rounded-3 bg-#f5f7ff py-3"
-          @click="goToHistory"
-        >
-          <view
-            class="h-9 w-9 flex items-center justify-center rounded-3 bg-#e7edff text-#3f5fff"
-          >
-            <wd-icon name="time" size="18px" />
+
+        <view class="flex flex-col items-center gap-2 rounded-3 py-3" @click="goToHistory">
+          <view class="h-12 w-12 flex items-center justify-center rounded-3 text-#3f5fff">
+            <image src="@/static/历史会议.svg" />
           </view>
-          <text class="text-3 text-#3f5fff">
+          <text class="text-3 text-#333333">
             历史会议
           </text>
         </view>
       </view>
     </view>
 
-    <view class="px-4 pb-4">
+    <view class="mt-4 bg-white px-4 pb-4 pt-2">
       <text class="mb-3 mt-4 block text-4 text-#2f2f2f font-600">
         预约会议列表
       </text>
-      <view v-for="section in meetingSections" :key="section.date" class="mb-4">
-        <view class="mb-2 flex items-center gap-2 text-3 text-#9aa0a6">
-          <wd-icon name="time" size="14px" />
-          <text>
-            {{ section.date }}
-          </text>
+
+      <!-- ✅ 空状态 -->
+      <view
+        v-if="!hasMeetingData"
+        class="flex flex-col items-center justify-center py-14 text-center"
+      >
+        <image class="h-40 w-40 opacity-80" src="@/static/empty.svg" mode="aspectFit" />
+        <text class="mt-3 text-3 text-#9aa0a6">
+          暂无数据
+        </text>
+        <view class="mt-4">
+          <van-button size="small" type="primary" plain @click="goToCreate">
+            去预约
+          </van-button>
         </view>
-        <view
-          v-for="item in section.items"
-          :key="item.id"
-          class="mb-3 rounded-3 bg-white p-3 shadow-[0_4px_12px_rgba(31,35,41,0.04)]"
-          @click="goToDetail(item.id)"
-        >
-          <view class="flex items-center gap-2">
-            <view
-              v-if="item.status"
-              class="rounded-full px-2 py-0.5 text-2.5 leading-4"
-              :class="item.statusClass"
-            >
-              {{ item.status }}
+      </view>
+
+      <!-- ✅ 有数据才渲染列表 -->
+      <view v-else>
+        <view v-for="section in meetingSections" :key="section.date" class="mb-4">
+          <view class="mb-2 flex items-center gap-2 text-3 text-#9aa0a6">
+            <image class="h-14px w-14px" src="@/static/日历.svg" />
+            <text>{{ section.date }}</text>
+          </view>
+
+          <view
+            v-for="item in section.items"
+            :key="item.id"
+            class="mb-3 rounded-4 bg-white px-3 py-3 shadow-sm"
+            @click="goToDetail(item.meetingId as any)"
+          >
+            <view class="flex items-center gap-2">
+              <view
+                v-if="item.status"
+                class="rounded-full px-2 py-0.5 text-2.5 leading-4"
+                :class="item.statusClass"
+              >
+                {{ item.status }}
+              </view>
+
+              <text class="min-w-0 flex-1 truncate text-3.5 text-#2f2f2f font-600">
+                {{ item.title }}
+              </text>
+
+              <view class="flex items-center text-#c2c6cc">
+                <van-icon name="arrow" size="16" />
+              </view>
             </view>
-            <text class="flex-1 text-3.5 text-#2f2f2f font-600">
-              {{ item.title }}
+
+            <text v-if="item.tip" class="mt-1 block text-2.5 text-#ff7a00">
+              {{ item.tip }}
             </text>
-            <wd-icon name="more" size="16px" color="#c2c6cc" />
-          </view>
-          <view class="mt-2 flex flex-wrap items-center gap-3 text-2.5 text-#5c6066">
-            <text v-if="item.time" class="block">
-              {{ item.time }}
-            </text>
-            <text v-if="item.duration" class="block">
-              {{ item.duration }}
-            </text>
-            <text v-if="item.location" class="block">
-              {{ item.location }}
-            </text>
-          </view>
-          <text v-if="item.tip" class="mt-1 block text-2.5 text-#ff7a00">
-            {{ item.tip }}
-          </text>
-          <view class="mt-2 text-2.5 text-#9aa0a6 space-y-1">
-            <text v-if="item.meetingNo" class="block">
-              会议号：{{ item.meetingNo }}
-            </text>
-            <text class="block">
-              创建者：{{ item.creator || item.adminUserid || '-' }}
-            </text>
-            <text class="block">
-              参会人：{{ item.participants || '-' }}
-            </text>
+
+            <view class="mt-2 flex flex-wrap items-center gap-3 text-2.5 text-#333333">
+              <text v-if="item.time" class="block">
+                {{ getAmPmLabel(item) }}{{ item.time }}
+              </text>
+            </view>
+
+            <view class="mt-2 text-2.5 text-#9aa0a6 space-y-1">
+              <text v-if="item.meetingNo" class="block">
+                会议号：{{ item.meetingNo }}
+              </text>
+              <text class="block">
+                创建者：{{ item.createUserName || '-' }}
+              </text>
+              <text class="block">
+                参会人：{{ item.userName || '-' }}
+              </text>
+            </view>
           </view>
         </view>
       </view>

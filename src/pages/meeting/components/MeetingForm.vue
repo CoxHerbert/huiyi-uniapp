@@ -36,47 +36,46 @@ const adminUserOptions = [
   { label: 'EW-M6', value: 'EW-M6' },
 ]
 
-const updateField = <K extends keyof MeetingInfo>(key: K, value: MeetingInfo[K]) => {
+function updateField<K extends keyof MeetingInfo>(key: K, value: MeetingInfo[K]) {
   emit('update:meeting', { ...props.meeting, [key]: value })
 }
 
-const openTypeSheet = () => {
+function openTypeSheet() {
   showTypeSheet.value = true
 }
 
-const openAdminSheet = () => {
+function openAdminSheet() {
   showAdminSheet.value = true
 }
 
-const handleTypeSelect = (option: { label: string, value: string }) => {
+function handleTypeSelect(option: { label: string, value: string }) {
   updateField('type', option.value)
   showTypeSheet.value = false
 }
 
-const handleAdminSelect = (option: { label: string, value: string }) => {
+function handleAdminSelect(option: { label: string, value: string }) {
   updateField('adminUserid', option.value)
   showAdminSheet.value = false
 }
 </script>
 
 <template>
-  <view class="min-h-screen bg-#f5f6f8 pb-24">
-    <view class="mx-4 mt-4 space-y-2 rounded-4 bg-white">
+  <view class="min-h-screen bg-#f5f6f8 pb-8">
+    <view class="">
       <slot name="title">
-        <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-2">
+        <view class="mb-2 flex items-center justify-between bg-white px-4 py-3">
           <wd-input
             :model-value="meeting.name"
             placeholder="请输入会议名称"
-            clearable
             custom-class="flex-1 w-full"
             @update:model-value="(value) => updateField('name', value)"
           />
-          <wd-icon name="close" size="16px" color="#c4c7cc" />
+          <wd-icon name="close" size="16px" color="#c4c7cc" @click="meeting.name = ''" />
         </view>
       </slot>
 
       <view
-        class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-4"
+        class="mb-2 flex items-center justify-between bg-white px-4 py-3"
         @click="openTypeSheet"
       >
         <text class="text-3 text-#8a8f99">
@@ -90,31 +89,8 @@ const handleAdminSelect = (option: { label: string, value: string }) => {
         </view>
       </view>
 
-      <view
-        class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-4"
-        @click="openAdminSheet"
-      >
-        <view class="flex items-center gap-1">
-          <text class="text-3 text-#8a8f99">
-            管理员
-          </text>
-          <text class="text-3 text-#ff4d4f">
-            *
-          </text>
-        </view>
-        <view class="flex items-center gap-2">
-          <text
-            class="text-3"
-            :class="meeting.adminUserid ? 'text-#2f2f2f' : 'text-#c2c6cc'"
-          >
-            {{ meeting.adminUserid || '请选择管理员' }}
-          </text>
-          <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
-        </view>
-      </view>
-
       <slot name="time">
-        <view class="border-b border-#f0f1f2 px-4 py-4">
+        <view class="mb-2 bg-white px-4 py-3">
           <view class="flex items-center justify-between">
             <view class="flex items-center gap-6">
               <view class="text-center">
@@ -143,7 +119,30 @@ const handleAdminSelect = (option: { label: string, value: string }) => {
         </view>
       </slot>
 
-      <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-2">
+      <view
+        class="flex items-center justify-between bg-white px-4 py-3"
+        @click="openAdminSheet"
+      >
+        <view class="flex items-center gap-1">
+          <text class="text-3 text-#ff4d4f">
+            *
+          </text>
+          <text class="text-3 text-#8a8f99">
+            管理员
+          </text>
+        </view>
+        <view class="flex items-center gap-2">
+          <text
+            class="text-3"
+            :class="meeting.adminUserid ? 'text-#2f2f2f' : 'text-#c2c6cc'"
+          >
+            {{ meeting.adminUserid || '请选择管理员' }}
+          </text>
+          <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
+        </view>
+      </view>
+
+      <view class="mb-2 flex items-center justify-between bg-white px-4 pb-3">
         <text class="text-3 text-#8a8f99">
           参会人
         </text>
@@ -155,7 +154,7 @@ const handleAdminSelect = (option: { label: string, value: string }) => {
         />
       </view>
 
-      <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-4">
+      <view class="flex items-center justify-between bg-white px-4 py-3">
         <text class="text-3 text-#8a8f99">
           会议室
         </text>
@@ -167,7 +166,7 @@ const handleAdminSelect = (option: { label: string, value: string }) => {
         />
       </view>
 
-      <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-4">
+      <view class="flex items-center justify-between bg-white px-4">
         <text class="text-3 text-#8a8f99">
           地点
         </text>
@@ -179,7 +178,7 @@ const handleAdminSelect = (option: { label: string, value: string }) => {
         />
       </view>
 
-      <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-4">
+      <view class="mb-2 flex items-center justify-between bg-white px-4 py-3">
         <text class="text-3 text-#8a8f99">
           会议密码
         </text>
@@ -191,14 +190,14 @@ const handleAdminSelect = (option: { label: string, value: string }) => {
         />
       </view>
 
-      <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-4">
+      <view class="mb-2 flex items-center justify-between bg-white px-4 py-3">
         <text class="text-3 text-#8a8f99">
           添加会议附件
         </text>
         <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
       </view>
 
-      <view class="px-4 py-3">
+      <view class="bg-white px-4 py-3">
         <wd-input
           :model-value="meeting.description"
           placeholder="请输入会议描述..."
@@ -224,7 +223,9 @@ const handleAdminSelect = (option: { label: string, value: string }) => {
           class="flex items-center justify-between border-b border-#f0f1f2 py-3 last:border-b-0"
           @click="handleTypeSelect(option)"
         >
-          <text class="text-3 text-#2f2f2f">{{ option.label }}</text>
+          <text class="text-3 text-#2f2f2f">
+            {{ option.label }}
+          </text>
           <wd-icon
             v-if="meeting.type === option.value"
             name="check"
@@ -244,7 +245,9 @@ const handleAdminSelect = (option: { label: string, value: string }) => {
           class="flex items-center justify-between border-b border-#f0f1f2 py-3 last:border-b-0"
           @click="handleAdminSelect(option)"
         >
-          <text class="text-3 text-#2f2f2f">{{ option.label }}</text>
+          <text class="text-3 text-#2f2f2f">
+            {{ option.label }}
+          </text>
           <wd-icon
             v-if="meeting.adminUserid === option.value"
             name="check"

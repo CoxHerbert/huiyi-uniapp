@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { computed, reactive, watch, watchEffect } from 'vue'
 import { createMeeting } from '@/api/meeting'
+import { useUserStore } from '@/store/user'
 import MeetingForm from './components/MeetingForm.vue'
 
 definePage({
@@ -9,8 +11,11 @@ definePage({
   },
 })
 
+const userStore = useUserStore()
+const loginInfo = computed(() => userStore.loginInfo)
+
 const meetingForm = reactive({
-  name: '张浩预定的会议',
+  name: '',
   type: '线上会议',
   adminUserid: 'EW-M1',
   startTime: '',
@@ -71,6 +76,8 @@ function initDefaultDateTime() {
   meetingForm.date = formatDate(now)
   meetingForm.startTime = formatTime(now)
   meetingForm.endTime = addMinutesToTime(meetingForm.startTime, 30)
+  console.log(loginInfo.value)
+  meetingForm.name = `${loginInfo.value.real_name}预定的会议`
 }
 
 initDefaultDateTime()
@@ -150,6 +157,7 @@ watchEffect(() => {
   meetingForm.duration = durationLabel.value
 })
 
+/** 解析参与人字符串（支持 、 , ，） */
 function parseUserIds(value: string) {
   return value
     .split(/[、,，]/)
@@ -157,23 +165,48 @@ function parseUserIds(value: string) {
     .filter(Boolean)
 }
 
-const invitees = computed(() => parseUserIds(meetingForm.participants))
+/** 参与人 + 管理员合并，管理员强制存在，且去重（保持顺序） */
+function mergeParticipantsWithAdmin(participants: string, adminUserid: string) {
+  const list = parseUserIds(participants)
+  const merged = [adminUserid, ...list].filter(Boolean)
 
-const createMeetingPayload = computed(() => ({
-  admin_userid: meetingForm.adminUserid,
-  title: meetingForm.name,
-  meeting_start: meetingStartTimestamp.value,
-  meeting_duration: meetingDurationSeconds.value,
-  description: meetingForm.description,
-  location: meetingForm.location,
-  invitees: {
-    userid: invitees.value.length ? invitees.value : [meetingForm.adminUserid],
-  },
-  settings: {
-    password: meetingForm.password,
-    remind_scope: 1,
-  },
-}))
+  const uniq: string[] = []
+  for (const id of merged) {
+    if (!uniq.includes(id))
+      uniq.push(id)
+  }
+  return uniq
+}
+
+/** 最终参与人（保证包含管理员、去重） */
+const participantsWithAdmin = computed(() => {
+  return mergeParticipantsWithAdmin(meetingForm.participants, meetingForm.adminUserid)
+})
+
+/** 转成服务端接收格式（统一在这里维护字段映射） */
+function toServerPayload() {
+  const ids = participantsWithAdmin.value.length
+    ? participantsWithAdmin.value
+    : [meetingForm.adminUserid].filter(Boolean)
+
+  return {
+    admin_userid: meetingForm.adminUserid,
+    title: meetingForm.name,
+    meeting_start: meetingStartTimestamp.value,
+    meeting_duration: meetingDurationSeconds.value,
+    description: meetingForm.description,
+    location: meetingForm.location,
+    invitees: {
+      userid: ids,
+    },
+    settings: {
+      password: meetingForm.password,
+      remind_scope: 1,
+    },
+  }
+}
+
+const createMeetingPayload = computed(() => toServerPayload())
 
 async function handleCreate() {
   try {
@@ -181,6 +214,11 @@ async function handleCreate() {
       uni.showToast({ title: '请选择管理员', icon: 'none' })
       return
     }
+
+    // ✅ 提交前：把 adminUserid 拼接进 participants（去重后回写）
+    meetingForm.participants = participantsWithAdmin.value.join(',')
+
+    // ✅ 再按服务端接收格式提交
     await createMeeting(createMeetingPayload.value)
   }
   catch (error) {
@@ -198,7 +236,7 @@ async function handleCreate() {
     @submit="handleCreate"
   >
     <template #time>
-      <view class="border-b border-#f0f1f2 px-4 py-4">
+      <view class="mb-2 bg-white px-4 py-3">
         <view class="mb-4 flex items-center justify-between">
           <text class="text-3 text-#8a8f99">
             会议日期
@@ -212,7 +250,7 @@ async function handleCreate() {
             </view>
           </wd-datetime-picker>
         </view>
-        <view class="flex items-center justify-between">
+        <view class="flex items-center justify-center">
           <view class="flex items-center gap-6">
             <view class="text-center">
               <wd-datetime-picker v-model="meetingForm.startTime" type="time" :use-second="false">
@@ -227,7 +265,7 @@ async function handleCreate() {
               </wd-datetime-picker>
             </view>
             <view class="text-center">
-              <text class="block text-2.5 text-#9aa0a6">
+              <text class="block bg-#F6F8FA px-1 py-2 text-2.5 text-#9aa0a6">
                 {{ durationLabel }}
               </text>
             </view>
