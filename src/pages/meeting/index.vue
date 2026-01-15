@@ -10,7 +10,7 @@ definePage({
 
 interface MeetingItem {
   id: number | string
-  status?: string
+  status?: string | number
   statusClass?: string
   title: string
   time?: string
@@ -101,6 +101,23 @@ const meetingSections = ref<MeetingSection[]>([
   },
 ])
 
+const statusMeta = new Map<number, { label: string, className: string }>([
+  [1, { label: '已创建', className: 'bg-#e7edff text-#3f5fff' }],
+  [2, { label: '进行中', className: 'bg-#e8f7f0 text-#1e8e5a' }],
+  [3, { label: '已结束', className: 'bg-#f1f2f4 text-#8a8f99' }],
+  [4, { label: '已取消', className: 'bg-#fdeaea text-#ff4d4f' }],
+])
+
+function getStatusMeta(status?: string | number) {
+  if (typeof status === 'number') {
+    return statusMeta.get(status)
+  }
+  const parsed = Number(status)
+  if (Number.isNaN(parsed))
+    return null
+  return statusMeta.get(parsed)
+}
+
 function padTime(value: number) {
   return String(value).padStart(2, '0')
 }
@@ -169,6 +186,12 @@ function normalizeMeetingSections(list: any[]): MeetingSection[] {
       participants,
       location: record?.location ?? record?.room,
       meetingNo: record?.meetingNo ?? record?.meeting_no,
+    }
+    const derivedStatus = getStatusMeta(item.status)
+    if (derivedStatus) {
+      item.status = derivedStatus.label
+      if (!item.statusClass)
+        item.statusClass = derivedStatus.className
     }
     if (!grouped.has(dateLabel)) {
       grouped.set(dateLabel, [])
