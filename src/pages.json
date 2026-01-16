@@ -112,11 +112,9 @@
     "backgroundColor": "@tabBgColor",
     "borderStyle": "@tabBorderStyle",
     "list": [
-      // #ifdef APP
       {
         "pagePath": "pages/meeting/index"
       },
-      // #endif
       {
         "pagePath": "pages/index/index"
       }
