@@ -9,7 +9,7 @@ import { themeColorOptions } from '@/composables/types/theme'
 export const useManualThemeStore = defineStore('manualTheme', {
   state: (): ThemeState => ({
     theme: 'light',
-    followSystem: true, // 是否跟随系统主题
+    followSystem: false, // 是否跟随系统主题
     hasUserSet: false, // 用户是否手动设置过主题
     currentThemeColor: themeColorOptions[0],
     themeVars: {
@@ -110,6 +110,12 @@ export const useManualThemeStore = defineStore('manualTheme', {
      * 初始化主题
      */
     initTheme() {
+      if (!this.followSystem) {
+        this.theme = 'light'
+        this.setNavigationBarColor()
+        return
+      }
+
       // 如果用户已手动设置且不跟随系统，保持当前主题
       if (this.hasUserSet && !this.followSystem) {
         console.log('使用用户设置的主题:', this.theme)

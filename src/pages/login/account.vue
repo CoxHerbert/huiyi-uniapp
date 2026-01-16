@@ -89,19 +89,12 @@ async function onSubmit() {
       </view>
 
       <view class="form">
-        <wd-input
-          v-model="formData.username"
-          placeholder="请输入账号"
-          clearable
-        />
+        <wd-input v-model="formData.username" placeholder="请输入账号" clearable :no-border="true" />
 
         <view class="password-row">
           <wd-input
-            v-model="formData.password"
-            :type="showPassword ? 'text' : 'password'"
-            placeholder="请输入密码"
-            clearable
-            class="password-input"
+            v-model="formData.password" :type="showPassword ? 'text' : 'password'" placeholder="请输入密码" clearable
+            class="password-input" :no-border="true"
           />
           <view class="toggle" @click="showPassword = !showPassword">
             {{ showPassword ? '隐藏' : '显示' }}

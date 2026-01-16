@@ -213,7 +213,7 @@ function normalizeMeetingSections(list: any[]): MeetingSection[] {
 
 async function loadMeetingList() {
   try {
-    const response = await getMeetingList()
+    const response = await getMeetingList({ type: 1 })
     const list = response?.data?.data?.records || response?.data?.data || []
     if (Array.isArray(list) && list.length > 0) {
       meetingSections.value = normalizeMeetingSections(list)
