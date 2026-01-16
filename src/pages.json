@@ -17,15 +17,6 @@
     {
       "path": "pages/index/index",
       "type": "home",
-      "name": "settings",
-      "layout": "tabbar",
-      "style": {
-        "navigationBarTitleText": "基础设置"
-      }
-    },
-    {
-      "path": "pages/login/account",
-      "type": "page",
       "name": "login",
       "style": {
         "navigationBarTitleText": "登录"

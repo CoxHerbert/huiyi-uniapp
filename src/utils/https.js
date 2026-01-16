@@ -192,7 +192,7 @@ async function handleResponse(res) {
           isRedirecting401 = true
           try {
             console.log('401无权限之后的处理')
-            uni.reLaunch({ path: '/pages/login/account' })
+            uni.reLaunch({ path: '/pages/index/index' })
           }
           finally {
             setTimeout(() => (isRedirecting401 = false), 200)

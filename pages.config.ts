@@ -11,7 +11,7 @@ import { defineUniPages } from '@uni-helper/vite-plugin-uni-pages'
 
 export default defineUniPages({
   pages: [{
-    path: 'pages/login/account',
+    path: 'pages/index/index',
     type: 'page',
     name: 'login',
     style: {
