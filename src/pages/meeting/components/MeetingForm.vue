@@ -35,6 +35,7 @@ const userLoading = ref(false)
 const userOptions = ref<Array<{ account: string, name: string }>>([])
 const selectedParticipantIds = ref<string[]>([])
 const participantExpanded = ref(false)
+const hiddenParticipantAccounts = new Set(['EW-M1', 'EW-M2', 'EW-M3', 'EW-M4', 'EW-M5', 'EW-M6'])
 let searchTimer: ReturnType<typeof setTimeout> | null = null
 
 function updateField<K extends keyof MeetingInfo>(key: K, value: MeetingInfo[K]) {
@@ -114,6 +115,7 @@ function handleAdminSelect(option: { account: string, name: string }) {
 
 function openParticipantSheet() {
   selectedParticipantIds.value = parseUserIds(props.meeting.participants)
+    .filter(account => !hiddenParticipantAccounts.has(account))
   showParticipantSheet.value = true
   loadUsers()
 }
@@ -130,7 +132,9 @@ function toggleParticipant(account: string) {
 }
 
 function applyParticipantSelection() {
-  updateField('participants', selectedParticipantIds.value.join(','))
+  const cleaned = selectedParticipantIds.value.filter(account => !hiddenParticipantAccounts.has(account))
+  selectedParticipantIds.value = cleaned
+  updateField('participants', cleaned.join(','))
   showParticipantSheet.value = false
 }
 
@@ -154,6 +158,10 @@ const selectedParticipants = computed(() => {
       name: option?.name || account,
     }
   })
+})
+
+const participantOptions = computed(() => {
+  return userOptions.value.filter(option => !hiddenParticipantAccounts.has(option.account))
 })
 
 const displayedSelectedParticipants = computed(() => {
@@ -496,7 +504,7 @@ watch([userAccount, userName], () => {
             暂无人员数据
           </view>
           <view
-            v-for="option in userOptions"
+            v-for="option in participantOptions"
             :key="option.account"
             class="flex items-center justify-between rounded-3 px-2 py-3 hover:bg-#f6f7fb"
             @click="toggleParticipant(option.account)"
