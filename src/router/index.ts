@@ -1,5 +1,6 @@
 /// <reference types="@uni-helper/vite-plugin-uni-pages/client" />
 import { pages, subPackages } from 'virtual:uni-pages'
+import { useAuthStore } from '@/store/auth'
 
 function generateRoutes() {
   const routes = pages.map((page) => {
@@ -21,12 +22,30 @@ function generateRoutes() {
 const router = createRouter({
   routes: generateRoutes(),
 })
+
+const publicRouteNames = new Set(['login'])
+const isPublicRoute = (route: { name?: string | null, path?: string | null }) => {
+  if (route.name && publicRouteNames.has(String(route.name)))
+    return true
+  return Boolean(route.path && route.path.startsWith('/pages/login'))
+}
+
 router.beforeEach((to, from, next) => {
   console.log('🚀 beforeEach 守卫触发:', { to, from })
 
   // 演示：基本的导航日志记录
   if (to.path && from.path) {
     console.log(`📍 导航: ${from.path} → ${to.path}`)
+  }
+
+  const auth = useAuthStore()
+  if (!auth.isLogin && !isPublicRoute(to)) {
+    console.log('🔒 未登录，重定向到登录页')
+    next({
+      path: '/pages/login/account',
+      query: { redirect: to.path || '' },
+    })
+    return
   }
 
   // 演示：对受保护页面的简单拦截
