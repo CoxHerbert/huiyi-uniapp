@@ -27,7 +27,7 @@ tabBar: {
   custom: true,
   // ... 其他配置
   list: [{
-    pagePath: 'pages/index/index',
+    pagePath: 'pages/settings/index',
   },{
     // 添加新的tabbar项
     pagePath: 'pages/new-page/index',

@@ -31,29 +31,11 @@ function isPublicRoute(route: { name?: string | null, path?: string | null }) {
 }
 
 router.beforeEach((to, from, next) => {
-  console.log('🚀 beforeEach 守卫触发:', { to, from })
-
-  // 演示：基本的导航日志记录
-  if (to.path && from.path) {
-    console.log(`📍 导航: ${from.path} → ${to.path}`)
-  }
-
   const auth = useAuthStore()
-  console.log(!auth.isLogin && !isPublicRoute(to))
-  if (!auth.isLogin && !isPublicRoute(to)) {
-    console.log('🔒 未登录，重定向到登录页')
-    next({
-      path: '/pages/login/account',
-      query: { redirect: to.path || '' },
-    })
-
-    return
-  }
 
   // 演示：对受保护页面的简单拦截
-  if (to.name === 'demo-protected') {
+  if (!auth.isLogin && !isPublicRoute(to)) {
     const { confirm: showConfirm } = useGlobalMessage()
-    console.log('🛡️ 检测到访问受保护页面')
 
     return new Promise<void>((resolve, reject) => {
       showConfirm({

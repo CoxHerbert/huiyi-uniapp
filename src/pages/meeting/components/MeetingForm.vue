@@ -210,7 +210,7 @@ watch([userAccount, userName], () => {
         </view>
       </slot>
 
-      <view class="mb-2 flex items-center justify-between bg-white px-4 py-3" @click="openTypeSheet">
+      <!-- <view class="mb-2 flex items-center justify-between bg-white px-4 py-3" @click="openTypeSheet">
         <text class="text-3 text-#8a8f99">
           会议类型
         </text>
@@ -220,7 +220,7 @@ watch([userAccount, userName], () => {
           </text>
           <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
         </view>
-      </view>
+      </view> -->
 
       <slot name="time">
         <view class="mb-2 bg-white px-4 py-3">

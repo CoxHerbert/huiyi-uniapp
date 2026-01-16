@@ -29,8 +29,7 @@
       "name": "login",
       "style": {
         "navigationBarTitleText": "登录"
-      },
-      "layout": "tabbar"
+      }
     },
     {
       "path": "pages/meeting/create",
@@ -107,7 +106,7 @@
         "pagePath": "pages/meeting/index"
       },
       {
-        "pagePath": "pages/index/index"
+        "pagePath": "pages/settings/index"
       }
     ]
   }

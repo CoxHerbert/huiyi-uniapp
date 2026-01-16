@@ -11,19 +11,19 @@ definePage({
 })
 
 const meetingForm = reactive({
-  name: '张浩预定的会议',
-  type: '线上会议',
-  adminUserid: 'EW-M2',
+  name: '',
+  type: '',
+  adminUserid: '',
   startTime: '',
   endTime: '',
   date: '',
-  duration: '60分钟',
-  participants: '张浩,李晓',
-  room: '线上会议室',
-  location: '会议室A',
-  password: '333333',
+  duration: '',
+  participants: '',
+  room: '',
+  location: '',
+  password: '',
   attachment: '',
-  description: '项目复盘与任务分配',
+  description: '',
 })
 
 const MIN_DURATION_MINUTES = 5
@@ -229,7 +229,7 @@ async function handleSave() {
     @submit="handleSave"
   >
     <template #time>
-      <view class="mb-2 border-#f0f1f2 px-4 py-3">
+      <view class="mb-2 border-#f0f1f2 bg-white px-4 py-3">
         <!-- <view class="mb-4 flex items-center justify-between">
           <text class="text-3 text-#8a8f99">
             会议日期

@@ -38,7 +38,7 @@ onShow(() => {
 })
 
 function resolveRedirect() {
-  return redirectPath.value || '/pages/index/index'
+  return redirectPath.value || '/pages/meeting/index'
 }
 
 function redirectAfterLogin() {

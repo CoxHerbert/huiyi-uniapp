@@ -1,7 +1,7 @@
 ---
 title: 暗黑模式
 iframe: true
-url: pages/index/index
+url: pages/settings/index
 ---
 
 # 暗黑模式

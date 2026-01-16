@@ -14,7 +14,6 @@ export default defineUniPages({
     path: 'pages/login/account',
     type: 'page',
     name: 'login',
-    layout: 'tabbar',
     style: {
       navigationBarTitleText: '登录',
     },
@@ -107,7 +106,7 @@ export default defineUniPages({
         pagePath: 'pages/meeting/index',
       },
       {
-        pagePath: 'pages/index/index',
+        pagePath: 'pages/settings/index',
       },
     ],
   },
