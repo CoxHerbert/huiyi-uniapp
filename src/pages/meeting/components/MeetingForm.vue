@@ -15,25 +15,53 @@ interface MeetingInfo {
 }
 
 const props = defineProps<{ title: string, submitText: string, meeting: MeetingInfo }>()
-const emit = defineEmits<{ (event: 'submit'): void }>()
+const emit = defineEmits<{
+  (event: 'submit'): void
+  (event: 'update:meeting', value: MeetingInfo): void
+}>()
 
-const displayText = (value: string, placeholder: string) => value || placeholder
-const isPlaceholder = (value: string) => !value
+const showTypeSheet = ref(false)
+const meetingTypeOptions = [
+  { label: '线上会议', value: '线上会议' },
+  { label: '线下会议', value: '线下会议' },
+]
+
+const updateField = <K extends keyof MeetingInfo>(key: K, value: MeetingInfo[K]) => {
+  emit('update:meeting', { ...props.meeting, [key]: value })
+}
+
+const openTypeSheet = () => {
+  showTypeSheet.value = true
+}
+
+const handleTypeSelect = (option: { label: string, value: string }) => {
+  updateField('type', option.value)
+  showTypeSheet.value = false
+}
 </script>
 
 <template>
   <view class="min-h-screen bg-#f5f6f8 pb-6">
     <view class="mx-4 mt-4 rounded-4 bg-white">
       <slot name="title">
-        <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-4">
-          <text class="text-3.5 text-#2f2f2f">
-            {{ meeting.name }}
-          </text>
+        <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-2">
+          <wd-input
+            :model-value="meeting.name"
+            placeholder="请输入会议名称"
+            clearable
+            :no-border="true"
+            :align-right="true"
+            custom-class="flex-1"
+            @update:model-value="(value) => updateField('name', value)"
+          />
           <wd-icon name="close" size="16px" color="#c4c7cc" />
         </view>
       </slot>
 
-      <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-4">
+      <view
+        class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-4"
+        @click="openTypeSheet"
+      >
         <text class="text-3 text-#8a8f99">
           会议类型
         </text>
@@ -75,53 +103,60 @@ const isPlaceholder = (value: string) => !value
         </view>
       </slot>
 
-      <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-4">
+      <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-2">
         <text class="text-3 text-#8a8f99">
           参会人
         </text>
-        <view class="flex items-center gap-2">
-          <view class="h-6 w-6 rounded-full bg-#d9dce1" />
-          <text class="text-3 text-#2f2f2f">
-            {{ meeting.participants }}
-          </text>
-          <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
-        </view>
+        <wd-input
+          :model-value="meeting.participants"
+          placeholder="请输入参会人，逗号分隔"
+          :no-border="true"
+          :align-right="true"
+          custom-class="flex-1"
+          @update:model-value="(value) => updateField('participants', value)"
+        />
       </view>
 
       <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-4">
         <text class="text-3 text-#8a8f99">
           会议室
         </text>
-        <text
-          class="text-3"
-          :class="isPlaceholder(meeting.room) ? 'text-#c4c7cc' : 'text-#2f2f2f'"
-        >
-          {{ displayText(meeting.room, '选择会议室') }}
-        </text>
+        <wd-input
+          :model-value="meeting.room"
+          placeholder="选择会议室"
+          :no-border="true"
+          :align-right="true"
+          custom-class="flex-1"
+          @update:model-value="(value) => updateField('room', value)"
+        />
       </view>
 
       <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-4">
         <text class="text-3 text-#8a8f99">
           地点
         </text>
-        <text
-          class="text-3"
-          :class="isPlaceholder(meeting.location) ? 'text-#c4c7cc' : 'text-#2f2f2f'"
-        >
-          {{ displayText(meeting.location, '添加地点') }}
-        </text>
+        <wd-input
+          :model-value="meeting.location"
+          placeholder="添加地点"
+          :no-border="true"
+          :align-right="true"
+          custom-class="flex-1"
+          @update:model-value="(value) => updateField('location', value)"
+        />
       </view>
 
       <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-4">
         <text class="text-3 text-#8a8f99">
           会议密码
         </text>
-        <text
-          class="text-3"
-          :class="isPlaceholder(meeting.password) ? 'text-#c4c7cc' : 'text-#2f2f2f'"
-        >
-          {{ displayText(meeting.password, '请设置会议密码') }}
-        </text>
+        <wd-input
+          :model-value="meeting.password"
+          placeholder="请设置会议密码"
+          :no-border="true"
+          :align-right="true"
+          custom-class="flex-1"
+          @update:model-value="(value) => updateField('password', value)"
+        />
       </view>
 
       <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-4">
@@ -131,13 +166,16 @@ const isPlaceholder = (value: string) => !value
         <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
       </view>
 
-      <view class="px-4 py-4">
-        <text
-          class="text-3"
-          :class="isPlaceholder(meeting.description) ? 'text-#c4c7cc' : 'text-#2f2f2f'"
-        >
-          {{ displayText(meeting.description, '请输入会议描述...') }}
-        </text>
+      <view class="px-4 py-3">
+        <wd-input
+          :model-value="meeting.description"
+          placeholder="请输入会议描述..."
+          type="textarea"
+          auto-height
+          :no-border="true"
+          :align-right="true"
+          @update:model-value="(value) => updateField('description', value)"
+        />
       </view>
     </view>
 
@@ -146,5 +184,25 @@ const isPlaceholder = (value: string) => !value
         {{ submitText }}
       </wd-button>
     </view>
+
+    <wd-action-sheet v-model="showTypeSheet" title="会议类型" :close-on-click-action="true">
+      <view class="px-4 pb-4">
+        <view
+          v-for="option in meetingTypeOptions"
+          :key="option.value"
+          class="flex items-center justify-between border-b border-#f0f1f2 py-3 last:border-b-0"
+          @click="handleTypeSelect(option)"
+        >
+          <text class="text-3 text-#2f2f2f">{{ option.label }}</text>
+          <wd-icon
+            v-if="meeting.type === option.value"
+            name="check"
+            size="18px"
+            color="#4f7bff"
+          />
+        </view>
+      </view>
+      <wd-gap :height="50" />
+    </wd-action-sheet>
   </view>
 </template>
