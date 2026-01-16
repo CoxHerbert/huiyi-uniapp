@@ -44,7 +44,7 @@ router.beforeEach((to, from, next) => {
         confirmButtonText: '去登录',
         cancelButtonText: '取消',
         success() {
-          next({ path: '/pages/index/index' })
+          next({ path: '/pages/index/index', navType: 'replaceAll' })
           resolve()
         },
         fail() {

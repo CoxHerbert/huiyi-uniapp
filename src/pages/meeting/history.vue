@@ -14,6 +14,7 @@ interface HistoryItem {
   time?: string
   meetingId?: string
   creatorName?: string // 发起人：createUserName
+  _sortKey?: number
 }
 
 interface HistorySection {
@@ -63,11 +64,27 @@ function buildTimeLabel(startTimestamp?: number, durationSeconds?: number, fallb
   return fallback || ''
 }
 
+function getRecordSortKey(record: any) {
+  const raw = record?.create_time
+    ?? record?.createTime
+    ?? record?.created_at
+    ?? record?.createdAt
+    ?? record?.createAt
+    ?? record?.createAtTime
+    ?? record?.createdTime
+    ?? record?.meetingStart
+    ?? record?.meeting_start
+    ?? record?.start_time
+  const numeric = Number(raw)
+  return Number.isFinite(numeric) ? numeric : 0
+}
+
 function normalizeHistorySections(list: any[]): HistorySection[] {
   if (!Array.isArray(list))
     return []
   const grouped = new Map<string, HistorySection>()
   list.forEach((record) => {
+    const sortKey = getRecordSortKey(record)
     const startTimestamp = record?.meetingStart
     const duration = record?.meetingDuration ?? 0
     const startDate = typeof startTimestamp === 'number'
@@ -89,6 +106,7 @@ function normalizeHistorySections(list: any[]): HistorySection[] {
       time: timeLabel,
       meetingId: record?.meetingId,
       creatorName: record?.createUserName || '',
+      _sortKey: sortKey,
     }
 
     if (!grouped.has(dateKey)) {
@@ -97,6 +115,15 @@ function normalizeHistorySections(list: any[]): HistorySection[] {
     grouped.get(dateKey)?.items.push(item)
   })
   return Array.from(grouped.values())
+    .map(section => ({
+      ...section,
+      items: [...section.items].sort((a, b) => (b._sortKey ?? 0) - (a._sortKey ?? 0)),
+    }))
+    .sort((a, b) => {
+      const aKey = a.items[0]?._sortKey ?? 0
+      const bKey = b.items[0]?._sortKey ?? 0
+      return bKey - aKey
+    })
 }
 
 // ✅ 仅支持：会议名称(title) + 发起人(createUserName)
