@@ -26,6 +26,7 @@ interface MeetingItem {
   userName?: string
   meetingId?: string
   createUserName?: string
+  _sortKey?: number
 }
 
 interface MeetingSection {
@@ -144,6 +145,21 @@ function getAmPmLabel(item: MeetingItem) {
   return ''
 }
 
+function getRecordSortKey(record: any) {
+  const raw = record?.create_time
+    ?? record?.createTime
+    ?? record?.created_at
+    ?? record?.createdAt
+    ?? record?.createAt
+    ?? record?.createAtTime
+    ?? record?.createdTime
+    ?? record?.meeting_start
+    ?? record?.meetingStart
+    ?? record?.start_time
+  const numeric = Number(raw)
+  return Number.isFinite(numeric) ? numeric : 0
+}
+
 function normalizeMeetingSections(list: any[]): MeetingSection[] {
   if (!Array.isArray(list))
     return []
@@ -152,6 +168,7 @@ function normalizeMeetingSections(list: any[]): MeetingSection[] {
   }
   const grouped = new Map<string, MeetingItem[]>()
   list.forEach((record) => {
+    const sortKey = getRecordSortKey(record)
     const startTimestamp = record?.meeting_start ?? record?.meetingStart ?? record?.start_time
     const duration = record?.meeting_duration ?? record?.meetingDuration ?? 0
     const startDate = typeof startTimestamp === 'number'
@@ -197,6 +214,7 @@ function normalizeMeetingSections(list: any[]): MeetingSection[] {
       isCreator: Boolean(record?.is_creator ?? record?.isCreator ?? record?.role === 'creator'),
       meetingId: record?.meetingId,
       userName,
+      _sortKey: sortKey,
     }
     const derivedStatus = getStatusMeta(item.status)
     if (derivedStatus) {
@@ -209,7 +227,16 @@ function normalizeMeetingSections(list: any[]): MeetingSection[] {
     }
     grouped.get(dateLabel)?.push(item)
   })
-  return Array.from(grouped.entries()).map(([date, items]) => ({ date, items }))
+  return Array.from(grouped.entries())
+    .map(([date, items]) => ({
+      date,
+      items: [...items].sort((a, b) => (b._sortKey ?? 0) - (a._sortKey ?? 0)),
+    }))
+    .sort((a, b) => {
+      const aKey = a.items[0]?._sortKey ?? 0
+      const bKey = b.items[0]?._sortKey ?? 0
+      return bKey - aKey
+    })
 }
 
 async function loadMeetingList() {
