@@ -28,9 +28,7 @@ tabBar: {
   // ... 其他配置
   list: [{
     pagePath: 'pages/index/index',
-  }, {
-    pagePath: 'pages/about/index',
-  }, {
+  },{
     // 添加新的tabbar项
     pagePath: 'pages/new-page/index',
   }],
@@ -243,11 +241,6 @@ tabBar: {
     text: '首页',
     iconPath: '/static/icon/home.png',           // 需要提供图标文件
     selectedIconPath: '/static/icon/home-active.png'
-  }, {
-    pagePath: 'pages/about/index',
-    text: '关于',
-    iconPath: '/static/icon/about.png',
-    selectedIconPath: '/static/icon/about-active.png'
   }],
 }
 ```

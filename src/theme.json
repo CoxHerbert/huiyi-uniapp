@@ -6,6 +6,12 @@
     "bgTxtStyle": "dark",
     "navBgColor": "#FFF",
     "navTxtStyle": "black",
+    "tabBar": {
+      "list": [
+        { "pagePath": "pages/meeting/index" },
+        { "pagePath": "pages/index/index" }
+      ]
+    },
     "tabBgColor": "#ffffff",
     "tabBorderStyle": "black",
     "tabColor": "#bfbfbf",
@@ -18,6 +24,12 @@
     "bgTxtStyle": "light",
     "navBgColor": "#000000",
     "navTxtStyle": "white",
+    "tabBar": {
+      "list": [
+        { "pagePath": "pages/meeting/index" },
+        { "pagePath": "pages/index/index" }
+      ]
+    },
     "tabBgColor": "#1a1a1a",
     "tabBorderStyle": "white",
     "tabColor": "#bfbfbf",

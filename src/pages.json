@@ -13,17 +13,6 @@
     "animationDuration": 300
   },
   "pages": [
-    // #ifdef MP-WEIXIN
-    {
-      "path": "pages/meeting/index",
-      "type": "home",
-      "name": "meeting",
-      "layout": "tabbar",
-      "style": {
-        "navigationBarTitleText": "会议"
-      }
-    },
-    // #endif
     // #ifdef H5
     {
       "path": "pages/meeting/index",
@@ -35,6 +24,34 @@
       }
     },
     // #endif
+    {
+      "path": "pages/meeting/index",
+      "type": "page",
+      "name": "meeting",
+      "style": {
+        "navigationBarTitleText": "会议"
+      }
+    },
+    // #ifdef H5
+    {
+      "path": "pages/index/index",
+      "type": "page",
+      "name": "settings",
+      "layout": "tabbar",
+      "style": {
+        "navigationBarTitleText": "基础设置"
+      }
+    },
+    // #endif
+    {
+      "path": "pages/index/index",
+      "type": "home",
+      "name": "settings",
+      "layout": "tabbar",
+      "style": {
+        "navigationBarTitleText": "基础设置"
+      }
+    },
     {
       "path": "pages/login/account",
       "type": "page",
@@ -43,42 +60,12 @@
         "navigationBarTitleText": "登录"
       }
     },
-    // #ifdef MP-WEIXIN
-    {
-      "path": "pages/index/index",
-      "type": "page",
-      "name": "settings",
-      "layout": "tabbar",
-      "style": {
-        "navigationBarTitleText": "基础设置"
-      }
-    },
-    // #endif
-    // #ifdef H5
-    {
-      "path": "pages/index/index",
-      "type": "page",
-      "name": "settings",
-      "layout": "tabbar",
-      "style": {
-        "navigationBarTitleText": "基础设置"
-      }
-    },
-    // #endif
     {
       "path": "pages/meeting/create",
       "type": "page",
       "name": "meeting-create",
       "style": {
         "navigationBarTitleText": "创建会议"
-      }
-    },
-    {
-      "path": "pages/meeting/edit",
-      "type": "page",
-      "name": "meeting-edit",
-      "style": {
-        "navigationBarTitleText": "编辑会议"
       }
     },
     {
@@ -90,11 +77,11 @@
       }
     },
     {
-      "path": "pages/meeting/history",
+      "path": "pages/meeting/edit",
       "type": "page",
-      "name": "meeting-history",
+      "name": "meeting-edit",
       "style": {
-        "navigationBarTitleText": "历史会议"
+        "navigationBarTitleText": "编辑会议"
       }
     },
     {
@@ -103,6 +90,14 @@
       "name": "meeting-history-detail",
       "style": {
         "navigationBarTitleText": "历史会议详情"
+      }
+    },
+    {
+      "path": "pages/meeting/history",
+      "type": "page",
+      "name": "meeting-history",
+      "style": {
+        "navigationBarTitleText": "历史会议"
       }
     }
   ],
@@ -117,16 +112,14 @@
     "backgroundColor": "@tabBgColor",
     "borderStyle": "@tabBorderStyle",
     "list": [
-      // #ifdef APP || MP-WEIXIN
+      // #ifdef APP
       {
         "pagePath": "pages/meeting/index"
       },
       // #endif
-      // #ifdef APP || H5 || MP-WEIXIN
       {
         "pagePath": "pages/index/index"
-      },
-      // #endif
+      }
     ]
   }
 }

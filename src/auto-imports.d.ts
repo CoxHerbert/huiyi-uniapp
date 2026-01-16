@@ -80,6 +80,7 @@ declare global {
   const getToken: typeof import('./utils/auth.js')['getToken']
   const getTopUrl: typeof import('./utils/util.js')['getTopUrl']
   const getUrlCode: typeof import('./utils/util.js')['getUrlCode']
+  const getUserList: typeof import('./api/user')['getUserList']
   const h: typeof import('vue')['h']
   const h5Apis: typeof import('./api/index')['h5Apis']
   const handleTree: typeof import('./utils/util.js')['handleTree']
@@ -152,7 +153,6 @@ declare global {
   const onUnload: typeof import('@dcloudio/uni-app')['onUnload']
   const onUnmounted: typeof import('vue')['onUnmounted']
   const onUpdated: typeof import('vue')['onUpdated']
-  const onWatcherCleanup: typeof import('vue')['onWatcherCleanup']
   const openWindow: typeof import('./utils/util.js')['openWindow']
   const parseStrEmpty: typeof import('./utils/util.js')['parseStrEmpty']
   const pausableWatch: typeof import('@vueuse/core')['pausableWatch']
@@ -287,7 +287,6 @@ declare global {
   const useGlobalLoading: typeof import('./composables/useGlobalLoading')['useGlobalLoading']
   const useGlobalMessage: typeof import('./composables/useGlobalMessage')['useGlobalMessage']
   const useGlobalToast: typeof import('./composables/useGlobalToast')['useGlobalToast']
-  const useId: typeof import('vue')['useId']
   const useIdle: typeof import('@vueuse/core')['useIdle']
   const useImage: typeof import('@vueuse/core')['useImage']
   const useInfiniteScroll: typeof import('@vueuse/core')['useInfiniteScroll']
@@ -306,7 +305,6 @@ declare global {
   const useMemoize: typeof import('@vueuse/core')['useMemoize']
   const useMemory: typeof import('@vueuse/core')['useMemory']
   const useMessage: typeof import('wot-design-uni')['useMessage']
-  const useModel: typeof import('vue')['useModel']
   const useMounted: typeof import('@vueuse/core')['useMounted']
   const useMouse: typeof import('@vueuse/core')['useMouse']
   const useMouseInElement: typeof import('@vueuse/core')['useMouseInElement']
@@ -358,7 +356,6 @@ declare global {
   const useSupported: typeof import('@vueuse/core')['useSupported']
   const useSwipe: typeof import('@vueuse/core')['useSwipe']
   const useTabbar: typeof import('./composables/useTabbar')['useTabbar']
-  const useTemplateRef: typeof import('vue')['useTemplateRef']
   const useTemplateRefsList: typeof import('@vueuse/core')['useTemplateRefsList']
   const useTextDirection: typeof import('@vueuse/core')['useTextDirection']
   const useTextSelection: typeof import('@vueuse/core')['useTextSelection']
@@ -510,6 +507,7 @@ declare module 'vue' {
     readonly getToken: UnwrapRef<typeof import('./utils/auth.js')['getToken']>
     readonly getTopUrl: UnwrapRef<typeof import('./utils/util.js')['getTopUrl']>
     readonly getUrlCode: UnwrapRef<typeof import('./utils/util.js')['getUrlCode']>
+    readonly getUserList: UnwrapRef<typeof import('./api/user')['getUserList']>
     readonly h5Apis: UnwrapRef<typeof import('./api/index')['h5Apis']>
     readonly h: UnwrapRef<typeof import('vue')['h']>
     readonly handleTree: UnwrapRef<typeof import('./utils/util.js')['handleTree']>
