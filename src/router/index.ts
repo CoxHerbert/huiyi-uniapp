@@ -24,7 +24,7 @@ const router = createRouter({
 })
 
 const publicRouteNames = new Set(['login'])
-const isPublicRoute = (route: { name?: string | null, path?: string | null }) => {
+function isPublicRoute(route: { name?: string | null, path?: string | null }) {
   if (route.name && publicRouteNames.has(String(route.name)))
     return true
   return Boolean(route.path && route.path.startsWith('/pages/login'))
@@ -39,12 +39,14 @@ router.beforeEach((to, from, next) => {
   }
 
   const auth = useAuthStore()
+  console.log(!auth.isLogin && !isPublicRoute(to))
   if (!auth.isLogin && !isPublicRoute(to)) {
     console.log('🔒 未登录，重定向到登录页')
     next({
       path: '/pages/login/account',
       query: { redirect: to.path || '' },
     })
+
     return
   }
 

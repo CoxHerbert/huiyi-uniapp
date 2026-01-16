@@ -11,7 +11,8 @@ type _LocationUrl =
   "/pages/meeting/edit" |
   "/pages/meeting/history-detail" |
   "/pages/meeting/history" |
-  "/pages/meeting/index";
+  "/pages/meeting/index" |
+  "/pages/settings/index";
 
 interface NavigateToOptions {
   url: _LocationUrl;
@@ -19,7 +20,7 @@ interface NavigateToOptions {
 interface RedirectToOptions extends NavigateToOptions {}
 
 interface SwitchTabOptions {
-  url: "/pages/index/index"
+  url: "/pages/meeting/index" | "/pages/index/index"
 }
 
 type ReLaunchOptions = NavigateToOptions | SwitchTabOptions;

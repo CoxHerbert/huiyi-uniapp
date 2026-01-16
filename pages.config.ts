@@ -10,7 +10,66 @@
 import { defineUniPages } from '@uni-helper/vite-plugin-uni-pages'
 
 export default defineUniPages({
-  pages: [],
+  pages: [{
+    path: 'pages/login/account',
+    type: 'page',
+    name: 'login',
+    layout: 'tabbar',
+    style: {
+      navigationBarTitleText: '登录',
+    },
+  }, {
+    path: 'pages/meeting/create',
+    type: 'page',
+    name: 'meeting-create',
+    style: {
+      navigationBarTitleText: '创建会议',
+    },
+  }, {
+    path: 'pages/meeting/detail',
+    type: 'page',
+    name: 'meeting-detail',
+    style: {
+      navigationBarTitleText: '会议详情',
+    },
+  }, {
+    path: 'pages/meeting/edit',
+    type: 'page',
+    name: 'meeting-edit',
+    style: {
+      navigationBarTitleText: '编辑会议',
+    },
+  }, {
+    path: 'pages/meeting/history-detail',
+    type: 'page',
+    name: 'meeting-history-detail',
+    style: {
+      navigationBarTitleText: '历史会议详情',
+    },
+  }, {
+    path: 'pages/meeting/history',
+    type: 'page',
+    name: 'meeting-history',
+    style: {
+      navigationBarTitleText: '历史会议',
+    },
+  }, {
+    path: 'pages/meeting/index',
+    type: 'page',
+    name: 'meeting',
+    layout: 'tabbar',
+    style: {
+      navigationBarTitleText: '会议',
+    },
+  }, {
+    path: 'pages/settings/index',
+    type: 'page',
+    name: 'settings',
+    layout: 'tabbar',
+    style: {
+      navigationBarTitleText: '基础设置',
+    },
+  }],
   globalStyle: {
     // 导航栏配置
     navigationBarBackgroundColor: '@navBgColor',
