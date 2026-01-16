@@ -67,7 +67,8 @@ function handleAdminSelect(option: { label: string, value: string }) {
           <wd-input
             :model-value="meeting.name"
             placeholder="请输入会议名称"
-            custom-class="flex-1 w-full"
+            custom-class="meeting-form-input flex-1 w-full"
+            align-right
             @update:model-value="(value) => updateField('name', value)"
           />
           <wd-icon name="close" size="16px" color="#c4c7cc" @click="meeting.name = ''" />
@@ -149,7 +150,8 @@ function handleAdminSelect(option: { label: string, value: string }) {
         <wd-input
           :model-value="meeting.participants"
           placeholder="请输入参会人，逗号分隔"
-          custom-class="flex-1 w-full text-right"
+          custom-class="meeting-form-input flex-1 w-full"
+          align-right
           @update:model-value="(value) => updateField('participants', value)"
         />
       </view>
@@ -161,7 +163,8 @@ function handleAdminSelect(option: { label: string, value: string }) {
         <wd-input
           :model-value="meeting.room"
           placeholder="选择会议室"
-          custom-class="flex-1 w-full text-right"
+          custom-class="meeting-form-input flex-1 w-full"
+          align-right
           @update:model-value="(value) => updateField('room', value)"
         />
       </view>
@@ -173,7 +176,8 @@ function handleAdminSelect(option: { label: string, value: string }) {
         <wd-input
           :model-value="meeting.location"
           placeholder="添加地点"
-          custom-class="flex-1 w-full text-right"
+          custom-class="meeting-form-input flex-1 w-full"
+          align-right
           @update:model-value="(value) => updateField('location', value)"
         />
       </view>
@@ -185,7 +189,8 @@ function handleAdminSelect(option: { label: string, value: string }) {
         <wd-input
           :model-value="meeting.password"
           placeholder="请设置会议密码"
-          custom-class="flex-1 w-full text-right"
+          custom-class="meeting-form-input flex-1 w-full"
+          align-right
           @update:model-value="(value) => updateField('password', value)"
         />
       </view>
@@ -203,7 +208,8 @@ function handleAdminSelect(option: { label: string, value: string }) {
           placeholder="请输入会议描述..."
           type="textarea"
           auto-height
-          custom-class="w-full"
+          custom-class="meeting-form-input w-full"
+          align-right
           @update:model-value="(value) => updateField('description', value)"
         />
       </view>
@@ -260,3 +266,9 @@ function handleAdminSelect(option: { label: string, value: string }) {
     </wd-action-sheet>
   </view>
 </template>
+
+<style scoped>
+:deep(.meeting-form-input.wd-input::after) {
+  display: none;
+}
+</style>
