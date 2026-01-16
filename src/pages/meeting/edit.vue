@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, reactive, watch, watchEffect } from 'vue'
-import { createMeeting } from '@/api/meeting'
+import { computed, reactive, ref, watch, watchEffect } from 'vue'
+import { getMeetingInfo, updateMeeting } from '@/api/meeting'
 import MeetingForm from './components/MeetingForm.vue'
 
 definePage({
@@ -9,6 +9,23 @@ definePage({
     navigationBarTitleText: '编辑会议',
   },
 })
+
+interface MeetingMember {
+  userid?: string
+}
+
+interface MeetingInfoApi {
+  title?: string
+  meeting_start?: number
+  meeting_duration?: number
+  admin_userid?: string
+  location?: string
+  description?: string
+  attendees?: { member?: MeetingMember[] }
+  settings?: { password?: string }
+}
+
+const meetingId = ref('')
 
 const meetingForm = reactive({
   name: '',
@@ -177,6 +194,51 @@ const participantsWithAdmin = computed(() => {
   return mergeParticipantsWithAdmin(meetingForm.participants, meetingForm.adminUserid)
 })
 
+function resolveAttendeeIds(attendees?: { member?: MeetingMember[] }) {
+  const members = attendees?.member ?? []
+  return Array.isArray(members)
+    ? members
+        .map(item => item?.userid)
+        .filter((value): value is string => !!value)
+    : []
+}
+
+function applyMeetingToForm(data: MeetingInfoApi) {
+  const startSec = Number(data.meeting_start || 0)
+  const durationSec = Number(data.meeting_duration || 0)
+  const start = startSec ? new Date(startSec * 1000) : null
+
+  if (start) {
+    meetingForm.date = formatDate(start)
+    meetingForm.startTime = formatTime(start)
+    const end = durationSec ? new Date((startSec + durationSec) * 1000) : null
+    meetingForm.endTime = end ? formatTime(end) : addMinutesToTime(meetingForm.startTime, 30)
+  }
+
+  meetingForm.name = data.title ?? ''
+  meetingForm.adminUserid = data.admin_userid ?? ''
+  meetingForm.location = data.location ?? ''
+  meetingForm.description = data.description ?? ''
+  meetingForm.password = data.settings?.password ?? ''
+
+  const attendeeIds = resolveAttendeeIds(data.attendees)
+  meetingForm.participants = mergeParticipantsWithAdmin(attendeeIds.join(','), meetingForm.adminUserid).join(',')
+}
+
+async function loadMeetingInfo() {
+  if (!meetingId.value)
+    return
+  try {
+    const res: any = await getMeetingInfo(meetingId.value)
+    const data: MeetingInfoApi = res?.data?.data || res?.data || {}
+    applyMeetingToForm(data)
+  }
+  catch (error) {
+    console.error('fetch meeting info failed', error)
+    uni.showToast({ title: '获取会议详情失败', icon: 'none' })
+  }
+}
+
 /** 转成服务端接收格式（统一在这里维护字段映射） */
 function toServerPayload() {
   const ids = participantsWithAdmin.value.length
@@ -184,6 +246,7 @@ function toServerPayload() {
     : [meetingForm.adminUserid].filter(Boolean)
 
   return {
+    meetingId: meetingId.value,
     admin_userid: meetingForm.adminUserid,
     title: meetingForm.name,
     meeting_start: meetingStartTimestamp.value,
@@ -212,12 +275,20 @@ async function handleSave() {
     meetingForm.participants = participantsWithAdmin.value.join(',')
 
     // ✅ 再按服务端接收格式提交
-    await createMeeting(updateMeetingPayload.value)
+    await updateMeeting(updateMeetingPayload.value)
+    uni.showToast({ title: '会议已更新', icon: 'none' })
   }
   catch (error) {
     console.error('update meeting failed', error)
+    uni.showToast({ title: '更新会议失败', icon: 'none' })
   }
 }
+
+onLoad((options) => {
+  if (options?.meetingId)
+    meetingId.value = String(options.meetingId)
+  loadMeetingInfo()
+})
 </script>
 
 <template>
