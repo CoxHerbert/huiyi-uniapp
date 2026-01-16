@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { getUserList } from '@/api/user'
+
 interface MeetingInfo {
   name: string
   type: string
@@ -201,20 +202,15 @@ watch([userAccount, userName], () => {
       <slot name="title">
         <view class="mb-2 flex items-center justify-between bg-white px-4 py-3">
           <wd-input
-            :model-value="meeting.name"
-            placeholder="请输入会议名称"
-            custom-class="meeting-form-input flex-1 w-full"
-            align-right
+            :model-value="meeting.name" placeholder="请输入会议名称" custom-class="meeting-form-input flex-1 w-full"
+            :no-border="true" size="16"
             @update:model-value="(value) => updateField('name', value)"
           />
-          <wd-icon name="close" size="16px" color="#c4c7cc" @click="meeting.name = ''" />
+          <wd-icon class="ml-1" name="close" size="16" color="#c4c7cc" @click="meeting.name = ''" />
         </view>
       </slot>
 
-      <view
-        class="mb-2 flex items-center justify-between bg-white px-4 py-3"
-        @click="openTypeSheet"
-      >
+      <view class="mb-2 flex items-center justify-between bg-white px-4 py-3" @click="openTypeSheet">
         <text class="text-3 text-#8a8f99">
           会议类型
         </text>
@@ -256,10 +252,7 @@ watch([userAccount, userName], () => {
         </view>
       </slot>
 
-      <view
-        class="flex items-center justify-between bg-white px-4 py-3"
-        @click="openAdminSheet"
-      >
+      <view class="flex items-center justify-between bg-white px-4 py-3" @click="openAdminSheet">
         <view class="flex items-center gap-1">
           <text class="text-3 text-#ff4d4f">
             *
@@ -269,10 +262,7 @@ watch([userAccount, userName], () => {
           </text>
         </view>
         <view class="flex items-center gap-2">
-          <text
-            class="text-3"
-            :class="meeting.adminUserid ? 'text-#2f2f2f' : 'text-#c2c6cc'"
-          >
+          <text class="text-3" :class="meeting.adminUserid ? 'text-#2f2f2f' : 'text-#c2c6cc'">
             {{ meeting.adminUserid || '请选择管理员' }}
           </text>
           <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
@@ -283,46 +273,34 @@ watch([userAccount, userName], () => {
         <text class="text-3 text-#8a8f99">
           参会人
         </text>
-        <view class="flex flex-1 items-center justify-end gap-2">
+        <view class="flex flex-1 items-center justify-end gap-2" @click="openParticipantSheet">
           <wd-input
-            :model-value="meeting.participants"
-            placeholder="请选择参会人"
-            custom-class="meeting-form-input flex-1 w-full"
-            align-right
+            :model-value="meeting.participants" placeholder="请选择参会人"
+            custom-class="meeting-form-input flex-1 w-full" align-right :no-border="true"
+            disabled
             @update:model-value="(value) => updateField('participants', value)"
           />
-          <view
-            class="flex h-7 w-7 items-center justify-center rounded-full bg-#eef2ff text-#4f7bff"
-            @click="openParticipantSheet"
-          >
-            <wd-icon name="search" size="14px" color="#4f7bff" />
-          </view>
+          <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
         </view>
       </view>
 
-      <view class="flex items-center justify-between bg-white px-4 py-3">
+      <!-- <view class="flex items-center justify-between bg-white px-4 py-3">
         <text class="text-3 text-#8a8f99">
           会议室
         </text>
         <wd-input
-          :model-value="meeting.room"
-          placeholder="选择会议室"
-          custom-class="meeting-form-input flex-1 w-full"
-          align-right
-          @update:model-value="(value) => updateField('room', value)"
+          :model-value="meeting.room" placeholder="选择会议室" custom-class="meeting-form-input flex-1 w-full"
+          align-right :no-border="true" @update:model-value="(value) => updateField('room', value)"
         />
-      </view>
+      </view> -->
 
-      <view class="flex items-center justify-between bg-white px-4">
+      <view class="flex items-center justify-between bg-white px-4 py-3">
         <text class="text-3 text-#8a8f99">
           地点
         </text>
         <wd-input
-          :model-value="meeting.location"
-          placeholder="添加地点"
-          custom-class="meeting-form-input flex-1 w-full"
-          align-right
-          @update:model-value="(value) => updateField('location', value)"
+          :model-value="meeting.location" placeholder="添加地点" custom-class="meeting-form-input flex-1 w-full"
+          align-right :no-border="true" @update:model-value="(value) => updateField('location', value)"
         />
       </view>
 
@@ -331,35 +309,31 @@ watch([userAccount, userName], () => {
           会议密码
         </text>
         <wd-input
-          :model-value="meeting.password"
-          placeholder="请设置会议密码"
-          custom-class="meeting-form-input flex-1 w-full"
-          align-right
-          @update:model-value="(value) => updateField('password', value)"
+          :model-value="meeting.password" placeholder="请设置会议密码" custom-class="meeting-form-input flex-1 w-full"
+          align-right :no-border="true" @update:model-value="(value) => updateField('password', value)"
         />
       </view>
 
-      <view class="mb-2 flex items-center justify-between bg-white px-4 py-3">
+      <!-- <view class="mb-2 flex items-center justify-between bg-white px-4 py-3">
         <text class="text-3 text-#8a8f99">
           添加会议附件
         </text>
         <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
-      </view>
+      </view> -->
 
       <view class="bg-white px-4 py-3">
         <wd-input
-          :model-value="meeting.description"
-          placeholder="请输入会议描述..."
-          type="textarea"
-          auto-height
-          custom-class="meeting-form-input w-full"
-          align-right
+          :model-value="meeting.description" placeholder="请输入会议描述..." type="textarea" auto-height
+          custom-class="meeting-form-input w-full" align-right
+          :no-border="true"
           @update:model-value="(value) => updateField('description', value)"
         />
       </view>
     </view>
 
-    <view class="fixed bottom-0 left-0 right-0 z-10 border-t border-#f0f1f2 bg-white px-4 py-3 pb-[calc(12px+env(safe-area-inset-bottom))]">
+    <view
+      class="fixed bottom-0 left-0 right-0 z-10 border-t border-#f0f1f2 bg-white px-4 py-3 pb-[calc(12px+env(safe-area-inset-bottom))]"
+    >
       <wd-button type="primary" block @click="emit('submit')">
         {{ submitText }}
       </wd-button>
@@ -368,20 +342,14 @@ watch([userAccount, userName], () => {
     <wd-action-sheet v-model="showTypeSheet" title="会议类型" :close-on-click-action="true">
       <view class="px-4 pb-4">
         <view
-          v-for="option in meetingTypeOptions"
-          :key="option.value"
+          v-for="option in meetingTypeOptions" :key="option.value"
           class="flex items-center justify-between border-b border-#f0f1f2 py-3 last:border-b-0"
           @click="handleTypeSelect(option)"
         >
           <text class="text-3 text-#2f2f2f">
             {{ option.label }}
           </text>
-          <wd-icon
-            v-if="meeting.type === option.value"
-            name="check"
-            size="18px"
-            color="#4f7bff"
-          />
+          <wd-icon v-if="meeting.type === option.value" name="check" size="18px" color="#4f7bff" />
         </view>
       </view>
       <wd-gap :height="50" />
@@ -393,19 +361,15 @@ watch([userAccount, userName], () => {
           <view class="flex items-center gap-2 rounded-3 bg-#f3f4f6 px-3 py-2">
             <wd-icon name="search" size="16px" color="#9aa0a6" />
             <wd-input
-              v-model="userAccount"
-              placeholder="搜索账号"
-              custom-class="meeting-form-input w-full"
-              align-right
+              v-model="userAccount" placeholder="搜索账号" custom-class="meeting-form-input w-full" align-right
+              :no-border="true"
             />
             <wd-input
-              v-model="userName"
-              placeholder="搜索姓名"
-              custom-class="meeting-form-input w-full"
-              align-right
+              v-model="userName" placeholder="搜索姓名" custom-class="meeting-form-input w-full" align-right
+              :no-border="true"
             />
             <view
-              class="flex h-6 w-6 items-center justify-center rounded-full bg-white text-#c4c7cc"
+              class="h-6 w-6 flex items-center justify-center rounded-full bg-white text-#c4c7cc"
               @click="resetUserSearch"
             >
               <wd-icon name="close" size="12px" color="#c4c7cc" />
@@ -420,13 +384,12 @@ watch([userAccount, userName], () => {
             暂无人员数据
           </view>
           <view
-            v-for="option in userOptions"
-            :key="option.account"
+            v-for="option in userOptions" :key="option.account"
             class="flex items-center justify-between rounded-3 px-2 py-3 hover:bg-#f6f7fb"
             @click="handleAdminSelect(option)"
           >
             <view class="flex items-center gap-3">
-              <view class="flex h-8 w-8 items-center justify-center rounded-2 bg-#eef2ff text-#4f7bff text-3 font-600">
+              <view class="h-8 w-8 flex items-center justify-center rounded-2 bg-#eef2ff text-3 text-#4f7bff font-600">
                 {{ (option.name || option.account).slice(0, 1) }}
               </view>
               <view class="flex flex-col">
@@ -439,10 +402,13 @@ watch([userAccount, userName], () => {
               </view>
             </view>
             <view
-              class="flex h-6 w-6 items-center justify-center rounded-full border border-#e3e6ee"
+              class="h-6 w-6 flex items-center justify-center border border-#e3e6ee rounded-full"
               :class="meeting.adminUserid === option.account ? 'bg-#4f7bff text-white border-#4f7bff' : 'bg-white text-transparent'"
             >
-              <wd-icon name="check" size="12px" :color="meeting.adminUserid === option.account ? '#ffffff' : '#ffffff'" />
+              <wd-icon
+                name="check" size="12px"
+                :color="meeting.adminUserid === option.account ? '#ffffff' : '#ffffff'"
+              />
             </view>
           </view>
         </view>
@@ -456,19 +422,15 @@ watch([userAccount, userName], () => {
           <view class="flex items-center gap-2 rounded-3 bg-#f3f4f6 px-3 py-2">
             <wd-icon name="search" size="16px" color="#9aa0a6" />
             <wd-input
-              v-model="userAccount"
-              placeholder="搜索账号"
-              custom-class="meeting-form-input w-full"
-              align-right
+              v-model="userAccount" placeholder="搜索账号" custom-class="meeting-form-input w-full" align-right
+              :no-border="true"
             />
             <wd-input
-              v-model="userName"
-              placeholder="搜索姓名"
-              custom-class="meeting-form-input w-full"
-              align-right
+              v-model="userName" placeholder="搜索姓名" custom-class="meeting-form-input w-full" align-right
+              :no-border="true"
             />
             <view
-              class="flex h-6 w-6 items-center justify-center rounded-full bg-white text-#c4c7cc"
+              class="h-6 w-6 flex items-center justify-center rounded-full bg-white text-#c4c7cc"
               @click="resetUserSearch"
             >
               <wd-icon name="close" size="12px" color="#c4c7cc" />
@@ -481,8 +443,7 @@ watch([userAccount, userName], () => {
           <view v-if="selectedParticipants.length" class="mt-3">
             <view class="flex flex-wrap gap-2">
               <view
-                v-for="person in displayedSelectedParticipants"
-                :key="person.account"
+                v-for="person in displayedSelectedParticipants" :key="person.account"
                 class="flex items-center gap-1 rounded-full bg-#eef2ff px-2 py-1 text-2.5 text-#4f7bff"
               >
                 <text>{{ person.name }}</text>
@@ -504,13 +465,12 @@ watch([userAccount, userName], () => {
             暂无人员数据
           </view>
           <view
-            v-for="option in participantOptions"
-            :key="option.account"
+            v-for="option in participantOptions" :key="option.account"
             class="flex items-center justify-between rounded-3 px-2 py-3 hover:bg-#f6f7fb"
             @click="toggleParticipant(option.account)"
           >
             <view class="flex items-center gap-3">
-              <view class="flex h-8 w-8 items-center justify-center rounded-2 bg-#eef2ff text-#4f7bff text-3 font-600">
+              <view class="h-8 w-8 flex items-center justify-center rounded-2 bg-#eef2ff text-3 text-#4f7bff font-600">
                 {{ (option.name || option.account).slice(0, 1) }}
               </view>
               <view class="flex flex-col">
@@ -523,10 +483,13 @@ watch([userAccount, userName], () => {
               </view>
             </view>
             <view
-              class="flex h-6 w-6 items-center justify-center rounded-full border border-#e3e6ee"
+              class="h-6 w-6 flex items-center justify-center border border-#e3e6ee rounded-full"
               :class="selectedParticipantIds.includes(option.account) ? 'bg-#4f7bff text-white border-#4f7bff' : 'bg-white text-transparent'"
             >
-              <wd-icon name="check" size="12px" :color="selectedParticipantIds.includes(option.account) ? '#ffffff' : '#ffffff'" />
+              <wd-icon
+                name="check" size="12px"
+                :color="selectedParticipantIds.includes(option.account) ? '#ffffff' : '#ffffff'"
+              />
             </view>
           </view>
         </view>
@@ -547,10 +510,6 @@ watch([userAccount, userName], () => {
 </template>
 
 <style scoped>
-:deep(.meeting-form-input.wd-input::after) {
-  display: none;
-}
-
 .picker-sheet {
   display: flex;
   flex-direction: column;

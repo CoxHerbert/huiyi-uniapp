@@ -13,6 +13,7 @@ interface HistoryItem {
   title: string
   time?: string
   meetingNo?: string
+  meetingId?: string
 }
 
 interface HistorySection {
@@ -65,8 +66,8 @@ function normalizeHistorySections(list: any[]): HistorySection[] {
     return []
   const grouped = new Map<string, HistorySection>()
   list.forEach((record) => {
-    const startTimestamp = record?.meeting_start ?? record?.meetingStart ?? record?.start_time
-    const duration = record?.meeting_duration ?? record?.meetingDuration ?? 0
+    const startTimestamp = record?.meetingStart
+    const duration = record?.meetingDuration ?? 0
     const startDate = typeof startTimestamp === 'number'
       ? new Date(startTimestamp * 1000)
       : parseDate(record?.date)
@@ -79,10 +80,11 @@ function normalizeHistorySections(list: any[]): HistorySection[] {
       record?.time || record?.timeRange,
     )
     const item: HistoryItem = {
-      id: record?.id ?? record?.meetingId ?? record?.meeting_id ?? record?.meetingId ?? '',
+      id: record?.id,
       title: record?.title ?? '未命名会议',
       time: timeLabel,
-      meetingNo: record?.meetingNo ?? record?.meeting_code ?? record?.meetingCode,
+      meetingNo: record?.meeting_code,
+      meetingId: record?.meetingId,
     }
     if (!grouped.has(dateKey)) {
       grouped.set(dateKey, { date: dateLabel, year: yearLabel, items: [] })
@@ -108,21 +110,23 @@ onLoad(() => {
   loadHistoryList()
 })
 
-const goToHistoryDetail = (meetingId: number | string) => {
+function goToHistoryDetail(meetingId: number | string) {
   uni.navigateTo({ url: `/pages/meeting/history-detail?meetingId=${meetingId}` })
 }
 </script>
 
 <template>
   <view class="min-h-screen bg-#f6f7f9">
-    <view class="mx-4 mt-3 rounded-4 bg-white px-3 py-2">
+    <view class="mt-3 bg-white px-3 py-2">
       <view class="flex items-center gap-2 rounded-3 bg-#f3f4f6 px-3 py-2">
         <wd-icon name="search" size="16px" color="#9aa0a6" />
-        <text class="text-2.5 text-#9aa0a6">会议名称、会议号、发起人</text>
+        <text class="text-2.5 text-#9aa0a6">
+          会议名称、会议号、发起人
+        </text>
       </view>
     </view>
 
-    <view class="mx-4 mt-4">
+    <view class="mt-4">
       <view v-for="section in historySections" :key="section.date" class="mb-4">
         <view class="flex items-center justify-between text-2.5 text-#9aa0a6">
           <text>{{ section.date }}</text>
@@ -131,10 +135,12 @@ const goToHistoryDetail = (meetingId: number | string) => {
         <view
           v-for="item in section.items"
           :key="item.id"
-          class="mt-3 rounded-4 bg-white px-4 py-3"
-          @click="goToHistoryDetail(item.id)"
+          class="mt-3 bg-white px-4 py-3"
+          @click="goToHistoryDetail(item.meetingId)"
         >
-          <text class="block text-3.5 text-#2f2f2f">{{ item.title }}</text>
+          <text class="block text-3.5 text-#2f2f2f">
+            {{ item.title }}
+          </text>
           <view class="mt-2 flex items-center justify-between text-2.5 text-#9aa0a6">
             <text>{{ item.time }}</text>
             <text>会议号：{{ item.meetingNo }}</text>

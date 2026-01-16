@@ -21,8 +21,8 @@ const meetingForm = reactive({
   startTime: '',
   endTime: '',
   date: '',
-  duration: '60分钟',
-  participants: 'EW-M1,EW-6504',
+  duration: '',
+  participants: 'EW-6504',
   room: '',
   location: '',
   password: '',
@@ -237,7 +237,7 @@ async function handleCreate() {
   >
     <template #time>
       <view class="mb-2 bg-white px-4 py-3">
-        <view class="mb-4 flex items-center justify-between">
+        <!-- <view class="mb-4 flex items-center justify-between">
           <text class="text-3 text-#8a8f99">
             会议日期
           </text>
@@ -249,7 +249,7 @@ async function handleCreate() {
               <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
             </view>
           </wd-datetime-picker>
-        </view>
+        </view> -->
         <view class="flex items-center justify-center">
           <view class="flex items-center gap-6">
             <view class="text-center">
