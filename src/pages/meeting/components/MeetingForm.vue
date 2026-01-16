@@ -34,6 +34,7 @@ const userName = ref('')
 const userLoading = ref(false)
 const userOptions = ref<Array<{ account: string, name: string }>>([])
 const selectedParticipantIds = ref<string[]>([])
+const participantExpanded = ref(false)
 let searchTimer: ReturnType<typeof setTimeout> | null = null
 
 function updateField<K extends keyof MeetingInfo>(key: K, value: MeetingInfo[K]) {
@@ -138,6 +139,37 @@ function parseUserIds(value: string) {
     .split(/[、,，]/)
     .map(item => item.trim())
     .filter(Boolean)
+}
+
+const selectedParticipants = computed(() => {
+  if (!selectedParticipantIds.value.length)
+    return []
+  const optionMap = new Map(
+    userOptions.value.map(option => [option.account, option]),
+  )
+  return selectedParticipantIds.value.map((account) => {
+    const option = optionMap.get(account)
+    return {
+      account,
+      name: option?.name || account,
+    }
+  })
+})
+
+const displayedSelectedParticipants = computed(() => {
+  if (participantExpanded.value)
+    return selectedParticipants.value
+  return selectedParticipants.value.slice(0, 6)
+})
+
+const shouldShowToggle = computed(() => selectedParticipants.value.length > 6)
+
+function toggleSelectedUser(account: string) {
+  toggleParticipant(account)
+}
+
+function toggleParticipantExpanded() {
+  participantExpanded.value = !participantExpanded.value
 }
 
 function resetUserSearch() {
@@ -438,6 +470,23 @@ watch([userAccount, userName], () => {
             <text>已选 {{ selectedParticipantIds.length }} 人</text>
             <text>点击姓名可多选</text>
           </view>
+          <view v-if="selectedParticipants.length" class="mt-3">
+            <view class="flex flex-wrap gap-2">
+              <view
+                v-for="person in displayedSelectedParticipants"
+                :key="person.account"
+                class="flex items-center gap-1 rounded-full bg-#eef2ff px-2 py-1 text-2.5 text-#4f7bff"
+              >
+                <text>{{ person.name }}</text>
+                <wd-icon name="close" size="10px" color="#4f7bff" @click="toggleSelectedUser(person.account)" />
+              </view>
+            </view>
+            <view v-if="shouldShowToggle" class="mt-2 text-right text-2.5 text-#4f7bff">
+              <text @click="toggleParticipantExpanded">
+                {{ participantExpanded ? '收起' : '展开' }}
+              </text>
+            </view>
+          </view>
         </view>
         <view class="picker-body px-4 pb-20">
           <view v-if="userLoading" class="py-4 text-center text-2.5 text-#9aa0a6">
@@ -475,10 +524,10 @@ watch([userAccount, userName], () => {
         </view>
         <view class="picker-footer px-4 pb-4">
           <view class="flex gap-3">
-            <wd-button block type="info" @click="showParticipantSheet = false">
+            <wd-button class="flex-1" type="info" @click="showParticipantSheet = false">
               取消
             </wd-button>
-            <wd-button block type="primary" @click="applyParticipantSelection">
+            <wd-button class="flex-1" type="primary" @click="applyParticipantSelection">
               确认
             </wd-button>
           </view>
