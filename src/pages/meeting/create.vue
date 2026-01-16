@@ -80,8 +80,7 @@ function initDefaultDateTime() {
   meetingForm.date = formatDate(now)
   meetingForm.startTime = formatTimeFromMinutes(startMinutes)
   meetingForm.endTime = addMinutesToTime(meetingForm.startTime, 30)
-  console.log(loginInfo.value)
-  meetingForm.name = `${loginInfo.value.real_name}预定的会议`
+  meetingForm.name = `${loginInfo.value?.real_name || ''}预定的会议`
 }
 
 initDefaultDateTime()
@@ -251,11 +250,8 @@ async function handleCreate() {
 
 <template>
   <MeetingForm
-    title="创建会议"
-    submit-text="预约会议"
-    :meeting="meetingForm"
-    @update:meeting="(value) => Object.assign(meetingForm, value)"
-    @submit="handleCreate"
+    title="创建会议" submit-text="预约会议" :meeting="meetingForm"
+    @update:meeting="(value) => Object.assign(meetingForm, value)" @submit="handleCreate"
   >
     <template #time>
       <view class="mb-2 bg-white px-4 py-3">
@@ -276,11 +272,8 @@ async function handleCreate() {
           <view class="flex items-center gap-6">
             <view class="text-center">
               <wd-datetime-picker
-                v-model="meetingForm.startTime"
-                type="time"
-                :use-second="false"
-                :min-hour="minStartTime.hour"
-                :min-minute="minStartTime.minute"
+                v-model="meetingForm.startTime" type="time" :use-second="false"
+                :min-hour="minStartTime.hour" :min-minute="minStartTime.minute"
               >
                 <view class="text-center">
                   <text class="block text-5 text-#2f2f2f font-600">
@@ -292,18 +285,18 @@ async function handleCreate() {
                 </view>
               </wd-datetime-picker>
             </view>
-            <view class="text-center">
-              <text class="block bg-#F6F8FA px-1 py-2 text-2.5 text-#9aa0a6">
+            <view class="duration-wrap gap-3">
+              <view class="line" />
+              <text class="duration-text">
                 {{ durationLabel }}
               </text>
+              <view class="line" />
             </view>
+
             <view class="text-center">
               <wd-datetime-picker
-                v-model="meetingForm.endTime"
-                type="time"
-                :use-second="false"
-                :min-hour="minEndTime.hour"
-                :min-minute="minEndTime.minute"
+                v-model="meetingForm.endTime" type="time" :use-second="false"
+                :min-hour="minEndTime.hour" :min-minute="minEndTime.minute"
               >
                 <view class="text-center">
                   <text class="block text-5 text-#2f2f2f font-600">
@@ -321,3 +314,28 @@ async function handleCreate() {
     </template>
   </MeetingForm>
 </template>
+
+<style scoped>
+.duration-wrap {
+  padding: 0 16rpx;
+  display: flex;
+  align-items: center;
+}
+.line {
+  width: 56rpx;
+  height: 2rpx;
+  background: #DADBE0;
+}
+.duration-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 108rpx;
+  height: 56rpx;
+  background: #F6F8FA;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+  color: #333333;
+  line-height: 24rpx;
+}
+</style>

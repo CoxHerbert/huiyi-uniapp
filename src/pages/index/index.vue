@@ -13,12 +13,11 @@ const globalToast = useGlobalToast()
 const router = useRouter()
 
 const logoUrl = '/static/logo.png'
-const showPassword = ref(false)
 const loading = ref(false)
 const redirectPath = ref('')
 
 const formData = reactive({
-  username: 'E',
+  username: '',
   password: '',
   type: 'account',
 })
@@ -81,7 +80,7 @@ async function onSubmit() {
       <view class="brand">
         <image class="logo" :src="logoUrl" mode="aspectFit" />
         <text class="title">
-          慧医登录
+          联合东创
         </text>
         <text class="subtitle">
           请输入账号密码继续
@@ -89,17 +88,15 @@ async function onSubmit() {
       </view>
 
       <view class="form">
-        <wd-input v-model="formData.username" placeholder="请输入账号" clearable :no-border="true" />
+        <wd-input v-model="formData.username" placeholder="请输入账号" clearable />
 
-        <view class="password-row">
-          <wd-input
-            v-model="formData.password" :type="showPassword ? 'text' : 'password'" placeholder="请输入密码" clearable
-            class="password-input" :no-border="true"
-          />
-          <view class="toggle" @click="showPassword = !showPassword">
-            {{ showPassword ? '隐藏' : '显示' }}
-          </view>
-        </view>
+        <wd-input
+          v-model="formData.password"
+          clearable
+          show-password
+          placeholder="请输入密码"
+          class="password-input"
+        />
       </view>
 
       <wd-button block type="primary" :loading="loading" @click="onSubmit">
@@ -163,15 +160,18 @@ async function onSubmit() {
   margin-bottom: 20px;
 }
 
-.password-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
+/* 关键：确保 wd-input 容器级别就 100% 宽度 */
 .password-input {
   flex: 1;
+  width: 100%;
+  display: block;
 }
+
+/* 如果 wd-input 内层还有一层包装导致不满，再放开这一段（一般不需要）
+:deep(.password-input) {
+  width: 100%;
+}
+*/
 
 .toggle {
   font-size: 12px;
