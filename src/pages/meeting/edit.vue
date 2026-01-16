@@ -27,6 +27,7 @@ interface MeetingInfoApi {
 
 const meetingId = ref('')
 const pageId = ref('')
+const MEETING_LIST_REFRESH_KEY = 'meeting-list-refresh'
 
 const meetingForm = reactive({
   name: '',
@@ -279,6 +280,10 @@ async function handleSave() {
     // ✅ 再按服务端接收格式提交
     await updateMeeting(updateMeetingPayload.value)
     uni.showToast({ title: '会议已更新', icon: 'none' })
+    uni.setStorageSync(MEETING_LIST_REFRESH_KEY, true)
+    setTimeout(() => {
+      uni.navigateBack()
+    }, 800)
   }
   catch (error) {
     console.error('update meeting failed', error)
