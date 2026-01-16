@@ -248,7 +248,12 @@ watch(userKeyword, () => {
             align-right
             @update:model-value="(value) => updateField('participants', value)"
           />
-          <wd-icon name="search" size="16px" color="#c4c7cc" @click="openParticipantSheet" />
+          <view
+            class="flex h-7 w-7 items-center justify-center rounded-full bg-#eef2ff text-#4f7bff"
+            @click="openParticipantSheet"
+          >
+            <wd-icon name="search" size="14px" color="#4f7bff" />
+          </view>
         </view>
       </view>
 
@@ -341,15 +346,20 @@ watch(userKeyword, () => {
 
     <wd-action-sheet v-model="showAdminSheet" title="选择管理员" :close-on-click-action="true">
       <view class="px-4 pb-4">
-        <view class="mb-3 flex items-center gap-2 rounded-2 bg-#f3f4f6 px-3 py-2">
+        <view class="mb-3 flex items-center gap-2 rounded-3 bg-#f3f4f6 px-3 py-2">
           <wd-icon name="search" size="16px" color="#9aa0a6" />
           <wd-input
             v-model="userKeyword"
-            placeholder="请输入工号或姓名"
+            placeholder="搜索工号或姓名"
             custom-class="meeting-form-input w-full"
             align-right
           />
-          <wd-icon name="close" size="14px" color="#c4c7cc" @click="resetUserSearch" />
+          <view
+            class="flex h-6 w-6 items-center justify-center rounded-full bg-white text-#c4c7cc"
+            @click="resetUserSearch"
+          >
+            <wd-icon name="close" size="12px" color="#c4c7cc" />
+          </view>
         </view>
         <view v-if="userLoading" class="py-4 text-center text-2.5 text-#9aa0a6">
           正在加载...
@@ -360,23 +370,28 @@ watch(userKeyword, () => {
         <view
           v-for="option in userOptions"
           :key="option.account"
-          class="flex items-center justify-between border-b border-#f0f1f2 py-3 last:border-b-0"
+          class="flex items-center justify-between rounded-3 px-2 py-3 hover:bg-#f6f7fb"
           @click="handleAdminSelect(option)"
         >
-          <view class="flex flex-col">
-            <text class="text-3 text-#2f2f2f">
-              {{ option.name || option.account }}
-            </text>
-            <text v-if="option.name && option.account" class="text-2.5 text-#9aa0a6">
-              {{ option.account }}
-            </text>
+          <view class="flex items-center gap-3">
+            <view class="flex h-8 w-8 items-center justify-center rounded-2 bg-#eef2ff text-#4f7bff text-3 font-600">
+              {{ (option.name || option.account).slice(0, 1) }}
+            </view>
+            <view class="flex flex-col">
+              <text class="text-3 text-#2f2f2f">
+                {{ option.name || option.account }}
+              </text>
+              <text v-if="option.name && option.account" class="text-2.5 text-#9aa0a6">
+                {{ option.account }}
+              </text>
+            </view>
           </view>
-          <wd-icon
-            v-if="meeting.adminUserid === option.account"
-            name="check"
-            size="18px"
-            color="#4f7bff"
-          />
+          <view
+            class="flex h-6 w-6 items-center justify-center rounded-full border border-#e3e6ee"
+            :class="meeting.adminUserid === option.account ? 'bg-#4f7bff text-white border-#4f7bff' : 'bg-white text-transparent'"
+          >
+            <wd-icon name="check" size="12px" :color="meeting.adminUserid === option.account ? '#ffffff' : '#ffffff'" />
+          </view>
         </view>
       </view>
       <wd-gap :height="50" />
@@ -384,15 +399,24 @@ watch(userKeyword, () => {
 
     <wd-action-sheet v-model="showParticipantSheet" title="选择参会人" :close-on-click-action="true">
       <view class="px-4 pb-4">
-        <view class="mb-3 flex items-center gap-2 rounded-2 bg-#f3f4f6 px-3 py-2">
+        <view class="mb-3 flex items-center gap-2 rounded-3 bg-#f3f4f6 px-3 py-2">
           <wd-icon name="search" size="16px" color="#9aa0a6" />
           <wd-input
             v-model="userKeyword"
-            placeholder="请输入工号或姓名"
+            placeholder="搜索工号或姓名"
             custom-class="meeting-form-input w-full"
             align-right
           />
-          <wd-icon name="close" size="14px" color="#c4c7cc" @click="resetUserSearch" />
+          <view
+            class="flex h-6 w-6 items-center justify-center rounded-full bg-white text-#c4c7cc"
+            @click="resetUserSearch"
+          >
+            <wd-icon name="close" size="12px" color="#c4c7cc" />
+          </view>
+        </view>
+        <view class="mb-2 flex items-center justify-between text-2.5 text-#9aa0a6">
+          <text>已选 {{ selectedParticipantIds.length }} 人</text>
+          <text>点击姓名可多选</text>
         </view>
         <view v-if="userLoading" class="py-4 text-center text-2.5 text-#9aa0a6">
           正在加载...
@@ -403,23 +427,28 @@ watch(userKeyword, () => {
         <view
           v-for="option in userOptions"
           :key="option.account"
-          class="flex items-center justify-between border-b border-#f0f1f2 py-3 last:border-b-0"
+          class="flex items-center justify-between rounded-3 px-2 py-3 hover:bg-#f6f7fb"
           @click="toggleParticipant(option.account)"
         >
-          <view class="flex flex-col">
-            <text class="text-3 text-#2f2f2f">
-              {{ option.name || option.account }}
-            </text>
-            <text v-if="option.name && option.account" class="text-2.5 text-#9aa0a6">
-              {{ option.account }}
-            </text>
+          <view class="flex items-center gap-3">
+            <view class="flex h-8 w-8 items-center justify-center rounded-2 bg-#eef2ff text-#4f7bff text-3 font-600">
+              {{ (option.name || option.account).slice(0, 1) }}
+            </view>
+            <view class="flex flex-col">
+              <text class="text-3 text-#2f2f2f">
+                {{ option.name || option.account }}
+              </text>
+              <text v-if="option.name && option.account" class="text-2.5 text-#9aa0a6">
+                {{ option.account }}
+              </text>
+            </view>
           </view>
-          <wd-icon
-            v-if="selectedParticipantIds.includes(option.account)"
-            name="check"
-            size="18px"
-            color="#4f7bff"
-          />
+          <view
+            class="flex h-6 w-6 items-center justify-center rounded-full border border-#e3e6ee"
+            :class="selectedParticipantIds.includes(option.account) ? 'bg-#4f7bff text-white border-#4f7bff' : 'bg-white text-transparent'"
+          >
+            <wd-icon name="check" size="12px" :color="selectedParticipantIds.includes(option.account) ? '#ffffff' : '#ffffff'" />
+          </view>
         </view>
         <view class="mt-4 flex gap-3">
           <wd-button block type="info" @click="showParticipantSheet = false">
