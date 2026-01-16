@@ -9,7 +9,13 @@
     "tabBgColor": "#ffffff",
     "tabBorderStyle": "black",
     "tabColor": "#bfbfbf",
-    "tabSelectedColor": "#0165FF"
+    "tabSelectedColor": "#0165FF",
+    "tabBar": {
+      "list": [
+        { "pagePath": "pages/meeting/index" },
+        { "pagePath": "pages/index/index" }
+      ]
+    }
   },
   "dark": {
     "bgColor": "#000",
@@ -21,6 +27,12 @@
     "tabBgColor": "#1a1a1a",
     "tabBorderStyle": "white",
     "tabColor": "#bfbfbf",
-    "tabSelectedColor": "#0165FF"
+    "tabSelectedColor": "#0165FF",
+    "tabBar": {
+      "list": [
+        { "pagePath": "pages/meeting/index" },
+        { "pagePath": "pages/index/index" }
+      ]
+    }
   }
 }
