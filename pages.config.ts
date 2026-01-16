@@ -107,7 +107,7 @@ export default defineUniPages({
         pagePath: 'pages/meeting/index',
       },
       {
-        pagePath: 'pages/index/index',
+        pagePath: 'pages/settings/index',
       },
     ],
   },
