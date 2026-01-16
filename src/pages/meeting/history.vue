@@ -143,7 +143,6 @@ function goToHistoryDetail(meetingId: number | string) {
           </text>
           <view class="mt-2 flex items-center justify-between text-2.5 text-#9aa0a6">
             <text>{{ item.time }}</text>
-            <text>会议号：{{ item.meetingNo }}</text>
           </view>
         </view>
       </view>
