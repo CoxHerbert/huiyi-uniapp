@@ -13,75 +13,90 @@ import { UniEcharts } from 'uni-echarts/vite'
 import UnoCSS from 'unocss/vite'
 import AutoImport from 'unplugin-auto-import/vite'
 import { defineConfig } from 'vite'
-// https://vitejs.dev/config/
+
 export default defineConfig({
   base: './',
-  optimizeDeps: {
-    exclude: process.env.NODE_ENV === 'development' ? ['wot-design-uni', 'uni-echarts'] : [],
+
+  /**
+   * ✅ 关键：统一把构建目标降到 ES2015，避免 vendor.js 出现 ?. / ??
+   * - 微信小程序运行环境对现代语法支持不完整
+   * - 微信开发者工具的“ES6->ES5”有时对 vendor 处理不稳定，最好产物本身就兼容
+   */
+  esbuild: {
+    target: 'es2015',
   },
+
+  build: {
+    target: 'es2015',
+    // 默认 esbuild 压缩即可（不要换成 terser，除非你有特殊需求）
+    minify: 'esbuild',
+  },
+
+  /**
+   * dev 依赖预构建也尽量降级（可减少开发模式 vendor 里混入新语法）
+   */
+  optimizeDeps: {
+    // 你原来的 exclude 保留
+    exclude: process.env.NODE_ENV === 'development' ? ['wot-design-uni', 'uni-echarts'] : [],
+    // ✅ 增加：预构建 target
+    esbuildOptions: {
+      target: 'es2015',
+    },
+  },
+
   plugins: [
-    // https://github.com/uni-helper/vite-plugin-uni-manifest
     UniHelperManifest(),
-    // https://github.com/uni-helper/vite-plugin-uni-pages
+
     UniHelperPages({
       dts: 'src/uni-pages.d.ts',
       subPackages: [],
-      /**
-       * 排除的页面，相对于 dir 和 subPackages
-       * @default []
-       */
       exclude: ['**/components/**/*.*'],
     }),
-    // https://github.com/uni-helper/vite-plugin-uni-layouts
+
     UniHelperLayouts(),
-    // https://github.com/uni-helper/vite-plugin-uni-components
+
     UniHelperComponents({
       resolvers: [WotResolver(), UniEchartsResolver()],
       dts: 'src/components.d.ts',
       dirs: ['src/components', 'src/business'],
       directoryAsNamespace: true,
     }),
-    // https://github.com/uni-ku/root
+
     UniKuRoot(),
-    // https://uni-echarts.xiaohe.ink
+
     UniEcharts(),
-    // https://uni-helper.cn/plugin-uni
+
     Uni(),
-    // https://github.com/uni-ku/bundle-optimizer
+
     Optimization({
       enable: isMpWeixin,
       logger: false,
     }),
-    // https://github.com/antfu/unplugin-auto-import
+
     AutoImport({
-      imports: ['vue', '@vueuse/core', 'pinia', 'uni-app', {
-        from: '@wot-ui/router',
-        imports: ['createRouter', 'useRouter', 'useRoute'],
-      }, {
-        from: 'wot-design-uni',
-        imports: ['useToast', 'useMessage', 'useNotify', 'CommonUtil'],
-      }, {
-        from: 'alova/client',
-        imports: ['usePagination', 'useRequest'],
-      }],
+      imports: [
+        'vue',
+        '@vueuse/core',
+        'pinia',
+        'uni-app',
+        {
+          from: '@wot-ui/router',
+          imports: ['createRouter', 'useRouter', 'useRoute'],
+        },
+        {
+          from: 'wot-design-uni',
+          imports: ['useToast', 'useMessage', 'useNotify', 'CommonUtil'],
+        },
+        {
+          from: 'alova/client',
+          imports: ['usePagination', 'useRequest'],
+        },
+      ],
       dts: 'src/auto-imports.d.ts',
       dirs: ['src/composables', 'src/store', 'src/utils', 'src/api'],
       vueTemplate: true,
     }),
-    // https://github.com/antfu/unocss
-    // see unocss.config.ts for config
+
     UnoCSS(),
   ],
-  server: {
-    proxy: {
-      // 你代码里一般会写 /api/xxx
-      '/api': {
-        target: 'http://192.168.32.15', // 后端地址
-        changeOrigin: true,
-        secure: false,
-        // 如果后端本身没有 /api 前缀可重写
-        // rewrite: (path) => path.replace(/^\/api/, ''),
-      },
-    },
-  },
 })

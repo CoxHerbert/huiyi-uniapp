@@ -1,13 +1,11 @@
-import common from './modules/common/index';
-import dict from './modules/dict/index';
-import auth from './modules/auth';
-import user from './modules/user';
-import message from './modules/message';
+import auth from './modules/auth'
+import dict from './modules/dict/index'
+import message from './modules/message'
+import user from './modules/user'
 
 export default {
-  common,
   dict,
   auth,
   user,
   message,
-};
+}

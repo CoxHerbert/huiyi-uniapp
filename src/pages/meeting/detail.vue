@@ -16,9 +16,12 @@ interface MeetingInfoApi {
   admin_userid?: string
   meeting_code?: string
   attendees?: { member?: MeetingMember[] }
+  // 接口实际可能返回 JSON 字符串 / 数组 / 逗号字符串，这里用 any 兼容
+  userName?: any
 }
 
 const meetingId = ref('')
+
 const meetingDetail = reactive({
   title: '-',
   startTime: '--:--',
@@ -28,6 +31,11 @@ const meetingDetail = reactive({
   host: '-',
   attendees: [] as string[],
   meetingNo: '-',
+  userName: [] as string[],
+
+  // ✅ 新增：动态时长文本
+  durationText: '--',
+
   tipTitle: '温馨提示',
   tipContent: '此小程序仅作会议预约，请从企业微信“会议”功能进入会议。',
 })
@@ -48,6 +56,53 @@ function safeText(v: any, fallback = '-') {
   return v === null || v === undefined || v === '' ? fallback : String(v)
 }
 
+/** ✅ 秒 -> 友好时长文本 */
+function formatDuration(sec: any) {
+  const s = Math.max(0, Number(sec || 0))
+  if (!s)
+    return '--'
+
+  const min = Math.round(s / 60)
+  if (min < 60)
+    return `${min}分钟`
+
+  const h = Math.floor(min / 60)
+  const m = min % 60
+  return m ? `${h}小时${m}分钟` : `${h}小时`
+}
+
+/** ✅ 解析 userName：支持 JSON 字符串 / 数组 / 逗号字符串 */
+function parseUserName(input: any): string[] {
+  if (input === null || input === undefined || input === '')
+    return []
+
+  if (Array.isArray(input))
+    return input.map((x: any) => String(x)).filter(Boolean)
+
+  if (typeof input === 'string') {
+    const str = input.trim()
+    if (!str)
+      return []
+
+    // JSON 数组字符串
+    if (str.startsWith('[')) {
+      try {
+        const arr = JSON.parse(str)
+        if (Array.isArray(arr))
+          return arr.map((x: any) => String(x)).filter(Boolean)
+      }
+      catch (e) {
+        // ignore
+      }
+    }
+
+    // 普通逗号分隔
+    return str.split(/[,，]/).map(s => s.trim()).filter(Boolean)
+  }
+
+  return [String(input)].filter(Boolean)
+}
+
 function applyMeetingToView(m: MeetingInfoApi) {
   const startSec = Number(m.meeting_start || 0)
   const durSec = Number(m.meeting_duration || 0)
@@ -63,6 +118,12 @@ function applyMeetingToView(m: MeetingInfoApi) {
   meetingDetail.endTime = end ? formatHM(end) : '--:--'
   meetingDetail.date = start ? formatCNDate(start) : '-'
 
+  // ✅ 动态时长
+  meetingDetail.durationText = formatDuration(durSec)
+
+  // ✅ userName 处理成 UI 可用数组
+  meetingDetail.userName = parseUserName(m.userName)
+
   const members = m.attendees?.member || []
   meetingDetail.attendees = members.map(i => i.userid).filter(Boolean)
 }
@@ -73,8 +134,6 @@ async function loadMeetingDetail() {
   loading.value = true
   try {
     const res: any = await getMeetingInfo(meetingId.value)
-
-    // 兼容你们可能的封装层：优先取 res.data.data，其次 res.data
     const data: MeetingInfoApi = res?.data?.data || res?.data || {}
     applyMeetingToView(data)
   }
@@ -120,7 +179,6 @@ async function handleCancelMeeting() {
   try {
     await cancelMeeting(meetingId.value)
     uni.showToast({ title: '已取消会议', icon: 'none' })
-    // 如果你希望取消后返回上一页：改成 uni.navigateBack()
     await loadMeetingDetail()
   }
   catch (error) {
@@ -154,11 +212,15 @@ async function handleCancelMeeting() {
         </view>
 
         <view class="flex items-center">
-          <!-- 这里仍然显示静态 60分钟（保持你现有字段不变） -->
-          <text class="block bg-#F6F8FA px-1 py-2 text-2.5 text-#9aa0a6">
-            60分钟
+          <text
+            class="h-6 flex items-center justify-center rounded-1 bg-#F6F8FA px-2 text-2.5 text-#9aa0a6"
+          >
+            {{ meetingDetail.durationText }}
           </text>
-          <text class="ml-2 block text-2.5 text-#9aa0a6">
+
+          <text
+            class="ml-2 h-6 flex items-center text-2.5 text-#9aa0a6"
+          >
             {{ meetingDetail.timezone }}
           </text>
         </view>
@@ -180,27 +242,27 @@ async function handleCancelMeeting() {
           发起人
         </text>
         <view class="flex items-center gap-2">
-          <view class="h-7 w-7 rounded-2 bg-#d9dce1" />
           <text class="text-3 text-#2f2f2f">
             {{ meetingDetail.host }}
           </text>
-          <!-- <wd-icon name="arrow-right" size="14px" color="#c4c7cc" /> -->
         </view>
       </view>
 
-      <view class="mb-2 flex items-center justify-between border-b border-#f0f1f2 px-4 py-4">
+      <view class="mb-2 flex items-center justify-between border-b border-#f0f1f2 px-4">
         <text class="text-3 text-#8a8f99">
           参会人
         </text>
         <view class="flex items-center gap-2">
           <view class="flex">
             <view
-              v-for="(person, index) in meetingDetail.attendees"
+              v-for="(person, index) in meetingDetail.userName"
               :key="`${person}-${index}`"
-              class="h-7 w-7 border-2 border-white rounded-2 bg-#4f7bff -ml-1"
-            />
+              class="h-7 w-7 flex items-center justify-center border-2 border-white rounded-2 bg-#4f7bff text-3 text-white font-700 -ml-1"
+            >
+              {{ person?.slice(0, 1) }}
+            </view>
           </view>
-          <!-- <wd-icon name="arrow-right" size="14px" color="#c4c7cc" /> -->
+          <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
         </view>
       </view>
 
