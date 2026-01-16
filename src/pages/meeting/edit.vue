@@ -26,6 +26,7 @@ interface MeetingInfoApi {
 }
 
 const meetingId = ref('')
+const pageId = ref('')
 
 const meetingForm = reactive({
   name: '',
@@ -246,6 +247,7 @@ function toServerPayload() {
     : [meetingForm.adminUserid].filter(Boolean)
 
   return {
+    id: pageId.value,
     meetingId: meetingId.value,
     admin_userid: meetingForm.adminUserid,
     title: meetingForm.name,
@@ -285,8 +287,11 @@ async function handleSave() {
 }
 
 onLoad((options) => {
-  if (options?.meetingId)
+  if (options?.meetingId) {
     meetingId.value = String(options.meetingId)
+    pageId.value = String(options.id)
+  }
+
   loadMeetingInfo()
 })
 </script>

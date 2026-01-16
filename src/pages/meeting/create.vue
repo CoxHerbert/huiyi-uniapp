@@ -22,7 +22,7 @@ const meetingForm = reactive({
   endTime: '',
   date: '',
   duration: '',
-  participants: 'EW-6504',
+  participants: '',
   room: '',
   location: '',
   password: '',
