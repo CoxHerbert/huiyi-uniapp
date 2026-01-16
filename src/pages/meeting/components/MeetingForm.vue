@@ -493,18 +493,24 @@ watch([userAccount, userName], () => {
             </view>
           </view>
         </view>
-        <view class="picker-footer px-4 pb-4">
-          <view class="flex gap-3">
-            <wd-button class="flex-1" type="info" @click="showParticipantSheet = false">
-              取消
-            </wd-button>
-            <wd-button class="flex-1" type="primary" @click="applyParticipantSelection">
-              确认
-            </wd-button>
-          </view>
+        <view class="picker-footer px-4">
+          <wd-button
+            custom-class="w-48%"
+            type="info"
+            @click="showParticipantSheet = false"
+          >
+            取消
+          </wd-button>
+
+          <wd-button
+            custom-class="w-48%"
+            type="primary"
+            @click="applyParticipantSelection"
+          >
+            确认
+          </wd-button>
         </view>
       </view>
-      <wd-gap :height="50" />
     </wd-action-sheet>
   </view>
 </template>
@@ -532,5 +538,7 @@ watch([userAccount, userName], () => {
   bottom: 0;
   z-index: 2;
   background: #ffffff;
+   display: flex;
+    justify-content: space-between;
 }
 </style>

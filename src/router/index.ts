@@ -39,17 +39,15 @@ router.beforeEach((to, from, next) => {
 
     return new Promise<void>((resolve, reject) => {
       showConfirm({
-        title: '守卫拦截演示',
-        msg: '这是一个受保护的页面，需要确认后才能访问',
-        confirmButtonText: '允许访问',
+        title: '提示',
+        msg: '未登录，请前往登录后访问',
+        confirmButtonText: '去登录',
         cancelButtonText: '取消',
         success() {
-          console.log('✅ 用户确认访问，允许导航')
-          next()
+          next({ path: '/pages/login/account' })
           resolve()
         },
         fail() {
-          console.log('❌ 用户取消访问，阻止导航')
           next(false)
           reject(new Error('用户取消访问'))
         },

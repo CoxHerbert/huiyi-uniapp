@@ -8,14 +8,13 @@ definePage({
   },
 })
 
-interface MeetingMember { userid: string }
 interface MeetingInfoApi {
   title?: string
   meeting_start?: number
   meeting_duration?: number
   admin_userid?: string
   meeting_code?: string
-  attendees?: { member?: MeetingMember[] }
+  userName: Array<string>
 }
 
 const meetingId = ref('')
@@ -26,9 +25,9 @@ const historyDetail = reactive({
   timeRange: '-',
   meetingNo: '-',
   host: '-',
-  attendees: [] as string[],
   joinTime: '--',
   duration: '--',
+  userName: [],
 })
 
 function pad2(n: number) {
@@ -79,9 +78,40 @@ function applyMeetingToView(m: MeetingInfoApi) {
   }
 
   historyDetail.duration = durationSec ? formatHMS(durationSec) : '--'
+  historyDetail.userName = parseUserName(m.userName)
+  console.log(historyDetail)
+}
 
-  const members = m.attendees?.member || []
-  historyDetail.attendees = members.map(i => i.userid).filter(Boolean)
+/** ✅ 解析 userName：支持 JSON 字符串 / 数组 / 逗号字符串 */
+function parseUserName(input: any): string[] {
+  if (input === null || input === undefined || input === '')
+    return []
+
+  if (Array.isArray(input))
+    return input.map((x: any) => String(x)).filter(Boolean)
+
+  if (typeof input === 'string') {
+    const str = input.trim()
+    if (!str)
+      return []
+
+    // JSON 数组字符串
+    if (str.startsWith('[')) {
+      try {
+        const arr = JSON.parse(str)
+        if (Array.isArray(arr))
+          return arr.map((x: any) => String(x)).filter(Boolean)
+      }
+      catch (e) {
+        // ignore
+      }
+    }
+
+    // 普通逗号分隔
+    return str.split(/[,，]/).map(s => s.trim()).filter(Boolean)
+  }
+
+  return [String(input)].filter(Boolean)
 }
 
 async function loadHistoryDetail() {
@@ -113,25 +143,24 @@ onLoad((options) => {
   <view class="min-h-screen bg-#f6f7f9">
     <view class="mt-4 bg-white px-4 py-4">
       <view class="flex items-center justify-between">
-        <text class="block text-3.5 text-#2f2f2f">
+        <text class="title">
           {{ historyDetail.title }}
         </text>
         <wd-loading v-if="loading" size="18px" />
       </view>
-      <text class="mt-2 block text-2.5 text-#9aa0a6">
+      <view class="desc-text mt-4">
         {{ historyDetail.timeRange }}
-      </text>
-      <text class="mt-1 block text-2.5 text-#9aa0a6">
+      </view>
+      <view class="desc-text mt-2">
         会议号：{{ historyDetail.meetingNo }}
-      </text>
+      </view>
 
-      <view class="mt-4 border-t border-#f0f1f2 pt-4">
+      <view class="border-t border-#f0f1f2 pt-4">
         <view class="flex items-center justify-between py-2">
           <text class="text-3 text-#8a8f99">
             发起人
           </text>
           <view class="flex items-center gap-2">
-            <view class="h-7 w-7 rounded-2 bg-#d9dce1" />
             <text class="text-3 text-#2f2f2f">
               {{ historyDetail.host }}
             </text>
@@ -144,20 +173,21 @@ onLoad((options) => {
           <view class="flex items-center gap-2">
             <view class="flex">
               <view
-                v-for="(person, index) in historyDetail.attendees"
-                :key="`${person}-${index}`"
-                class="h-7 w-7 border-2 border-white rounded-2 bg-#4f7bff -ml-1"
-              />
+                v-for="(person, index) in historyDetail.userName" :key="`${person}-${index}`"
+                class="h-7 w-7 flex items-center justify-center border-2 border-white rounded-2 bg-#4f7bff text-3 text-white font-700 -ml-1"
+              >
+                {{ person?.slice(0, 1) }}
+              </view>
             </view>
             <text class="text-2.5 text-#9aa0a6">
-              共{{ historyDetail.attendees.length }}人
+              共{{ historyDetail.userName.length }}人
             </text>
           </view>
         </view>
       </view>
     </view>
     <view class="meet-time">
-      <view class="text-center">
+      <view class="left">
         <text class="time">
           {{ historyDetail.joinTime }}
         </text>
@@ -165,8 +195,8 @@ onLoad((options) => {
           入会时间
         </text>
       </view>
-      <view class="h-6 w-px bg-#f0f1f2" />
-      <view class="text-center">
+      <view class="h-8 w-px bg-#f0f1f2" />
+      <view class="right">
         <text class="time">
           {{ historyDetail.duration }}
         </text>
@@ -182,24 +212,45 @@ onLoad((options) => {
 .meet-time {
   padding: 32rpx 0;
   margin-top: 24rpx;
-  display:flex;
-  flex-direction: column;
+  display: flex;
   justify-content: space-between;
   background: #FFFFFF;
 }
-.text-center {
+
+.title {
+  font-weight: 600;
+  font-size: 36rpx;
+  color: #333333;
+  line-height: 36rpx;
+}
+
+.desc-text {
+  font-weight: 400;
+  font-size: 28rpx;
+  color: #333333;
+  line-height: 28rpx;
+}
+
+.left,
+.right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   flex: 1;
 }
+
 .time {
-font-weight: 500;
-font-size: 32rpx;
-color: #333333;
-line-height: 32rpx;
+  font-weight: 500;
+  font-size: 32rpx;
+  color: #333333;
+  line-height: 32rpx;
 }
+
 .desc {
-font-weight: 400;
-font-size: 24rpx;
-color: #666666;
-line-height: 24rpx;
+  margin-top: 18rpx;
+  font-weight: 400;
+  font-size: 24rpx;
+  color: #666666;
+  line-height: 24rpx;
 }
 </style>

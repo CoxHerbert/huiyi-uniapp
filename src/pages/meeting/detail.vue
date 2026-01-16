@@ -21,7 +21,7 @@ interface MeetingInfoApi {
 }
 
 const meetingId = ref('')
-
+const pageId = ref('')
 const meetingDetail = reactive({
   title: '-',
   startTime: '--:--',
@@ -147,15 +147,18 @@ async function loadMeetingDetail() {
 }
 
 onLoad((options) => {
-  if (options?.meetingId)
+  if (options?.meetingId) {
     meetingId.value = String(options.meetingId)
+    pageId.value = String(options.id)
+  }
+
   loadMeetingDetail()
 })
 
 function goToEdit() {
   if (!meetingId.value)
     return
-  uni.navigateTo({ url: `/pages/meeting/edit?meetingId=${meetingId.value}` })
+  uni.navigateTo({ url: `/pages/meeting/edit?meetingId=${meetingId.value}&id=${pageId.value}` })
 }
 
 async function handleCancelMeeting() {
@@ -211,16 +214,12 @@ async function handleCancelMeeting() {
           </text>
         </view>
 
-        <view class="flex items-center">
-          <text
-            class="h-6 flex items-center justify-center rounded-1 bg-#F6F8FA px-2 text-2.5 text-#9aa0a6"
-          >
+        <view class="time-wrap">
+          <text class="duration-text">
             {{ meetingDetail.durationText }}
           </text>
 
-          <text
-            class="ml-2 h-6 flex items-center text-2.5 text-#9aa0a6"
-          >
+          <text class="timezone">
             {{ meetingDetail.timezone }}
           </text>
         </view>
@@ -255,14 +254,12 @@ async function handleCancelMeeting() {
         <view class="flex items-center gap-2">
           <view class="flex">
             <view
-              v-for="(person, index) in meetingDetail.userName"
-              :key="`${person}-${index}`"
+              v-for="(person, index) in meetingDetail.userName" :key="`${person}-${index}`"
               class="h-7 w-7 flex items-center justify-center border-2 border-white rounded-2 bg-#4f7bff text-3 text-white font-700 -ml-1"
             >
               {{ person?.slice(0, 1) }}
             </view>
           </view>
-          <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
         </view>
       </view>
 
@@ -285,26 +282,52 @@ async function handleCancelMeeting() {
       </text>
     </view>
 
-    <view class="fixed bottom-0 left-0 right-0 z-10 border-t border-#f0f1f2 bg-white px-4 py-3 pb-[calc(12px+env(safe-area-inset-bottom))]">
-      <view class="flex gap-3">
-        <wd-button
-          type="error"
-          plain
-          :loading="canceling"
-          @click="handleCancelMeeting"
-        >
-          取消会议
-        </wd-button>
-
-        <wd-button
-          type="primary"
-          class="flex-1"
-          block
-          @click="goToEdit"
-        >
-          编辑会议
-        </wd-button>
-      </view>
+    <view
+      class="btn-wrap fixed bottom-0 left-0 right-0 z-10 border-t border-#f0f1f2 bg-white px-4 py-3 pb-[calc(12px+env(safe-area-inset-bottom))]"
+    >
+      <wd-button
+        custom-class="w-48%" type="error" plain :loading="canceling" :round="false"
+        @click="handleCancelMeeting"
+      >
+        取消会议
+      </wd-button>
+      <wd-button type="primary" custom-class="w-48%" block :round="false" @click="goToEdit">
+        编辑会议
+      </wd-button>
     </view>
   </view>
 </template>
+
+<style scoped>
+.btn-wrap {
+  display: flex;
+  justify-content: space-between;
+}
+
+.time-wrap {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.duration-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 108rpx;
+  height: 56rpx;
+  background: #F6F8FA;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+  color: #333333;
+  line-height: 24rpx;
+}
+
+.timezone {
+  margin-top: 10rpx;
+  font-weight: 400;
+  font-size: 20rpx;
+  color: #333333;
+  line-height: 20rpx;
+}
+</style>

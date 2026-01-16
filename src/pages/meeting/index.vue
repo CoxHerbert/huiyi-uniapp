@@ -247,8 +247,8 @@ function goToHistory() {
   uni.navigateTo({ url: '/pages/meeting/history' })
 }
 
-function goToDetail(meetingId: number) {
-  uni.navigateTo({ url: `/pages/meeting/detail?meetingId=${meetingId}` })
+function goToDetail(meetingId: string, id: string) {
+  uni.navigateTo({ url: `/pages/meeting/detail?meetingId=${meetingId}&id=${id}` })
 }
 </script>
 
@@ -290,11 +290,6 @@ function goToDetail(meetingId: number) {
         <text class="mt-3 text-3 text-#9aa0a6">
           暂无数据
         </text>
-        <view class="mt-4">
-          <van-button size="small" type="primary" plain @click="goToCreate">
-            去预约
-          </van-button>
-        </view>
       </view>
 
       <!-- ✅ 有数据才渲染列表 -->
@@ -308,51 +303,62 @@ function goToDetail(meetingId: number) {
           <view
             v-for="item in section.items"
             :key="item.id"
-            class="mb-3 rounded-4 bg-white px-3 py-3 shadow-sm"
-            @click="goToDetail(item.meetingId as any)"
+            class="meet-item mb-3 rounded-4 bg-white py-3"
+            @click="goToDetail(item.meetingId as any, item.id as any)"
           >
-            <view class="flex items-center gap-2">
-              <view
-                v-if="item.status"
-                class="rounded-full px-2 py-0.5 text-2.5 leading-4"
-                :class="item.statusClass"
-              >
-                {{ item.status }}
+            <view>
+              <view class="flex items-center gap-2">
+                <view
+                  v-if="item.status"
+                  class="rounded-full px-2 py-0.5 text-2.5 leading-4"
+                  :class="item.statusClass"
+                >
+                  {{ item.status }}
+                </view>
+
+                <text class="min-w-0 flex-1 truncate text-3.5 text-#2f2f2f font-600">
+                  {{ item.title }}
+                </text>
+
+                <view class="flex items-center text-#c2c6cc">
+                  <van-icon name="arrow" size="16" />
+                </view>
               </view>
 
-              <text class="min-w-0 flex-1 truncate text-3.5 text-#2f2f2f font-600">
-                {{ item.title }}
+              <text v-if="item.tip" class="mt-1 block text-2.5 text-#ff7a00">
+                {{ item.tip }}
               </text>
 
-              <view class="flex items-center text-#c2c6cc">
-                <van-icon name="arrow" size="16" />
+              <view class="mt-2 flex flex-wrap items-center gap-3 text-2.5 text-#333333">
+                <text v-if="item.time" class="block">
+                  {{ getAmPmLabel(item) }}{{ item.time }}
+                </text>
+              </view>
+
+              <view class="mt-2 text-2.5 text-#9aa0a6 space-y-1">
+                <text v-if="item.meetingNo" class="block">
+                  会议号：{{ item.meetingNo }}
+                </text>
+                <text class="block">
+                  创建者：{{ item.createUserName || '-' }}
+                </text>
+                <text class="block">
+                  参会人：{{ item.userName || '-' }}
+                </text>
               </view>
             </view>
-
-            <text v-if="item.tip" class="mt-1 block text-2.5 text-#ff7a00">
-              {{ item.tip }}
-            </text>
-
-            <view class="mt-2 flex flex-wrap items-center gap-3 text-2.5 text-#333333">
-              <text v-if="item.time" class="block">
-                {{ getAmPmLabel(item) }}{{ item.time }}
-              </text>
-            </view>
-
-            <view class="mt-2 text-2.5 text-#9aa0a6 space-y-1">
-              <text v-if="item.meetingNo" class="block">
-                会议号：{{ item.meetingNo }}
-              </text>
-              <text class="block">
-                创建者：{{ item.createUserName || '-' }}
-              </text>
-              <text class="block">
-                参会人：{{ item.userName || '-' }}
-              </text>
-            </view>
+            <wd-icon name="arrow-right" size="22px" />
           </view>
         </view>
       </view>
     </view>
   </view>
 </template>
+
+<style  scoped>
+.meet-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+</style>

@@ -18,8 +18,8 @@ const loading = ref(false)
 const redirectPath = ref('')
 
 const formData = reactive({
-  username: 'EW-6504',
-  password: '123456',
+  username: 'E',
+  password: '',
   type: 'account',
 })
 
