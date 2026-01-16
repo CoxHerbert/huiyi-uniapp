@@ -34,6 +34,7 @@ interface MeetingSection {
 }
 
 const meetingSections = ref<MeetingSection[]>([])
+const MEETING_LIST_REFRESH_KEY = 'meeting-list-refresh'
 
 const statusMeta = new Map<number, { label: string, className: string }>([
   [1, { label: '已创建', className: 'bg-#e7edff text-#3f5fff' }],
@@ -237,6 +238,14 @@ const hasMeetingData = computed(() => {
 
 onLoad(() => {
   loadMeetingList()
+})
+
+onShow(() => {
+  const shouldRefresh = uni.getStorageSync(MEETING_LIST_REFRESH_KEY)
+  if (shouldRefresh) {
+    uni.removeStorageSync(MEETING_LIST_REFRESH_KEY)
+    loadMeetingList()
+  }
 })
 
 function goToCreate() {

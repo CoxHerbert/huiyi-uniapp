@@ -13,6 +13,7 @@ definePage({
 
 const userStore = useUserStore()
 const loginInfo = computed(() => userStore.loginInfo)
+const MEETING_LIST_REFRESH_KEY = 'meeting-list-refresh'
 
 const meetingForm = reactive({
   name: '',
@@ -220,6 +221,11 @@ async function handleCreate() {
 
     // ✅ 再按服务端接收格式提交
     await createMeeting(createMeetingPayload.value)
+    uni.showToast({ title: '预约会议成功', icon: 'none' })
+    uni.setStorageSync(MEETING_LIST_REFRESH_KEY, true)
+    setTimeout(() => {
+      uni.navigateBack()
+    }, 800)
   }
   catch (error) {
     console.error('create meeting failed', error)

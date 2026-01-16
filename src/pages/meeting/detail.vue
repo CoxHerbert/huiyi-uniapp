@@ -22,6 +22,7 @@ interface MeetingInfoApi {
 
 const meetingId = ref('')
 const pageId = ref('')
+const MEETING_LIST_REFRESH_KEY = 'meeting-list-refresh'
 const meetingDetail = reactive({
   title: '-',
   startTime: '--:--',
@@ -182,7 +183,10 @@ async function handleCancelMeeting() {
   try {
     await cancelMeeting(meetingId.value)
     uni.showToast({ title: '已取消会议', icon: 'none' })
-    await loadMeetingDetail()
+    uni.setStorageSync(MEETING_LIST_REFRESH_KEY, true)
+    setTimeout(() => {
+      uni.navigateBack()
+    }, 800)
   }
   catch (error) {
     console.error('cancel meeting failed', error)
