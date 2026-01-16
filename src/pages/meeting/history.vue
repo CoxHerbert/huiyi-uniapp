@@ -13,8 +13,11 @@ interface HistoryItem {
   title: string // 会议名称
   time?: string
   meetingId?: string
-  creatorName?: string // 发起人：createUserName
-  _sortKey?: number
+
+  // ✅ 创建人/创建时间
+  createUserName?: string
+  createTime?: string // 展示用
+  _sortKey?: number // 排序用：毫秒时间戳
 }
 
 interface HistorySection {
@@ -64,29 +67,75 @@ function buildTimeLabel(startTimestamp?: number, durationSeconds?: number, fallb
   return fallback || ''
 }
 
+/** ✅ 将各种时间字段统一转成毫秒时间戳（支持：秒/毫秒/字符串时间） */
+function toMillis(value: any) {
+  if (value === undefined || value === null || value === '')
+    return 0
+
+  const n = Number(value)
+  if (Number.isFinite(n)) {
+    // 秒级时间戳（一般 10 位）→ 转毫秒
+    if (n > 0 && n < 1e12)
+      return n * 1000
+    return n
+  }
+
+  if (typeof value === 'string') {
+    const d = new Date(value.replace(/-/g, '/'))
+    const t = d.getTime()
+    return Number.isNaN(t) ? 0 : t
+  }
+
+  return 0
+}
+
+function formatDateTime(ms: number) {
+  if (!ms)
+    return ''
+  const d = new Date(ms)
+  const y = d.getFullYear()
+  const m = padTime(d.getMonth() + 1)
+  const day = padTime(d.getDate())
+  const hh = padTime(d.getHours())
+  const mm = padTime(d.getMinutes())
+  return `${y}-${m}-${day} ${hh}:${mm}`
+}
+
+/** ✅ 排序键：优先创建时间(createTime / create_time)，其次用会议开始时间兜底 */
 function getRecordSortKey(record: any) {
-  const raw = record?.create_time
-    ?? record?.createTime
-    ?? record?.created_at
-    ?? record?.createdAt
-    ?? record?.createAt
-    ?? record?.createAtTime
-    ?? record?.createdTime
-    ?? record?.meetingStart
-    ?? record?.meeting_start
-    ?? record?.start_time
-  const numeric = Number(raw)
-  return Number.isFinite(numeric) ? numeric : 0
+  const createRaw
+    = record?.createTime
+      ?? record?.create_time
+      ?? record?.created_at
+      ?? record?.createdAt
+      ?? record?.createAt
+      ?? record?.createAtTime
+      ?? record?.createdTime
+
+  const createKey = toMillis(createRaw)
+  if (createKey)
+    return createKey
+
+  const startRaw
+    = record?.meetingStart
+      ?? record?.meeting_start
+      ?? record?.start_time
+
+  return toMillis(startRaw)
 }
 
 function normalizeHistorySections(list: any[]): HistorySection[] {
   if (!Array.isArray(list))
     return []
-  const grouped = new Map<string, HistorySection>()
+
+  const grouped = new Map<string, { date: string, year: string, items: HistoryItem[], _maxKey: number }>()
+
   list.forEach((record) => {
     const sortKey = getRecordSortKey(record)
-    const startTimestamp = record?.meetingStart
-    const duration = record?.meetingDuration ?? 0
+
+    const startTimestamp = record?.meetingStart ?? record?.meeting_start ?? record?.start_time
+    const duration = record?.meetingDuration ?? record?.meeting_duration ?? 0
+
     const startDate = typeof startTimestamp === 'number'
       ? new Date(startTimestamp * 1000)
       : parseDate(record?.date)
@@ -100,30 +149,43 @@ function normalizeHistorySections(list: any[]): HistorySection[] {
       record?.time || record?.timeRange,
     )
 
+    // ✅ 创建时间（展示用）：来自 record.createTime（你指定的字段）
+    const createTimeMs = toMillis(record?.createTime)
+    const createTimeLabel = createTimeMs ? formatDateTime(createTimeMs) : ''
+
     const item: HistoryItem = {
       id: record?.id,
       title: record?.title ?? '未命名会议',
       time: timeLabel,
       meetingId: record?.meetingId,
-      creatorName: record?.createUserName || '',
+
+      // ✅ 创建人/创建时间
+      createUserName: record?.createUserName || '',
+      createTime: createTimeLabel,
+
       _sortKey: sortKey,
     }
 
     if (!grouped.has(dateKey)) {
-      grouped.set(dateKey, { date: dateLabel, year: yearLabel, items: [] })
+      grouped.set(dateKey, { date: dateLabel, year: yearLabel, items: [], _maxKey: 0 })
     }
-    grouped.get(dateKey)?.items.push(item)
+
+    const section = grouped.get(dateKey)!
+    section.items.push(item)
+    section._maxKey = Math.max(section._maxKey, sortKey || 0)
   })
-  return Array.from(grouped.values())
-    .map(section => ({
-      ...section,
-      items: [...section.items].sort((a, b) => (b._sortKey ?? 0) - (a._sortKey ?? 0)),
-    }))
-    .sort((a, b) => {
-      const aKey = a.items[0]?._sortKey ?? 0
-      const bKey = b.items[0]?._sortKey ?? 0
-      return bKey - aKey
+
+  // ✅ 分组内倒叙 + 分组间倒叙（按创建时间越新越靠前）
+  const sections = Array.from(grouped.values())
+    .map((section) => {
+      const sortedItems = [...section.items].sort((a, b) => (b._sortKey ?? 0) - (a._sortKey ?? 0))
+      const maxKey = sortedItems[0]?._sortKey ?? section._maxKey ?? 0
+      return { date: section.date, year: section.year, items: sortedItems, _maxKey: maxKey }
     })
+    .sort((a: any, b: any) => (b._maxKey ?? 0) - (a._maxKey ?? 0))
+    .map(({ date, year, items }) => ({ date, year, items }))
+
+  return sections
 }
 
 // ✅ 仅支持：会议名称(title) + 发起人(createUserName)
@@ -138,7 +200,7 @@ function applyFilter() {
     .map((section) => {
       const items = section.items.filter((it) => {
         const title = (it.title || '').toLowerCase()
-        const creator = (it.creatorName || '').toLowerCase()
+        const creator = (it.createUserName || '').toLowerCase()
         return title.includes(kw) || creator.includes(kw)
       })
       return { ...section, items }
@@ -221,10 +283,18 @@ function goToHistoryDetail(meetingId: number | string) {
             <text class="meet-title">
               {{ item.title }}
             </text>
+
             <view class="meet-time">
               <text>{{ item.time }}</text>
-              <text v-if="item.creatorName" class="ml-2 text-#999999">
-                · {{ item.creatorName }}
+
+              <!-- ✅ 创建人 -->
+              <text v-if="item.createUserName" class="ml-2 text-#999999">
+                · {{ item.createUserName }}
+              </text>
+
+              <!-- ✅ 创建时间 -->
+              <text v-if="item.createTime" class="ml-2 text-#999999">
+                · {{ item.createTime }}
               </text>
             </view>
           </view>

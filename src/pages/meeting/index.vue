@@ -26,7 +26,7 @@ interface MeetingItem {
   userName?: string
   meetingId?: string
   createUserName?: string
-  _sortKey?: number
+  _sortKey?: number // ✅ 用于排序：毫秒级时间戳
 }
 
 interface MeetingSection {
@@ -145,19 +145,52 @@ function getAmPmLabel(item: MeetingItem) {
   return ''
 }
 
+/** ✅ 将各种 createTime 统一转成毫秒时间戳，用于倒叙排序（越大越新） */
+function toMillis(value: any) {
+  if (value === undefined || value === null || value === '')
+    return 0
+
+  // number / numeric string
+  const n = Number(value)
+  if (Number.isFinite(n)) {
+    // 秒级时间戳（通常 10 位）→ 转毫秒
+    if (n > 0 && n < 1e12)
+      return n * 1000
+    return n
+  }
+
+  // date string
+  if (typeof value === 'string') {
+    const d = new Date(value.replace(/-/g, '/'))
+    const t = d.getTime()
+    return Number.isNaN(t) ? 0 : t
+  }
+
+  return 0
+}
+
+/** ✅ 排序键：优先创建时间，其次用会议开始时间兜底 */
 function getRecordSortKey(record: any) {
-  const raw = record?.create_time
-    ?? record?.createTime
-    ?? record?.created_at
-    ?? record?.createdAt
-    ?? record?.createAt
-    ?? record?.createAtTime
-    ?? record?.createdTime
-    ?? record?.meeting_start
-    ?? record?.meetingStart
-    ?? record?.start_time
-  const numeric = Number(raw)
-  return Number.isFinite(numeric) ? numeric : 0
+  const createRaw
+    = record?.create_time
+      ?? record?.createTime
+      ?? record?.created_at
+      ?? record?.createdAt
+      ?? record?.createAt
+      ?? record?.createAtTime
+      ?? record?.createdTime
+
+  const createKey = toMillis(createRaw)
+  if (createKey)
+    return createKey
+
+  // 兜底：用会议开始时间
+  const startRaw
+    = record?.meeting_start
+      ?? record?.meetingStart
+      ?? record?.start_time
+
+  return toMillis(startRaw)
 }
 
 function normalizeMeetingSections(list: any[]): MeetingSection[] {
@@ -166,24 +199,33 @@ function normalizeMeetingSections(list: any[]): MeetingSection[] {
   if (list.length > 0 && Array.isArray(list[0]?.items)) {
     return list as MeetingSection[]
   }
+
   const grouped = new Map<string, MeetingItem[]>()
+
   list.forEach((record) => {
     const sortKey = getRecordSortKey(record)
+
     const startTimestamp = record?.meeting_start ?? record?.meetingStart ?? record?.start_time
     const duration = record?.meeting_duration ?? record?.meetingDuration ?? 0
+
     const startDate = typeof startTimestamp === 'number'
       ? new Date(startTimestamp * 1000)
       : parseDate(record?.date)
+
     const dateLabel = startDate ? formatDateLabel(startDate) : '未安排'
+
     const timeLabel = buildTimeLabel(
       typeof startTimestamp === 'number' ? startTimestamp : undefined,
       typeof duration === 'number' ? duration : undefined,
       record?.time || record?.timeRange,
     )
+
     const durationLabel = duration ? `${Math.max(Math.round(duration / 60), 1)}分钟` : record?.duration
+
     const participants = Array.isArray(record?.invitees?.userid)
       ? record.invitees.userid.join(' ')
       : record?.participants
+
     const userName = record?.userName
       ? (() => {
           try {
@@ -214,29 +256,33 @@ function normalizeMeetingSections(list: any[]): MeetingSection[] {
       isCreator: Boolean(record?.is_creator ?? record?.isCreator ?? record?.role === 'creator'),
       meetingId: record?.meetingId,
       userName,
-      _sortKey: sortKey,
+      _sortKey: sortKey, // ✅ 创建时间（毫秒）
     }
+
     const derivedStatus = getStatusMeta(item.status)
     if (derivedStatus) {
       item.status = derivedStatus.label
       if (!item.statusClass)
         item.statusClass = derivedStatus.className
     }
-    if (!grouped.has(dateLabel)) {
+
+    if (!grouped.has(dateLabel))
       grouped.set(dateLabel, [])
-    }
     grouped.get(dateLabel)?.push(item)
   })
-  return Array.from(grouped.entries())
-    .map(([date, items]) => ({
-      date,
-      items: [...items].sort((a, b) => (b._sortKey ?? 0) - (a._sortKey ?? 0)),
-    }))
-    .sort((a, b) => {
-      const aKey = a.items[0]?._sortKey ?? 0
-      const bKey = b.items[0]?._sortKey ?? 0
-      return bKey - aKey
-    })
+
+  // ✅ 分组内：按创建时间倒叙
+  const sections = Array.from(grouped.entries()).map(([date, items]) => {
+    const sortedItems = [...items].sort((a, b) => (b._sortKey ?? 0) - (a._sortKey ?? 0))
+    const maxKey = sortedItems[0]?._sortKey ?? 0
+    return { date, items: sortedItems, _maxKey: maxKey }
+  })
+
+  // ✅ 分组间：按该分组最新创建时间倒叙
+  sections.sort((a: any, b: any) => (b._maxKey ?? 0) - (a._maxKey ?? 0))
+
+  // 去掉内部字段
+  return sections.map(({ date, items }) => ({ date, items }))
 }
 
 async function loadMeetingList() {
@@ -391,7 +437,7 @@ function goToDetail(meetingId: string, id: string) {
   </view>
 </template>
 
-<style  scoped>
+<style scoped>
 .meet-item {
   display: flex;
   align-items: center;
