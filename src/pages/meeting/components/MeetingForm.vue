@@ -29,7 +29,8 @@ const meetingTypeOptions = [
   { label: '线上会议', value: '线上会议' },
   { label: '线下会议', value: '线下会议' },
 ]
-const userKeyword = ref('')
+const userAccount = ref('')
+const userName = ref('')
 const userLoading = ref(false)
 const userOptions = ref<Array<{ account: string, name: string }>>([])
 const selectedParticipantIds = ref<string[]>([])
@@ -80,9 +81,10 @@ function resolveUserName(record: any) {
 async function loadUsers() {
   try {
     userLoading.value = true
-    const keyword = userKeyword.value.trim()
-    const params = keyword
-      ? { name: keyword, account: keyword }
+    const account = userAccount.value.trim()
+    const name = userName.value.trim()
+    const params = account || name
+      ? { account, realName: name }
       : {}
     const response = await getUserList(params)
     const records = response?.data?.data?.records || response?.data?.data || []
@@ -139,11 +141,12 @@ function parseUserIds(value: string) {
 }
 
 function resetUserSearch() {
-  userKeyword.value = ''
+  userAccount.value = ''
+  userName.value = ''
   loadUsers()
 }
 
-watch(userKeyword, () => {
+watch([userAccount, userName], () => {
   if (searchTimer)
     clearTimeout(searchTimer)
   searchTimer = setTimeout(() => {
@@ -350,8 +353,14 @@ watch(userKeyword, () => {
           <view class="flex items-center gap-2 rounded-3 bg-#f3f4f6 px-3 py-2">
             <wd-icon name="search" size="16px" color="#9aa0a6" />
             <wd-input
-              v-model="userKeyword"
-              placeholder="搜索工号或姓名"
+              v-model="userAccount"
+              placeholder="搜索账号"
+              custom-class="meeting-form-input w-full"
+              align-right
+            />
+            <wd-input
+              v-model="userName"
+              placeholder="搜索姓名"
               custom-class="meeting-form-input w-full"
               align-right
             />
@@ -407,8 +416,14 @@ watch(userKeyword, () => {
           <view class="flex items-center gap-2 rounded-3 bg-#f3f4f6 px-3 py-2">
             <wd-icon name="search" size="16px" color="#9aa0a6" />
             <wd-input
-              v-model="userKeyword"
-              placeholder="搜索工号或姓名"
+              v-model="userAccount"
+              placeholder="搜索账号"
+              custom-class="meeting-form-input w-full"
+              align-right
+            />
+            <wd-input
+              v-model="userName"
+              placeholder="搜索姓名"
               custom-class="meeting-form-input w-full"
               align-right
             />
