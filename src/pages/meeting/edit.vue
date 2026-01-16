@@ -46,6 +46,7 @@ const meetingForm = reactive({
 })
 
 const MIN_DURATION_MINUTES = 5
+const MIN_START_OFFSET_MINUTES = 5
 
 function padTime(value: number) {
   return String(value).padStart(2, '0')
@@ -88,8 +89,10 @@ function addMinutesToTime(time: string, minutes: number) {
 
 function initDefaultDateTime() {
   const now = new Date()
+  const nowMinutes = now.getHours() * 60 + now.getMinutes()
+  const startMinutes = Math.min(nowMinutes + MIN_START_OFFSET_MINUTES, 23 * 60 + 59)
   meetingForm.date = formatDate(now)
-  meetingForm.startTime = formatTime(now)
+  meetingForm.startTime = formatTimeFromMinutes(startMinutes)
   meetingForm.endTime = addMinutesToTime(meetingForm.startTime, 30)
 }
 
@@ -99,6 +102,18 @@ const minEndTime = computed(() => {
   const minTime = addMinutesToTime(meetingForm.startTime, MIN_DURATION_MINUTES)
   const { hour, minute } = parseTime(minTime)
   return { hour, minute }
+})
+
+const minStartTime = computed(() => {
+  const todayLabel = formatDate(new Date())
+  if (meetingForm.date !== todayLabel)
+    return { hour: 0, minute: 0 }
+  const now = new Date()
+  const minStartMinutes = Math.min(
+    now.getHours() * 60 + now.getMinutes() + MIN_START_OFFSET_MINUTES,
+    23 * 60 + 59,
+  )
+  return { hour: Math.floor(minStartMinutes / 60), minute: minStartMinutes % 60 }
 })
 
 function parseDate(value: string) {
@@ -122,8 +137,9 @@ function ensureStartNotPast() {
   if (meetingForm.date !== todayLabel)
     return
   const nowMinutes = now.getHours() * 60 + now.getMinutes()
-  if (toMinutes(meetingForm.startTime) < nowMinutes) {
-    meetingForm.startTime = formatTime(now)
+  const minStartMinutes = Math.min(nowMinutes + MIN_START_OFFSET_MINUTES, 23 * 60 + 59)
+  if (toMinutes(meetingForm.startTime) < minStartMinutes) {
+    meetingForm.startTime = formatTimeFromMinutes(minStartMinutes)
   }
 }
 
@@ -324,7 +340,13 @@ onLoad((options) => {
         <view class="flex items-center justify-center">
           <view class="flex items-center gap-6">
             <view class="text-center">
-              <wd-datetime-picker v-model="meetingForm.startTime" type="time" :use-second="false">
+              <wd-datetime-picker
+                v-model="meetingForm.startTime"
+                type="time"
+                :use-second="false"
+                :min-hour="minStartTime.hour"
+                :min-minute="minStartTime.minute"
+              >
                 <view class="text-center">
                   <text class="block text-5 text-#2f2f2f font-600">
                     {{ meetingForm.startTime }}
