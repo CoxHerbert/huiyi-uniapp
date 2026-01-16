@@ -215,9 +215,13 @@ async function handleCancelMeeting() {
         </view>
 
         <view class="time-wrap">
-          <text class="duration-text">
-            {{ meetingDetail.durationText }}
-          </text>
+          <view class="duration-wrap gap-3">
+            <view class="line" />
+            <text class="duration-text">
+              {{ meetingDetail.durationText }}
+            </text>
+            <view class="line" />
+          </view>
 
           <text class="timezone">
             {{ meetingDetail.timezone }}
@@ -329,5 +333,17 @@ async function handleCancelMeeting() {
   font-size: 20rpx;
   color: #333333;
   line-height: 20rpx;
+}
+
+.duration-wrap {
+  padding: 0 16rpx;
+  display: flex;
+  align-items: center;
+}
+
+.line {
+  width: 56rpx;
+  height: 2rpx;
+  background: #DADBE0;
 }
 </style>

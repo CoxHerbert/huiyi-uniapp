@@ -298,11 +298,8 @@ onLoad((options) => {
 
 <template>
   <MeetingForm
-    title="编辑会议"
-    submit-text="保存"
-    :meeting="meetingForm"
-    @update:meeting="(value) => Object.assign(meetingForm, value)"
-    @submit="handleSave"
+    title="编辑会议" submit-text="保存" :meeting="meetingForm"
+    @update:meeting="(value) => Object.assign(meetingForm, value)" @submit="handleSave"
   >
     <template #time>
       <view class="mb-2 border-#f0f1f2 bg-white px-4 py-3">
@@ -333,18 +330,17 @@ onLoad((options) => {
                 </view>
               </wd-datetime-picker>
             </view>
-            <view class="text-center">
+            <view class="duration-label gap-4">
+              <view class="line" />
               <text class="block bg-#F6F8FA px-1 py-2 text-2.5 text-#9aa0a6">
                 {{ durationLabel }}
               </text>
+              <view class="line" />
             </view>
             <view class="text-center">
               <wd-datetime-picker
-                v-model="meetingForm.endTime"
-                type="time"
-                :use-second="false"
-                :min-hour="minEndTime.hour"
-                :min-minute="minEndTime.minute"
+                v-model="meetingForm.endTime" type="time" :use-second="false"
+                :min-hour="minEndTime.hour" :min-minute="minEndTime.minute"
               >
                 <view class="text-center">
                   <text class="block text-5 text-#2f2f2f font-600">
@@ -362,3 +358,17 @@ onLoad((options) => {
     </template>
   </MeetingForm>
 </template>
+
+<style scoped>
+.duration-label {
+  padding: 0 16rpx;
+  display: flex;
+  align-items: center;
+}
+
+.line {
+  width: 56rpx;
+  height: 2rpx;
+  background: #DADBE0;
+}
+</style>
