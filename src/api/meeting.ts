@@ -47,9 +47,10 @@ export function cancelMeeting(meetingId: string) {
   })
 }
 
-export function getMeetingList() {
+export function getMeetingList(params?: { type?: number }) {
   return request({
     url: '/blade-bip/wx/list',
     method: 'get',
+    params,
   })
 }
