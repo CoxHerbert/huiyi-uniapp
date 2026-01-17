@@ -37,7 +37,11 @@ const meetingTypeOptions = [
 const userAccount = ref('')
 const userName = ref('')
 const userLoading = ref(false)
+const userLoadingMore = ref(false)
 const userOptions = ref<Array<{ account: string, name: string }>>([])
+const userPage = ref(1)
+const userHasMore = ref(true)
+const userPageSize = 20
 const selectedParticipantIds = ref<string[]>([])
 const selectedHostIds = ref<string[]>([])
 const participantExpanded = ref(false)
@@ -51,9 +55,16 @@ function openTypeSheet() {
   showTypeSheet.value = true
 }
 
+function resetUserPaging() {
+  userPage.value = 1
+  userHasMore.value = true
+  userOptions.value = []
+}
+
 function openHostSheet() {
   selectedHostIds.value = props.meeting.hosts.slice(0, 1)
   showHostSheet.value = true
+  resetUserPaging()
   loadUsers()
 }
 
@@ -86,17 +97,28 @@ function resolveUserName(record: any) {
   ).trim()
 }
 
-async function loadUsers() {
+async function loadUsers(isLoadMore = false) {
+  if (userLoading.value || userLoadingMore.value)
+    return
+  if (isLoadMore && !userHasMore.value)
+    return
   try {
-    userLoading.value = true
+    if (isLoadMore)
+      userLoadingMore.value = true
+    else
+      userLoading.value = true
     const account = userAccount.value.trim()
     const name = userName.value.trim()
     const params = account || name
       ? { account, realName: name }
       : {}
-    const response = await getUserList(params)
+    const response = await getUserList({
+      ...params,
+      current: userPage.value,
+      size: userPageSize,
+    })
     const records = response?.data?.data?.records || response?.data?.data || []
-    userOptions.value = Array.isArray(records)
+    const nextOptions = Array.isArray(records)
       ? records
           .map((item: any) => ({
             account: resolveUserAccount(item),
@@ -104,20 +126,40 @@ async function loadUsers() {
           }))
           .filter(item => item.account || item.name)
       : []
+    if (isLoadMore)
+      userOptions.value = [...userOptions.value, ...nextOptions]
+    else
+      userOptions.value = nextOptions
+    const total = Number(response?.data?.data?.total || 0)
+    if (total) {
+      userHasMore.value = userOptions.value.length < total
+    }
+    else {
+      userHasMore.value = nextOptions.length >= userPageSize
+    }
+    if (userHasMore.value)
+      userPage.value += 1
   }
   catch (error) {
     console.error('fetch user list failed', error)
-    userOptions.value = []
+    if (!isLoadMore)
+      userOptions.value = []
   }
   finally {
     userLoading.value = false
+    userLoadingMore.value = false
   }
 }
 
 function openParticipantSheet() {
   selectedParticipantIds.value = parseUserIds(props.meeting.participants)
   showParticipantSheet.value = true
+  resetUserPaging()
   loadUsers()
+}
+
+function handleLoadMore() {
+  loadUsers(true)
 }
 
 function toggleParticipant(account: string) {
@@ -231,6 +273,7 @@ function toggleParticipantExpanded() {
 function resetUserSearch() {
   userAccount.value = ''
   userName.value = ''
+  resetUserPaging()
   loadUsers()
 }
 
@@ -238,6 +281,7 @@ watch([userAccount, userName], () => {
   if (searchTimer)
     clearTimeout(searchTimer)
   searchTimer = setTimeout(() => {
+    resetUserPaging()
     loadUsers()
   }, 300)
 })
@@ -438,7 +482,12 @@ watch([userAccount, userName], () => {
             </view>
           </view>
         </view>
-        <view class="picker-body px-4 pb-20">
+        <scroll-view
+          class="picker-body px-4 pb-20"
+          scroll-y
+          :lower-threshold="40"
+          @scrolltolower="handleLoadMore"
+        >
           <view v-if="userLoading" class="py-4 text-center text-3 text-#9aa0a6">
             正在加载...
           </view>
@@ -473,7 +522,13 @@ watch([userAccount, userName], () => {
               />
             </view>
           </view>
-        </view>
+          <view v-if="userLoadingMore" class="py-3 text-center text-3 text-#9aa0a6">
+            正在加载更多...
+          </view>
+          <view v-else-if="!userHasMore && userOptions.length" class="py-3 text-center text-3 text-#c2c6cc">
+            没有更多了
+          </view>
+        </scroll-view>
         <view class="picker-footer px-4">
           <wd-button
             custom-class="w-48%"
@@ -536,7 +591,12 @@ watch([userAccount, userName], () => {
             </view>
           </view>
         </view>
-        <view class="picker-body px-4 pb-20">
+        <scroll-view
+          class="picker-body px-4 pb-20"
+          scroll-y
+          :lower-threshold="40"
+          @scrolltolower="handleLoadMore"
+        >
           <view v-if="userLoading" class="py-4 text-center text-3 text-#9aa0a6">
             正在加载...
           </view>
@@ -571,7 +631,13 @@ watch([userAccount, userName], () => {
               />
             </view>
           </view>
-        </view>
+          <view v-if="userLoadingMore" class="py-3 text-center text-3 text-#9aa0a6">
+            正在加载更多...
+          </view>
+          <view v-else-if="!userHasMore && userOptions.length" class="py-3 text-center text-3 text-#c2c6cc">
+            没有更多了
+          </view>
+        </scroll-view>
         <view class="picker-footer px-4">
           <wd-button
             custom-class="w-48%"
