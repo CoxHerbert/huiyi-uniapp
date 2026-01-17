@@ -7,11 +7,6 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
-    DemoBlock: typeof import('./components/DemoBlock.vue')['default']
-    GlobalLoading: typeof import('./components/GlobalLoading.vue')['default']
-    GlobalMessage: typeof import('./components/GlobalMessage.vue')['default']
-    GlobalToast: typeof import('./components/GlobalToast.vue')['default']
-    PrivacyPopup: typeof import('./components/PrivacyPopup.vue')['default']
     WdActionSheet: typeof import('wot-design-uni/components/wd-action-sheet/wd-action-sheet.vue')['default']
     WdBadge: typeof import('wot-design-uni/components/wd-badge/wd-badge.vue')['default']
     WdButton: typeof import('wot-design-uni/components/wd-button/wd-button.vue')['default']
@@ -26,7 +21,6 @@ declare module 'vue' {
     WdLoading: typeof import('wot-design-uni/components/wd-loading/wd-loading.vue')['default']
     WdMessageBox: typeof import('wot-design-uni/components/wd-message-box/wd-message-box.vue')['default']
     WdNotify: typeof import('wot-design-uni/components/wd-notify/wd-notify.vue')['default']
-    WdPopup: typeof import('wot-design-uni/components/wd-popup/wd-popup.vue')['default']
     WdSearch: typeof import('wot-design-uni/components/wd-search/wd-search.vue')['default']
     WdTab: typeof import('wot-design-uni/components/wd-tab/wd-tab.vue')['default']
     WdTabbar: typeof import('wot-design-uni/components/wd-tabbar/wd-tabbar.vue')['default']
