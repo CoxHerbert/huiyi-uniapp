@@ -171,6 +171,24 @@ const selectedParticipants = computed(() => {
 })
 
 const participantOptions = computed(() => userOptions.value)
+const optionNameMap = computed(() => new Map(
+  userOptions.value.map(option => [option.account, option.name || option.account]),
+))
+
+function getNameByAccount(account: string) {
+  return optionNameMap.value.get(account) || account
+}
+
+const hostDisplayText = computed(() => {
+  const names = props.meeting.hosts.map(account => getNameByAccount(account))
+  return names.filter(Boolean).join('、')
+})
+
+const participantDisplayText = computed(() => {
+  const accounts = parseUserIds(props.meeting.participants)
+  const names = accounts.map(account => getNameByAccount(account))
+  return names.filter(Boolean).join('、')
+})
 
 const selectedHosts = computed(() => {
   if (!selectedHostIds.value.length)
@@ -283,7 +301,7 @@ watch([userAccount, userName], () => {
         </text>
         <view class="flex flex-1 items-center justify-end gap-2">
           <wd-input
-            :model-value="meeting.hosts.join(',')" placeholder="请选择主持人"
+            :model-value="hostDisplayText" placeholder="请选择主持人"
             custom-class="meeting-form-input flex-1 w-full" align-right :no-border="true"
             readonly
           />
@@ -297,10 +315,9 @@ watch([userAccount, userName], () => {
         </text>
         <view class="flex flex-1 items-center justify-end gap-2" @click="openParticipantSheet">
           <wd-input
-            :model-value="meeting.participants" placeholder="请选择参会人"
+            :model-value="participantDisplayText" placeholder="请选择参会人"
             custom-class="meeting-form-input flex-1 w-full" align-right :no-border="true"
             readonly
-            @update:model-value="(value) => updateField('participants', value)"
           />
           <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
         </view>

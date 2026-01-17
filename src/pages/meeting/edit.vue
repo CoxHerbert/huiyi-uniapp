@@ -28,6 +28,7 @@ interface MeetingInfoApi {
 const meetingId = ref('')
 const pageId = ref('')
 const MEETING_LIST_REFRESH_KEY = 'meeting-list-refresh'
+const MEETING_DETAIL_REFRESH_KEY = 'meeting-detail-refresh'
 const userStore = useUserStore()
 const loginInfo = computed(() => userStore.loginInfo)
 
@@ -276,6 +277,7 @@ async function handleSave() {
     await updateMeeting(updateMeetingPayload.value)
     uni.showToast({ title: '会议已更新', icon: 'none' })
     uni.setStorageSync(MEETING_LIST_REFRESH_KEY, true)
+    uni.setStorageSync(MEETING_DETAIL_REFRESH_KEY, true)
     setTimeout(() => {
       uni.navigateBack()
     }, 800)

@@ -5,6 +5,7 @@ definePage({
   name: 'meeting',
   style: {
     navigationBarTitleText: '会议',
+    enablePullDownRefresh: true,
   },
 })
 
@@ -319,6 +320,11 @@ onShow(() => {
     uni.removeStorageSync(MEETING_LIST_REFRESH_KEY)
     loadMeetingList()
   }
+})
+
+onPullDownRefresh(async () => {
+  await loadMeetingList()
+  uni.stopPullDownRefresh()
 })
 
 function goToCreate() {
