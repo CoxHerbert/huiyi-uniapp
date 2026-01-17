@@ -19,7 +19,7 @@ const meetingForm = reactive({
   name: '',
   type: '线上会议',
   adminUserid: '',
-  host: '',
+  hosts: [] as string[],
   startTime: '',
   endTime: '',
   date: '',
@@ -181,8 +181,8 @@ watchEffect(() => {
 })
 
 watchEffect(() => {
-  if (!meetingForm.host && loginInfo.value?.real_name) {
-    meetingForm.host = loginInfo.value.real_name
+  if (!meetingForm.hosts.length && loginInfo.value?.account) {
+    meetingForm.hosts = [loginInfo.value.account]
   }
 })
 
@@ -220,7 +220,6 @@ function toServerPayload() {
 
   return {
     admin_userid: meetingForm.adminUserid,
-    host: meetingForm.host,
     title: meetingForm.name,
     meeting_start: meetingStartTimestamp.value,
     meeting_duration: meetingDurationSeconds.value,
@@ -231,6 +230,7 @@ function toServerPayload() {
     },
     settings: {
       password: meetingForm.password,
+      host: meetingForm.hosts,
       remind_scope: 1,
     },
   }

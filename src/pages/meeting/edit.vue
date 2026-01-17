@@ -20,13 +20,10 @@ interface MeetingInfoApi {
   meeting_start?: number
   meeting_duration?: number
   admin_userid?: string
-  host?: string
-  host_name?: string
-  host_userid?: string
   location?: string
   description?: string
   attendees?: { member?: MeetingMember[] }
-  settings?: { password?: string }
+  settings?: { password?: string, host?: string[] }
 }
 
 const meetingId = ref('')
@@ -39,7 +36,7 @@ const meetingForm = reactive({
   name: '',
   type: '',
   adminUserid: '',
-  host: '',
+  hosts: [] as string[],
   startTime: '',
   endTime: '',
   date: '',
@@ -200,8 +197,8 @@ watchEffect(() => {
 })
 
 watchEffect(() => {
-  if (!meetingForm.host && loginInfo.value?.real_name) {
-    meetingForm.host = loginInfo.value.real_name
+  if (!meetingForm.hosts.length && loginInfo.value?.account) {
+    meetingForm.hosts = [loginInfo.value.account]
   }
 })
 
@@ -254,7 +251,7 @@ function applyMeetingToForm(data: MeetingInfoApi) {
 
   meetingForm.name = data.title ?? ''
   meetingForm.adminUserid = data.admin_userid ?? loginInfo.value?.account ?? ''
-  meetingForm.host = data.host ?? data.host_name ?? data.host_userid ?? meetingForm.adminUserid ?? ''
+  meetingForm.hosts = data.settings?.host ?? (meetingForm.adminUserid ? [meetingForm.adminUserid] : [])
   meetingForm.location = data.location ?? ''
   meetingForm.description = data.description ?? ''
   meetingForm.password = data.settings?.password ?? ''
@@ -287,7 +284,6 @@ function toServerPayload() {
     id: pageId.value,
     meetingId: meetingId.value,
     admin_userid: meetingForm.adminUserid,
-    host: meetingForm.host,
     title: meetingForm.name,
     meeting_start: meetingStartTimestamp.value,
     meeting_duration: meetingDurationSeconds.value,
@@ -298,6 +294,7 @@ function toServerPayload() {
     },
     settings: {
       password: meetingForm.password,
+      host: meetingForm.hosts,
     },
   }
 }
