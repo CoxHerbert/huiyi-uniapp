@@ -175,12 +175,6 @@ watchEffect(() => {
 })
 
 watchEffect(() => {
-  if (!meetingForm.adminUserid && loginInfo.value?.account) {
-    meetingForm.adminUserid = loginInfo.value.account
-  }
-})
-
-watchEffect(() => {
   if (!meetingForm.hosts.length && loginInfo.value?.account) {
     meetingForm.hosts = [loginInfo.value.account]
   }

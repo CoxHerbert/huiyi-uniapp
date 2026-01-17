@@ -191,12 +191,6 @@ watchEffect(() => {
 })
 
 watchEffect(() => {
-  if (!meetingForm.adminUserid && loginInfo.value?.account) {
-    meetingForm.adminUserid = loginInfo.value.account
-  }
-})
-
-watchEffect(() => {
   if (!meetingForm.hosts.length && loginInfo.value?.account) {
     meetingForm.hosts = [loginInfo.value.account]
   }
@@ -250,7 +244,7 @@ function applyMeetingToForm(data: MeetingInfoApi) {
   }
 
   meetingForm.name = data.title ?? ''
-  meetingForm.adminUserid = data.admin_userid ?? loginInfo.value?.account ?? ''
+  meetingForm.adminUserid = data.admin_userid ?? ''
   meetingForm.hosts = data.settings?.host ?? (meetingForm.adminUserid ? [meetingForm.adminUserid] : [])
   meetingForm.location = data.location ?? ''
   meetingForm.description = data.description ?? ''
