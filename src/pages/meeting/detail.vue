@@ -52,7 +52,7 @@ const meetingDetail = reactive({
   durationText: '--',
 
   tipTitle: '温馨提示',
-  tipContent: '此小程序仅作会议预约，请从企业微信“会议”功能进入会议。',
+  tipContent: '此小程序仅作会议预约，请从企业微信“会议”功能进入会议。只有"待开始"的会议才允许进行编辑',
 })
 
 const loading = ref(false)
@@ -274,7 +274,7 @@ async function handleCancelMeeting() {
             {{ meetingDetail.status }}
           </view>
           <text class="block text-4 text-#000">
-            会议标题：{{ meetingDetail.title }}
+            {{ meetingDetail.title }}
           </text>
         </view>
         <wd-loading v-if="loading" size="18px" />
@@ -388,9 +388,8 @@ async function handleCancelMeeting() {
         {{ meetingDetail.tipContent }}
       </text>
     </view>
-
     <view
-      v-if="meetingDetail.statusCode === 1"
+      v-if="meetingDetail.status === '待开始'"
       class="btn-wrap fixed bottom-0 left-0 right-0 z-10 border-t border-#f0f1f2 bg-white px-4 py-3 pb-[calc(12px+env(safe-area-inset-bottom))]"
     >
       <wd-button

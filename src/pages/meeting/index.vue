@@ -375,6 +375,7 @@ function handleRefresherAbort() {
       @refresherabort="handleRefresherAbort"
     >
       <view class="meeting-content">
+        <!-- 顶部功能区 -->
         <view class="bg-white px-4 pb-2 pt-3">
           <view class="flex gap-4">
             <view class="flex flex-col items-center gap-2 rounded-3 py-3" @click="goToCreate">
@@ -397,9 +398,10 @@ function handleRefresherAbort() {
           </view>
         </view>
 
+        <!-- 列表区 -->
         <view class="mt-4 bg-white px-4 pb-4 pt-2">
           <text class="mb-3 mt-4 block text-4 text-#2f2f2f font-600">
-            预约会议列表
+            未结束的会议
           </text>
 
           <view v-if="!hasMeetingData" class="flex flex-col items-center justify-center py-14 text-center">
@@ -410,58 +412,84 @@ function handleRefresherAbort() {
           </view>
 
           <view v-else>
-            <view v-for="section in meetingSections" :key="section.date" class="mb-4">
+            <view v-for="section in meetingSections" :key="section.date" class="mb-5">
               <view class="mb-2 flex items-center gap-2 text-3 text-#9aa0a6">
                 <image class="h-14px w-14px" src="@/static/日历.svg" />
                 <text>{{ section.date }}</text>
               </view>
 
               <view
-                v-for="item in section.items" :key="item.id" class="meet-item mb-3 rounded-4 bg-white py-3"
+                v-for="item in section.items"
+                :key="item.id"
+                class="meet-card mb-3"
                 @click="goToDetail(item.meetingId as any, item.id as any)"
               >
-                <view>
-                  <view class="flex items-center gap-2">
+                <!-- 标题行 -->
+                <view class="meet-card__header">
+                  <view class="min-w-0 flex flex-1 items-center gap-2">
                     <view
-                      v-if="item.status" class="rounded-full px-2 py-0.5 text-3 leading-4"
+                      v-if="item.status"
+                      class="meet-badge"
                       :class="item.statusClass"
                     >
                       {{ item.status }}
                     </view>
 
-                    <text class="min-w-0 flex-1 truncate text-3.5 text-#2f2f2f font-600">
+                    <text class="meet-title">
                       {{ item.title }}
                     </text>
-
-                    <view class="flex items-center text-#c2c6cc">
-                      <van-icon name="arrow" size="16" />
-                    </view>
                   </view>
 
-                  <text v-if="item.tip" class="mt-1 block text-3 text-#ff7a00">
-                    {{ item.tip }}
-                  </text>
-
-                  <view class="mt-2 flex flex-wrap items-center gap-3 text-3 text-#333333">
-                    <text v-if="item.time" class="block">
-                      {{ getAmPmLabel(item) }}{{ item.time }}
-                    </text>
-                  </view>
-
-                  <view class="mt-2 text-3 text-#9aa0a6 space-y-1">
-                    <text v-if="item.meetingNo" class="block">
-                      会议号：{{ item.meetingNo }}
-                    </text>
-                    <text class="block">
-                      创建者：{{ item.createUserName || '-' }}
-                    </text>
-                    <text class="block">
-                      参会人：{{ item.userName || '-' }}
-                    </text>
+                  <view class="meet-arrow">
+                    <van-icon name="arrow" size="16" />
                   </view>
                 </view>
 
-                <wd-icon name="arrow-right" size="22px" />
+                <!-- 时间 / 提示 -->
+                <view class="meet-card__sub">
+                  <view v-if="item.time" class="meet-time">
+                    <text class="meet-time__pill">
+                      {{ getAmPmLabel(item) }}{{ item.time }}
+                    </text>
+                    <text v-if="item.duration" class="meet-duration">
+                      · {{ item.duration }}
+                    </text>
+                  </view>
+
+                  <text v-if="item.tip" class="meet-tip">
+                    {{ item.tip }}
+                  </text>
+                </view>
+
+                <!-- 摘要信息 -->
+                <view class="meet-kv">
+                  <view class="meet-kv__row">
+                    <text class="meet-kv__k">
+                      创建者
+                    </text>
+                    <text class="meet-kv__v">
+                      {{ item.createUserName || '-' }}
+                    </text>
+                  </view>
+
+                  <view class="meet-kv__row">
+                    <text class="meet-kv__k">
+                      参会人
+                    </text>
+                    <text class="meet-kv__v meet-kv__v--truncate">
+                      {{ item.userName || '-' }}
+                    </text>
+                  </view>
+
+                  <view v-if="item.meetingNo" class="meet-kv__row">
+                    <text class="meet-kv__k">
+                      会议号
+                    </text>
+                    <text class="meet-kv__v">
+                      {{ item.meetingNo }}
+                    </text>
+                  </view>
+                </view>
               </view>
             </view>
           </view>
@@ -495,5 +523,126 @@ page {
 .meeting-content {
   padding-bottom: 110rpx; /* 给 tabbar 留位置 */
   box-sizing: border-box;
+}
+
+/* ------------------ 会议卡片美化 ------------------ */
+.meet-card {
+  border-radius: 24rpx;
+  background: #ffffff;
+  padding: 24rpx;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow: 0 10rpx 28rpx rgba(15, 23, 42, 0.06);
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+/* 按下反馈（H5/APP 通常可见，小程序也不影响） */
+.meet-card:active {
+  transform: scale(0.99);
+  box-shadow: 0 6rpx 18rpx rgba(15, 23, 42, 0.05);
+}
+
+.meet-card__header {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.meet-title {
+  min-width: 0;
+  flex: 1;
+  font-size: 30rpx;
+  line-height: 40rpx;
+  color: #1f2329;
+  font-weight: 600;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.meet-arrow {
+  color: #c2c6cc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.meet-badge {
+  padding: 6rpx 16rpx;
+  border-radius: 999rpx;
+  font-size: 24rpx;
+  line-height: 28rpx;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* 时间 & 提示 */
+.meet-card__sub {
+  margin-top: 14rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.meet-time {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10rpx;
+}
+
+.meet-time__pill {
+  padding: 8rpx 14rpx;
+  border-radius: 14rpx;
+  font-size: 26rpx;
+  line-height: 28rpx;
+  color: #2f2f2f;
+  background: #f6f7f9;
+}
+
+.meet-duration {
+  font-size: 26rpx;
+  color: #8a8f99;
+}
+
+.meet-tip {
+  font-size: 26rpx;
+  color: #ff7a00;
+  line-height: 34rpx;
+}
+
+/* KV 信息区 */
+.meet-kv {
+  margin-top: 18rpx;
+  padding-top: 16rpx;
+  border-top: 1px dashed rgba(15, 23, 42, 0.10);
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.meet-kv__row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.meet-kv__k {
+  width: 120rpx;
+  font-size: 26rpx;
+  color: #8a8f99;
+  flex-shrink: 0;
+}
+
+.meet-kv__v {
+  font-size: 26rpx;
+  color: #2f2f2f;
+  flex: 1;
+  min-width: 0;
+}
+
+.meet-kv__v--truncate {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 </style>

@@ -271,7 +271,7 @@ async function handleCancelMeeting() {
             {{ meetingDetail.status }}
           </view>
           <text class="block text-4 text-#000">
-            会议标题：{{ meetingDetail.title }}
+            {{ meetingDetail.title }}
           </text>
         </view>
         <wd-loading v-if="loading" size="18px" />
