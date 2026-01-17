@@ -14,6 +14,7 @@ interface MeetingInfoApi {
   meeting_start?: number // 秒级时间戳
   meeting_duration?: number // 秒
   admin_userid?: string
+  createUserName?: string
   meeting_code?: string
   attendees?: { member?: MeetingMember[] }
   // 接口实际可能返回 JSON 字符串 / 数组 / 逗号字符串，这里用 any 兼容
@@ -113,7 +114,7 @@ function applyMeetingToView(m: MeetingInfoApi) {
   const end = startSec && durSec ? new Date((startSec + durSec) * 1000) : null
 
   meetingDetail.title = safeText(m.title)
-  meetingDetail.host = safeText(m.admin_userid)
+  meetingDetail.host = safeText(m.createUserName ?? m.admin_userid)
   meetingDetail.meetingNo = safeText(m.meeting_code)
 
   meetingDetail.startTime = start ? formatHM(start) : '--:--'
