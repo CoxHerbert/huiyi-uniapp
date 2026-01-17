@@ -265,18 +265,18 @@ async function handleCancelMeeting() {
 
     <view class="rounded-4 bg-white">
       <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-4">
-        <text class="text-3 text-#8a8f99">
+        <text class="text-4 text-#8a8f99">
           发起人
         </text>
         <view class="flex items-center gap-2">
-          <text class="text-3 text-#2f2f2f">
+          <text class="text-4 text-#2f2f2f">
             {{ meetingDetail.host }}
           </text>
         </view>
       </view>
 
-      <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-4">
-        <text class="text-3 text-#8a8f99">
+      <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-2">
+        <text class="text-4 text-#8a8f99">
           参会人
         </text>
         <view class="flex items-center gap-2">
@@ -310,17 +310,17 @@ async function handleCancelMeeting() {
       </view> -->
 
       <view class="flex items-center justify-between px-4 py-4">
-        <text class="text-3 text-#8a8f99">
+        <text class="text-4 text-#8a8f99">
           会议号
         </text>
-        <text class="text-3 text-#2f2f2f">
+        <text class="text-4 text-#2f2f2f">
           {{ meetingDetail.meetingNo }}
         </text>
       </view>
     </view>
 
     <view class="mx-4 mt-4 rounded-4 bg-white px-4 py-4">
-      <text class="text-3 text-#8a8f99">
+      <text class="text-4 text-#8a8f99">
         会议描述
       </text>
       <text class="mt-2 block text-3 text-#2f2f2f">

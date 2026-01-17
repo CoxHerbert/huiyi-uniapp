@@ -102,7 +102,7 @@ export default defineUniPages({
     // 暂时不生效。4.71.2025061206-alpha已修复：https://uniapp.dcloud.net.cn/release-note-alpha.html#_4-71-2025061206-alpha，我们等正式版发布后更新。
     overlay: true,
     // #endif
-    height: '0',
+    height: '60',
     color: '@tabColor',
     selectedColor: '@tabSelectedColor',
     backgroundColor: '@tabBgColor',
