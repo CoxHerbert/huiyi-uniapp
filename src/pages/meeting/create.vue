@@ -285,7 +285,7 @@ async function handleCreate() {
                   <text class="block text-5 text-#2f2f2f font-600">
                     {{ meetingForm.startTime }}
                   </text>
-                  <text class="text-2.5 text-#9aa0a6">
+                  <text class="text-3 text-#9aa0a6">
                     {{ meetingForm.date }}
                   </text>
                 </view>
@@ -308,7 +308,7 @@ async function handleCreate() {
                   <text class="block text-5 text-#2f2f2f font-600">
                     {{ meetingForm.endTime }}
                   </text>
-                  <text class="text-2.5 text-#9aa0a6">
+                  <text class="text-3 text-#9aa0a6">
                     {{ meetingForm.date }}
                   </text>
                 </view>

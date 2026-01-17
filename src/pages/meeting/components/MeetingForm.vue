@@ -226,12 +226,12 @@ watch([userAccount, userName], () => {
                 <text class="block text-5 text-#2f2f2f font-600">
                   {{ meeting.startTime }}
                 </text>
-                <text class="text-2.5 text-#9aa0a6">
+                <text class="text-3 text-#9aa0a6">
                   {{ meeting.date }}
                 </text>
               </view>
               <view class="text-center">
-                <text class="block text-2.5 text-#9aa0a6">
+                <text class="block text-3 text-#9aa0a6">
                   {{ meeting.duration }}
                 </text>
               </view>
@@ -239,7 +239,7 @@ watch([userAccount, userName], () => {
                 <text class="block text-5 text-#2f2f2f font-600">
                   {{ meeting.endTime }}
                 </text>
-                <text class="text-2.5 text-#9aa0a6">
+                <text class="text-3 text-#9aa0a6">
                   {{ meeting.date }}
                 </text>
               </view>
@@ -354,7 +354,7 @@ watch([userAccount, userName], () => {
     <wd-action-sheet v-model="showAdminSheet" title="选择管理员" :close-on-click-action="true">
       <view class="picker-sheet">
         <view class="picker-body px-4 pb-4 pt-3">
-          <view v-if="adminOptions.length === 0" class="py-4 text-center text-2.5 text-#9aa0a6">
+          <view v-if="adminOptions.length === 0" class="py-4 text-center text-3 text-#9aa0a6">
             暂无管理员账号
           </view>
           <view
@@ -370,7 +370,7 @@ watch([userAccount, userName], () => {
                 <text class="text-3 text-#2f2f2f">
                   {{ option.name || option.account }}
                 </text>
-                <text v-if="option.name && option.account" class="text-2.5 text-#9aa0a6">
+                <text v-if="option.name && option.account" class="text-3 text-#9aa0a6">
                   {{ option.account }}
                 </text>
               </view>
@@ -410,7 +410,7 @@ watch([userAccount, userName], () => {
               <wd-icon name="close" size="12px" color="#c4c7cc" />
             </view>
           </view>
-          <view class="mt-2 flex items-center justify-between text-2.5 text-#9aa0a6">
+          <view class="mt-2 flex items-center justify-between text-3 text-#9aa0a6">
             <text>已选 {{ selectedParticipantIds.length }} 人</text>
             <text>点击姓名可多选</text>
           </view>
@@ -418,14 +418,14 @@ watch([userAccount, userName], () => {
             <view class="flex flex-wrap gap-2">
               <view
                 v-for="person in displayedSelectedParticipants" :key="person.account"
-                class="flex items-center gap-1 rounded-full bg-#eef2ff px-2 py-1 text-2.5 text-#4f7bff"
+                class="flex items-center gap-1 rounded-full bg-#eef2ff px-2 py-1 text-3 text-#4f7bff"
                 @click="toggleSelectedUser(person.account)"
               >
                 <text>{{ person.name }}</text>
                 <wd-icon name="close" size="10px" color="#4f7bff" />
               </view>
             </view>
-            <view v-if="shouldShowToggle" class="mt-2 text-right text-2.5 text-#4f7bff">
+            <view v-if="shouldShowToggle" class="mt-2 text-right text-3 text-#4f7bff">
               <text @click="toggleParticipantExpanded">
                 {{ participantExpanded ? '收起' : '展开' }}
               </text>
@@ -433,10 +433,10 @@ watch([userAccount, userName], () => {
           </view>
         </view>
         <view class="picker-body px-4 pb-20">
-          <view v-if="userLoading" class="py-4 text-center text-2.5 text-#9aa0a6">
+          <view v-if="userLoading" class="py-4 text-center text-3 text-#9aa0a6">
             正在加载...
           </view>
-          <view v-else-if="userOptions.length === 0" class="py-4 text-center text-2.5 text-#9aa0a6">
+          <view v-else-if="userOptions.length === 0" class="py-4 text-center text-3 text-#9aa0a6">
             暂无人员数据
           </view>
           <view
@@ -452,7 +452,7 @@ watch([userAccount, userName], () => {
                 <text class="text-3 text-#2f2f2f">
                   {{ option.name || option.account }}
                 </text>
-                <text v-if="option.name && option.account" class="text-2.5 text-#9aa0a6">
+                <text v-if="option.name && option.account" class="text-3 text-#9aa0a6">
                   {{ option.account }}
                 </text>
               </view>

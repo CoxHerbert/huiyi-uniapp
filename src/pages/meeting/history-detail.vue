@@ -179,7 +179,7 @@ onLoad((options) => {
                 {{ person?.slice(0, 1) }}
               </view>
             </view>
-            <text class="text-2.5 text-#9aa0a6">
+            <text class="text-3 text-#9aa0a6">
               共{{ historyDetail.userName.length }}人
             </text>
           </view>

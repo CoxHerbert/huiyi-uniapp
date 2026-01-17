@@ -392,7 +392,7 @@ function goToDetail(meetingId: string, id: string) {
               <view class="flex items-center gap-2">
                 <view
                   v-if="item.status"
-                  class="rounded-full px-2 py-0.5 text-2.5 leading-4"
+                  class="rounded-full px-2 py-0.5 text-3 leading-4"
                   :class="item.statusClass"
                 >
                   {{ item.status }}
@@ -407,17 +407,17 @@ function goToDetail(meetingId: string, id: string) {
                 </view>
               </view>
 
-              <text v-if="item.tip" class="mt-1 block text-2.5 text-#ff7a00">
+              <text v-if="item.tip" class="mt-1 block text-3 text-#ff7a00">
                 {{ item.tip }}
               </text>
 
-              <view class="mt-2 flex flex-wrap items-center gap-3 text-2.5 text-#333333">
+              <view class="mt-2 flex flex-wrap items-center gap-3 text-3 text-#333333">
                 <text v-if="item.time" class="block">
                   {{ getAmPmLabel(item) }}{{ item.time }}
                 </text>
               </view>
 
-              <view class="mt-2 text-2.5 text-#9aa0a6 space-y-1">
+              <view class="mt-2 text-3 text-#9aa0a6 space-y-1">
                 <text v-if="item.meetingNo" class="block">
                   会议号：{{ item.meetingNo }}
                 </text>

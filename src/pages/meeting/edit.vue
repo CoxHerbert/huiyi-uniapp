@@ -360,7 +360,7 @@ onLoad((options) => {
                   <text class="block text-5 text-#2f2f2f font-600">
                     {{ meetingForm.startTime }}
                   </text>
-                  <text class="text-2.5 text-#9aa0a6">
+                  <text class="text-3 text-#9aa0a6">
                     {{ meetingForm.date }}
                   </text>
                 </view>
@@ -368,7 +368,7 @@ onLoad((options) => {
             </view>
             <view class="duration-label gap-4">
               <view class="line" />
-              <text class="block bg-#F6F8FA px-1 py-2 text-2.5 text-#9aa0a6">
+              <text class="block bg-#F6F8FA px-1 py-2 text-3 text-#9aa0a6">
                 {{ durationLabel }}
               </text>
               <view class="line" />
@@ -382,7 +382,7 @@ onLoad((options) => {
                   <text class="block text-5 text-#2f2f2f font-600">
                     {{ meetingForm.endTime }}
                   </text>
-                  <text class="text-2.5 text-#9aa0a6">
+                  <text class="text-3 text-#9aa0a6">
                     {{ meetingForm.date }}
                   </text>
                 </view>
