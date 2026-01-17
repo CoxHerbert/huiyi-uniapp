@@ -12,8 +12,6 @@ const userStore = useUserStore()
 const authStore = useAuthStore()
 
 const {
-  theme,
-  toggleTheme,
   currentThemeColor,
   showThemeColorSheet,
   themeColorOptions,
@@ -21,15 +19,6 @@ const {
   closeThemeColorPicker,
   selectThemeColor,
 } = useManualTheme()
-
-const isDark = computed({
-  get() {
-    return theme.value === 'dark'
-  },
-  set() {
-    toggleTheme()
-  },
-})
 
 const userInfo = computed(() => userStore.userInfo || {})
 const loginInfo = computed(() => userStore.loginInfo || {})
@@ -102,9 +91,6 @@ function handleLogout() {
 
     <demo-block title="主题设置" transparent>
       <wd-cell-group border custom-class="rounded-2! overflow-hidden">
-        <wd-cell title="暗黑模式">
-          <wd-switch v-model="isDark" size="18px" />
-        </wd-cell>
         <wd-cell title="选择主题色" is-link @click="openThemeColorPicker">
           <view class="flex items-center justify-end gap-2">
             <view
