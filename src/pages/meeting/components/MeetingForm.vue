@@ -36,6 +36,14 @@ const userAccount = ref('')
 const userName = ref('')
 const userLoading = ref(false)
 const userOptions = ref<Array<{ account: string, name: string }>>([])
+const adminOptions = [
+  { account: 'EW-M1', name: 'EW-M1' },
+  { account: 'EW-M2', name: 'EW-M2' },
+  { account: 'EW-M3', name: 'EW-M3' },
+  { account: 'EW-M4', name: 'EW-M4' },
+  { account: 'EW-M5', name: 'EW-M5' },
+  { account: 'EW-M6', name: 'EW-M6' },
+]
 const selectedParticipantIds = ref<string[]>([])
 const selectedHostIds = ref<string[]>([])
 const participantExpanded = ref(false)
@@ -51,7 +59,6 @@ function openTypeSheet() {
 
 function openAdminSheet() {
   showAdminSheet.value = true
-  loadUsers()
 }
 
 function openHostSheet() {
@@ -183,8 +190,6 @@ const selectedParticipants = computed(() => {
 })
 
 const participantOptions = computed(() => userOptions.value)
-
-const adminOptions = computed(() => userOptions.value)
 
 const selectedHosts = computed(() => {
   if (!selectedHostIds.value.length)
