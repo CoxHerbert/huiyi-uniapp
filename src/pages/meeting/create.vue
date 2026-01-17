@@ -92,6 +92,26 @@ const minEndTime = computed(() => {
   return { hour, minute }
 })
 
+const minMeetingDate = computed(() => {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return today.getTime()
+})
+
+const calendarDate = computed<number | null>({
+  get() {
+    const parsed = parseDate(meetingForm.date)
+    return parsed ? parsed.getTime() : null
+  },
+  set(value) {
+    if (!value) {
+      meetingForm.date = ''
+      return
+    }
+    meetingForm.date = formatDate(new Date(value))
+  },
+})
+
 const minStartTime = computed(() => {
   const todayLabel = formatDate(new Date())
   if (meetingForm.date !== todayLabel)
@@ -247,7 +267,7 @@ async function handleCreate() {
           <text class="text-3 text-#8a8f99">
             会议日期
           </text>
-          <wd-calendar v-model="meetingForm.date">
+          <wd-calendar v-model="calendarDate" :min-date="minMeetingDate">
             <view class="flex items-center gap-2">
               <text class="text-3 text-#2f2f2f">
                 {{ meetingForm.date }}
