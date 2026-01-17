@@ -37,6 +37,10 @@ const userOptions = ref<Array<{ account: string, name: string }>>([])
 const selectedParticipantIds = ref<string[]>([])
 const participantExpanded = ref(false)
 const hiddenParticipantAccounts = new Set(['EW-M1', 'EW-M2', 'EW-M3', 'EW-M4', 'EW-M5', 'EW-M6'])
+const adminAccountOptions = Array.from(hiddenParticipantAccounts).map(account => ({
+  account,
+  name: account,
+}))
 let searchTimer: ReturnType<typeof setTimeout> | null = null
 
 function updateField<K extends keyof MeetingInfo>(key: K, value: MeetingInfo[K]) {
@@ -49,7 +53,6 @@ function openTypeSheet() {
 
 function openAdminSheet() {
   showAdminSheet.value = true
-  loadUsers()
 }
 
 function handleTypeSelect(option: { label: string, value: string }) {
@@ -165,9 +168,7 @@ const participantOptions = computed(() => {
   return userOptions.value.filter(option => !hiddenParticipantAccounts.has(option.account))
 })
 
-const adminOptions = computed(() => {
-  return userOptions.value.filter(option => hiddenParticipantAccounts.has(option.account))
-})
+const adminOptions = computed(() => adminAccountOptions)
 
 const displayedSelectedParticipants = computed(() => {
   if (participantExpanded.value)
@@ -361,31 +362,9 @@ watch([userAccount, userName], () => {
 
     <wd-action-sheet v-model="showAdminSheet" title="选择管理员" :close-on-click-action="true">
       <view class="picker-sheet">
-        <view class="picker-header px-4 pt-3">
-          <view class="flex items-center gap-2 rounded-3 bg-#f3f4f6 px-3 py-2">
-            <wd-icon name="search" size="16px" color="#9aa0a6" />
-            <wd-input
-              v-model="userAccount" placeholder="搜索账号" custom-class="meeting-form-input w-full" align-right
-              :no-border="true"
-            />
-            <wd-input
-              v-model="userName" placeholder="搜索姓名" custom-class="meeting-form-input w-full" align-right
-              :no-border="true"
-            />
-            <view
-              class="h-6 w-6 flex items-center justify-center rounded-full bg-white text-#c4c7cc"
-              @click="resetUserSearch"
-            >
-              <wd-icon name="close" size="12px" color="#c4c7cc" />
-            </view>
-          </view>
-        </view>
-        <view class="picker-body px-4 pb-4">
-          <view v-if="userLoading" class="py-4 text-center text-2.5 text-#9aa0a6">
-            正在加载...
-          </view>
-          <view v-else-if="adminOptions.length === 0" class="py-4 text-center text-2.5 text-#9aa0a6">
-            暂无人员数据
+        <view class="picker-body px-4 pb-4 pt-3">
+          <view v-if="adminOptions.length === 0" class="py-4 text-center text-2.5 text-#9aa0a6">
+            暂无管理员账号
           </view>
           <view
             v-for="option in adminOptions" :key="option.account"
@@ -398,9 +377,6 @@ watch([userAccount, userName], () => {
               </view>
               <view class="flex flex-col">
                 <text class="text-3 text-#2f2f2f">
-                  {{ option.name || option.account }}
-                </text>
-                <text v-if="option.name && option.account" class="text-2.5 text-#9aa0a6">
                   {{ option.account }}
                 </text>
               </view>
