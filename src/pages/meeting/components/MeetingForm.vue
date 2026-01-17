@@ -4,7 +4,6 @@ import { getUserList } from '@/api/user'
 interface MeetingInfo {
   name: string
   type: string
-  adminUserid: string
   hosts: string[]
   startTime: string
   endTime: string
@@ -25,7 +24,6 @@ const emit = defineEmits<{
 }>()
 
 const showTypeSheet = ref(false)
-const showAdminSheet = ref(false)
 const showHostSheet = ref(false)
 const showParticipantSheet = ref(false)
 const meetingTypeOptions = [
@@ -36,14 +34,6 @@ const userAccount = ref('')
 const userName = ref('')
 const userLoading = ref(false)
 const userOptions = ref<Array<{ account: string, name: string }>>([])
-const adminOptions = [
-  { account: 'EW-M1', name: 'EW-M1' },
-  { account: 'EW-M2', name: 'EW-M2' },
-  { account: 'EW-M3', name: 'EW-M3' },
-  { account: 'EW-M4', name: 'EW-M4' },
-  { account: 'EW-M5', name: 'EW-M5' },
-  { account: 'EW-M6', name: 'EW-M6' },
-]
 const selectedParticipantIds = ref<string[]>([])
 const selectedHostIds = ref<string[]>([])
 const participantExpanded = ref(false)
@@ -57,9 +47,6 @@ function openTypeSheet() {
   showTypeSheet.value = true
 }
 
-function openAdminSheet() {
-  showAdminSheet.value = true
-}
 
 function openHostSheet() {
   selectedHostIds.value = [...props.meeting.hosts]
@@ -124,10 +111,6 @@ async function loadUsers() {
   }
 }
 
-function handleAdminSelect(option: { account: string, name: string }) {
-  updateField('adminUserid', option.account)
-  showAdminSheet.value = false
-}
 
 function openParticipantSheet() {
   selectedParticipantIds.value = parseUserIds(props.meeting.participants)
@@ -307,23 +290,6 @@ watch([userAccount, userName], () => {
         </view>
       </view>
 
-      <view class="flex items-center justify-between bg-white px-3 py-4" @click="openAdminSheet">
-        <view class="flex items-center gap-1">
-          <text class="text-3 text-#ff4d4f">
-            *
-          </text>
-          <text class="text-3 text-#8a8f99">
-            管理员
-          </text>
-        </view>
-        <view class="flex items-center gap-2">
-          <text class="text-3.5" :class="meeting.adminUserid ? 'text-#2f2f2f' : 'text-#c2c6cc'">
-            {{ meeting.adminUserid || '请选择管理员' }}
-          </text>
-          <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
-        </view>
-      </view>
-
       <view class="mb-2 flex items-center justify-between bg-white px-3 py-4">
         <text class="text-3 text-#8a8f99">
           参会人
@@ -405,45 +371,6 @@ watch([userAccount, userName], () => {
             {{ option.label }}
           </text>
           <wd-icon v-if="meeting.type === option.value" name="check" size="18px" color="#4f7bff" />
-        </view>
-      </view>
-      <wd-gap :height="50" />
-    </wd-action-sheet>
-
-    <wd-action-sheet v-model="showAdminSheet" title="选择管理员" :close-on-click-action="true">
-      <view class="picker-sheet">
-        <view class="picker-body px-4 pb-4 pt-3">
-          <view v-if="adminOptions.length === 0" class="py-4 text-center text-3 text-#9aa0a6">
-            暂无管理员账号
-          </view>
-          <view
-            v-for="option in adminOptions" :key="option.account"
-            class="flex items-center justify-between rounded-3 px-2 py-3 hover:bg-#f6f7fb"
-            @click="handleAdminSelect(option)"
-          >
-            <view class="flex items-center gap-3">
-              <view class="h-8 w-8 flex items-center justify-center rounded-2 bg-#eef2ff text-3 text-#4f7bff font-600">
-                {{ (option.name || option.account).slice(0, 1) }}
-              </view>
-              <view class="flex flex-col">
-                <text class="text-3 text-#2f2f2f">
-                  {{ option.name || option.account }}
-                </text>
-                <text v-if="option.name && option.account" class="text-3 text-#9aa0a6">
-                  {{ option.account }}
-                </text>
-              </view>
-            </view>
-            <view
-              class="h-6 w-6 flex items-center justify-center border border-#e3e6ee rounded-full"
-              :class="meeting.adminUserid === option.account ? 'bg-#4f7bff text-white border-#4f7bff' : 'bg-white text-transparent'"
-            >
-              <wd-icon
-                name="check" size="12px"
-                :color="meeting.adminUserid === option.account ? '#ffffff' : '#ffffff'"
-              />
-            </view>
-          </view>
         </view>
       </view>
       <wd-gap :height="50" />
