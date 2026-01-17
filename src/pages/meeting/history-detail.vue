@@ -13,6 +13,7 @@ interface MeetingInfoApi {
   meeting_start?: number
   meeting_duration?: number
   admin_userid?: string
+  createUserName?: string
   meeting_code?: string
   userName: Array<string>
 }
@@ -62,7 +63,7 @@ function applyMeetingToView(m: MeetingInfoApi) {
 
   historyDetail.title = m.title || '-'
   historyDetail.meetingNo = m.meeting_code || '-'
-  historyDetail.host = m.admin_userid || '-'
+  historyDetail.host = m.createUserName || m.admin_userid || '-'
 
   if (start && end) {
     historyDetail.timeRange = `${formatCNDate(start)} ${formatHM(start)}-${formatHM(end)}`
