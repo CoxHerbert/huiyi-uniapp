@@ -47,7 +47,6 @@ function openTypeSheet() {
   showTypeSheet.value = true
 }
 
-
 function openHostSheet() {
   selectedHostIds.value = [...props.meeting.hosts]
   showHostSheet.value = true
@@ -110,7 +109,6 @@ async function loadUsers() {
     userLoading.value = false
   }
 }
-
 
 function openParticipantSheet() {
   selectedParticipantIds.value = parseUserIds(props.meeting.participants)
@@ -225,15 +223,15 @@ watch([userAccount, userName], () => {
     <view class="">
       <slot name="title">
         <view class="mb-2 flex items-center justify-between bg-white px-4 py-3">
-          <text class="text-3 text-#8a8f99">
+          <text class="text-4 text-#8a8f99">
             会议标题
           </text>
           <wd-input
             :model-value="meeting.name" placeholder="请输入会议名称" custom-class="meeting-form-input flex-1 w-full"
             align-right :no-border="true" size="16"
+            clearable
             @update:model-value="(value) => updateField('name', value)"
           />
-          <wd-icon class="ml-1" name="close" size="16" color="#c4c7cc" @click="meeting.name = ''" />
         </view>
       </slot>
 
