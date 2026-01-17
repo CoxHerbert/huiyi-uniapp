@@ -66,7 +66,7 @@ export default defineUniPages({
     name: 'settings',
     layout: 'tabbar',
     style: {
-      navigationBarTitleText: '基础设置',
+      navigationBarTitleText: '我的',
     },
   }],
   globalStyle: {
