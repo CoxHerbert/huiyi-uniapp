@@ -346,14 +346,14 @@ onLoad((options) => {
           <text class="text-3 text-#8a8f99">
             会议日期
           </text>
-          <wd-datetime-picker v-model="meetingForm.date" type="date">
+          <wd-calendar v-model="meetingForm.date">
             <view class="flex items-center gap-2">
               <text class="text-3 text-#2f2f2f">
                 {{ meetingForm.date }}
               </text>
               <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
             </view>
-          </wd-datetime-picker>
+          </wd-calendar>
         </view>
         <view class="flex items-center justify-center">
           <view class="flex items-center gap-6">
