@@ -15,6 +15,9 @@ interface MeetingInfoApi {
   admin_userid?: string
   createUserName?: string
   meeting_code?: string
+  location?: string
+  description?: string
+  settings?: { password?: string }
   userName: Array<string>
 }
 
@@ -29,6 +32,9 @@ const historyDetail = reactive({
   joinTime: '--',
   duration: '--',
   userName: [],
+  location: '-',
+  description: '-',
+  password: '-',
 })
 
 function pad2(n: number) {
@@ -64,6 +70,9 @@ function applyMeetingToView(m: MeetingInfoApi) {
   historyDetail.title = m.title || '-'
   historyDetail.meetingNo = m.meeting_code || '-'
   historyDetail.host = m.createUserName || m.admin_userid || '-'
+  historyDetail.location = m.location || '-'
+  historyDetail.description = m.description || '-'
+  historyDetail.password = m.settings?.password || '-'
 
   if (start && end) {
     historyDetail.timeRange = `${formatCNDate(start)} ${formatHM(start)}-${formatHM(end)}`
@@ -184,6 +193,30 @@ onLoad((options) => {
               共{{ historyDetail.userName.length }}人
             </text>
           </view>
+        </view>
+        <view class="flex items-center justify-between py-2">
+          <text class="text-3 text-#8a8f99">
+            地点
+          </text>
+          <text class="text-3 text-#2f2f2f">
+            {{ historyDetail.location }}
+          </text>
+        </view>
+        <view class="flex items-center justify-between py-2">
+          <text class="text-3 text-#8a8f99">
+            会议密码
+          </text>
+          <text class="text-3 text-#2f2f2f">
+            {{ historyDetail.password }}
+          </text>
+        </view>
+        <view class="py-2">
+          <text class="text-3 text-#8a8f99">
+            会议描述
+          </text>
+          <text class="desc-text mt-2 block">
+            {{ historyDetail.description }}
+          </text>
         </view>
       </view>
     </view>
