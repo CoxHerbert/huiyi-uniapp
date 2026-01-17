@@ -679,7 +679,8 @@ watch([userAccount, userName], () => {
 }
 
 .picker-body {
-  overflow: auto;
+  flex: 1;
+  height: 0;
 }
 
 .picker-footer {
