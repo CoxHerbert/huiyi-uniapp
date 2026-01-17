@@ -23,6 +23,7 @@ interface MeetingInfoApi {
 const meetingId = ref('')
 const pageId = ref('')
 const MEETING_LIST_REFRESH_KEY = 'meeting-list-refresh'
+const MEETING_DETAIL_REFRESH_KEY = 'meeting-detail-refresh'
 const meetingDetail = reactive({
   title: '-',
   startTime: '--:--',
@@ -154,6 +155,14 @@ onLoad((options) => {
   }
 
   loadMeetingDetail()
+})
+
+onShow(() => {
+  const shouldRefresh = uni.getStorageSync(MEETING_DETAIL_REFRESH_KEY)
+  if (shouldRefresh) {
+    uni.removeStorageSync(MEETING_DETAIL_REFRESH_KEY)
+    loadMeetingDetail()
+  }
 })
 
 function goToEdit() {
