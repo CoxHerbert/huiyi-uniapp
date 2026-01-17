@@ -35,6 +35,7 @@ const meetingDetail = reactive({
   title: '-',
   status: '',
   statusClass: '',
+  statusCode: undefined as number | undefined,
   startTime: '--:--',
   endTime: '--:--',
   date: '-',
@@ -158,6 +159,8 @@ function applyMeetingToView(m: MeetingInfoApi) {
 
   const statusRaw = m.status
   const statusStyle = getStatusMeta(statusRaw)
+  const statusCode = typeof statusRaw === 'number' ? statusRaw : Number(statusRaw)
+  meetingDetail.statusCode = Number.isFinite(statusCode) ? statusCode : undefined
   if (statusStyle) {
     meetingDetail.status = statusStyle.label
     meetingDetail.statusClass = m.statusClass || statusStyle.className
@@ -386,6 +389,7 @@ async function handleCancelMeeting() {
     </view>
 
     <view
+      v-if="meetingDetail.statusCode === 1"
       class="btn-wrap fixed bottom-0 left-0 right-0 z-10 border-t border-#f0f1f2 bg-white px-4 py-3 pb-[calc(12px+env(safe-area-inset-bottom))]"
     >
       <wd-button
