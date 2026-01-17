@@ -2,6 +2,7 @@ import request from '@/utils/https'
 
 export interface CreateMeetingPayload {
   admin_userid: string
+  host?: string
   title: string
   meeting_start: number
   meeting_duration: number

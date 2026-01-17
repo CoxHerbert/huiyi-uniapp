@@ -5,6 +5,7 @@ interface MeetingInfo {
   name: string
   type: string
   adminUserid: string
+  host: string
   startTime: string
   endTime: string
   date: string
@@ -247,6 +248,16 @@ watch([userAccount, userName], () => {
           </view>
         </view>
       </slot>
+
+      <view class="mb-2 flex items-center justify-between bg-white px-4 py-3">
+        <text class="text-3 text-#8a8f99">
+          主持人
+        </text>
+        <wd-input
+          :model-value="meeting.host" placeholder="请输入主持人" custom-class="meeting-form-input flex-1 w-full"
+          align-right :no-border="true" @update:model-value="(value) => updateField('host', value)"
+        />
+      </view>
 
       <view class="flex items-center justify-between bg-white px-4 py-3" @click="openAdminSheet">
         <view class="flex items-center gap-1">
