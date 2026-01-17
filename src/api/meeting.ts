@@ -12,6 +12,7 @@ export interface CreateMeetingPayload {
   }
   settings?: {
     password?: string
+    host?: string[]
   }
 }
 
