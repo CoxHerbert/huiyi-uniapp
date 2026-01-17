@@ -14,7 +14,11 @@ interface MeetingInfoApi {
   meeting_start?: number // 秒级时间戳
   meeting_duration?: number // 秒
   admin_userid?: string
+  createUserName?: string
   meeting_code?: string
+  location?: string
+  description?: string
+  settings?: { password?: string }
   attendees?: { member?: MeetingMember[] }
   // 接口实际可能返回 JSON 字符串 / 数组 / 逗号字符串，这里用 any 兼容
   userName?: any
@@ -24,6 +28,7 @@ const meetingId = ref('')
 const pageId = ref('')
 
 const MEETING_DETAIL_REFRESH_KEY = 'meeting-detail-refresh'
+const MEETING_LIST_REFRESH_KEY = 'meeting-list-refresh'
 const meetingDetail = reactive({
   title: '-',
   startTime: '--:--',
@@ -34,6 +39,9 @@ const meetingDetail = reactive({
   attendees: [] as string[],
   meetingNo: '-',
   userName: [] as string[],
+  location: '-',
+  description: '-',
+  password: '-',
 
   // ✅ 新增：动态时长文本
   durationText: '--',
@@ -113,8 +121,11 @@ function applyMeetingToView(m: MeetingInfoApi) {
   const end = startSec && durSec ? new Date((startSec + durSec) * 1000) : null
 
   meetingDetail.title = safeText(m.title)
-  meetingDetail.host = safeText(m.admin_userid)
+  meetingDetail.host = safeText(m.createUserName ?? m.admin_userid)
   meetingDetail.meetingNo = safeText(m.meeting_code)
+  meetingDetail.location = safeText(m.location)
+  meetingDetail.description = safeText(m.description)
+  meetingDetail.password = safeText(m.settings?.password)
 
   meetingDetail.startTime = start ? formatHM(start) : '--:--'
   meetingDetail.endTime = end ? formatHM(end) : '--:--'
@@ -192,7 +203,10 @@ async function handleCancelMeeting() {
   try {
     await cancelMeeting(meetingId.value)
     uni.showToast({ title: '已取消会议', icon: 'none' })
-    await loadMeetingDetail()
+    uni.setStorageSync(MEETING_LIST_REFRESH_KEY, true)
+    setTimeout(() => {
+      uni.navigateBack()
+    }, 500)
   }
   catch (error) {
     console.error('cancel meeting failed', error)
@@ -261,7 +275,7 @@ async function handleCancelMeeting() {
         </view>
       </view>
 
-      <view class="mb-2 flex items-center justify-between border-b border-#f0f1f2 px-4">
+      <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-4">
         <text class="text-3 text-#8a8f99">
           参会人
         </text>
@@ -277,6 +291,24 @@ async function handleCancelMeeting() {
         </view>
       </view>
 
+      <!-- <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-4">
+        <text class="text-3 text-#8a8f99">
+          地点
+        </text>
+        <text class="text-3 text-#2f2f2f">
+          {{ meetingDetail.location }}
+        </text>
+      </view>
+
+      <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-4">
+        <text class="text-3 text-#8a8f99">
+          会议密码
+        </text>
+        <text class="text-3 text-#2f2f2f">
+          {{ meetingDetail.password }}
+        </text>
+      </view> -->
+
       <view class="flex items-center justify-between px-4 py-4">
         <text class="text-3 text-#8a8f99">
           会议号
@@ -285,6 +317,15 @@ async function handleCancelMeeting() {
           {{ meetingDetail.meetingNo }}
         </text>
       </view>
+    </view>
+
+    <view class="mx-4 mt-4 rounded-4 bg-white px-4 py-4">
+      <text class="text-3 text-#8a8f99">
+        会议描述
+      </text>
+      <text class="mt-2 block text-3 text-#2f2f2f">
+        {{ meetingDetail.description }}
+      </text>
     </view>
 
     <view class="mx-4 mt-6 rounded-4 bg-white px-6 py-5 text-center">

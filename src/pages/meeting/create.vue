@@ -19,6 +19,7 @@ const meetingForm = reactive({
   name: '',
   type: '线上会议',
   hosts: [] as string[],
+  participantNames: [] as string[],
   startTime: '',
   endTime: '',
   date: '',
@@ -179,6 +180,16 @@ watchEffect(() => {
   }
 })
 
+watchEffect(() => {
+  const account = loginInfo.value?.account
+  if (!account)
+    return
+  const participantIds = parseUserIds(meetingForm.participants)
+  if (!participantIds.includes(account)) {
+    meetingForm.participants = [...participantIds, account].join(',')
+  }
+})
+
 /** 解析参与人字符串（支持 、 , ，） */
 function parseUserIds(value: string) {
   return value
@@ -236,14 +247,14 @@ async function handleCreate() {
           <text class="text-3 text-#8a8f99">
             会议日期
           </text>
-          <wd-datetime-picker v-model="meetingForm.date" type="date">
+          <wd-calendar v-model="meetingForm.date">
             <view class="flex items-center gap-2">
               <text class="text-3 text-#2f2f2f">
                 {{ meetingForm.date }}
               </text>
               <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
             </view>
-          </wd-datetime-picker>
+          </wd-calendar>
         </view>
         <view class="flex items-center justify-center">
           <view class="flex items-center gap-6">

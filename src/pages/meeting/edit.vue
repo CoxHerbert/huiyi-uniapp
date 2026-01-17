@@ -23,6 +23,7 @@ interface MeetingInfoApi {
   description?: string
   attendees?: { member?: MeetingMember[] }
   settings?: { password?: string, host?: string[] }
+  userName?: any
 }
 
 const meetingId = ref('')
@@ -36,6 +37,7 @@ const meetingForm = reactive({
   name: '',
   type: '',
   hosts: [] as string[],
+  participantNames: [] as string[],
   startTime: '',
   endTime: '',
   date: '',
@@ -203,11 +205,45 @@ function parseUserIds(value: string) {
     .filter(Boolean)
 }
 
+function parseUserNames(input: any): string[] {
+  if (input === null || input === undefined || input === '')
+    return []
+
+  if (Array.isArray(input))
+    return input.map((x: any) => String(x)).filter(Boolean)
+
+  if (typeof input === 'string') {
+    const str = input.trim()
+    if (!str)
+      return []
+
+    if (str.startsWith('[')) {
+      try {
+        const arr = JSON.parse(str)
+        if (Array.isArray(arr))
+          return arr.map((x: any) => String(x)).filter(Boolean)
+      }
+      catch (e) {
+        // ignore
+      }
+    }
+
+    return str.split(/[,，]/).map(s => s.trim()).filter(Boolean)
+  }
+
+  return [String(input)].filter(Boolean)
+}
+
+function shouldFilterAttendee(userid?: string) {
+  return typeof userid === 'string' && /^EW-M[1-6]$/.test(userid)
+}
+
 function resolveAttendeeIds(attendees?: { member?: MeetingMember[] }) {
   const members = attendees?.member ?? []
   return Array.isArray(members)
     ? members
         .map(item => item?.userid)
+        .filter(userid => !shouldFilterAttendee(userid))
         .filter((value): value is string => !!value)
     : []
 }
@@ -232,6 +268,7 @@ function applyMeetingToForm(data: MeetingInfoApi) {
 
   const attendeeIds = resolveAttendeeIds(data.attendees)
   meetingForm.participants = attendeeIds.join(',')
+  meetingForm.participantNames = parseUserNames(data.userName)
 }
 
 async function loadMeetingInfo() {
@@ -309,14 +346,14 @@ onLoad((options) => {
           <text class="text-3 text-#8a8f99">
             会议日期
           </text>
-          <wd-datetime-picker v-model="meetingForm.date" type="date">
+          <wd-calendar v-model="meetingForm.date">
             <view class="flex items-center gap-2">
               <text class="text-3 text-#2f2f2f">
                 {{ meetingForm.date }}
               </text>
               <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
             </view>
-          </wd-datetime-picker>
+          </wd-calendar>
         </view>
         <view class="flex items-center justify-center">
           <view class="flex items-center gap-6">

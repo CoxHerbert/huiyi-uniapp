@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { getUserList } from '@/api/user'
+import { useUserStore } from '@/store/user'
 
 interface MeetingInfo {
   name: string
   type: string
   hosts: string[]
+  participantNames?: string[]
   startTime: string
   endTime: string
   date: string
@@ -23,6 +25,8 @@ const emit = defineEmits<{
   (event: 'update:meeting', value: MeetingInfo): void
 }>()
 
+const userStore = useUserStore()
+const loginInfo = computed(() => userStore.loginInfo)
 const showTypeSheet = ref(false)
 const showHostSheet = ref(false)
 const showParticipantSheet = ref(false)
@@ -33,7 +37,11 @@ const meetingTypeOptions = [
 const userAccount = ref('')
 const userName = ref('')
 const userLoading = ref(false)
+const userLoadingMore = ref(false)
 const userOptions = ref<Array<{ account: string, name: string }>>([])
+const userPage = ref(1)
+const userHasMore = ref(true)
+const userPageSize = 20
 const selectedParticipantIds = ref<string[]>([])
 const selectedHostIds = ref<string[]>([])
 const participantExpanded = ref(false)
@@ -47,9 +55,16 @@ function openTypeSheet() {
   showTypeSheet.value = true
 }
 
+function resetUserPaging() {
+  userPage.value = 1
+  userHasMore.value = true
+  userOptions.value = []
+}
+
 function openHostSheet() {
-  selectedHostIds.value = [...props.meeting.hosts]
+  selectedHostIds.value = props.meeting.hosts.slice(0, 1)
   showHostSheet.value = true
+  resetUserPaging()
   loadUsers()
 }
 
@@ -82,17 +97,28 @@ function resolveUserName(record: any) {
   ).trim()
 }
 
-async function loadUsers() {
+async function loadUsers(isLoadMore = false) {
+  if (userLoading.value || userLoadingMore.value)
+    return
+  if (isLoadMore && !userHasMore.value)
+    return
   try {
-    userLoading.value = true
+    if (isLoadMore)
+      userLoadingMore.value = true
+    else
+      userLoading.value = true
     const account = userAccount.value.trim()
     const name = userName.value.trim()
     const params = account || name
       ? { account, realName: name }
       : {}
-    const response = await getUserList(params)
+    const response = await getUserList({
+      ...params,
+      current: userPage.value,
+      size: userPageSize,
+    })
     const records = response?.data?.data?.records || response?.data?.data || []
-    userOptions.value = Array.isArray(records)
+    const nextOptions = Array.isArray(records)
       ? records
           .map((item: any) => ({
             account: resolveUserAccount(item),
@@ -100,20 +126,40 @@ async function loadUsers() {
           }))
           .filter(item => item.account || item.name)
       : []
+    if (isLoadMore)
+      userOptions.value = [...userOptions.value, ...nextOptions]
+    else
+      userOptions.value = nextOptions
+    const total = Number(response?.data?.data?.total || 0)
+    if (total) {
+      userHasMore.value = userOptions.value.length < total
+    }
+    else {
+      userHasMore.value = nextOptions.length >= userPageSize
+    }
+    if (userHasMore.value)
+      userPage.value += 1
   }
   catch (error) {
     console.error('fetch user list failed', error)
-    userOptions.value = []
+    if (!isLoadMore)
+      userOptions.value = []
   }
   finally {
     userLoading.value = false
+    userLoadingMore.value = false
   }
 }
 
 function openParticipantSheet() {
   selectedParticipantIds.value = parseUserIds(props.meeting.participants)
   showParticipantSheet.value = true
+  resetUserPaging()
   loadUsers()
+}
+
+function handleLoadMore() {
+  loadUsers(true)
 }
 
 function toggleParticipant(account: string) {
@@ -129,22 +175,21 @@ function toggleParticipant(account: string) {
 
 function applyParticipantSelection() {
   updateField('participants', selectedParticipantIds.value.join(','))
+  updateField(
+    'participantNames',
+    selectedParticipants.value.map(participant => participant.name),
+  )
   showParticipantSheet.value = false
 }
 
 function toggleHost(account: string) {
   if (!account)
     return
-  if (selectedHostIds.value.includes(account)) {
-    selectedHostIds.value = selectedHostIds.value.filter(id => id !== account)
-  }
-  else {
-    selectedHostIds.value = [...selectedHostIds.value, account]
-  }
+  selectedHostIds.value = selectedHostIds.value.includes(account) ? [] : [account]
 }
 
 function applyHostSelection() {
-  updateField('hosts', [...selectedHostIds.value])
+  updateField('hosts', selectedHostIds.value.slice(0, 1))
   showHostSheet.value = false
 }
 
@@ -176,6 +221,8 @@ const optionNameMap = computed(() => new Map(
 ))
 
 function getNameByAccount(account: string) {
+  if (account && account === loginInfo.value?.account && loginInfo.value?.real_name)
+    return loginInfo.value.real_name
   return optionNameMap.value.get(account) || account
 }
 
@@ -185,6 +232,8 @@ const hostDisplayText = computed(() => {
 })
 
 const participantDisplayText = computed(() => {
+  if (props.meeting.participantNames?.length)
+    return props.meeting.participantNames.join('、')
   const accounts = parseUserIds(props.meeting.participants)
   const names = accounts.map(account => getNameByAccount(account))
   return names.filter(Boolean).join('、')
@@ -224,6 +273,7 @@ function toggleParticipantExpanded() {
 function resetUserSearch() {
   userAccount.value = ''
   userName.value = ''
+  resetUserPaging()
   loadUsers()
 }
 
@@ -231,6 +281,7 @@ watch([userAccount, userName], () => {
   if (searchTimer)
     clearTimeout(searchTimer)
   searchTimer = setTimeout(() => {
+    resetUserPaging()
     loadUsers()
   }, 300)
 })
@@ -240,14 +291,13 @@ watch([userAccount, userName], () => {
   <view class="meeting-page min-h-screen bg-#f5f6f8 pb-8">
     <view class="">
       <slot name="title">
-        <view class="mb-2 flex items-center justify-between bg-white px-4 py-3">
+        <view class="mb-2 flex items-center justify-between bg-white px-3 py-4">
           <text class="text-4 text-#8a8f99">
             会议标题
           </text>
           <wd-input
             :model-value="meeting.name" placeholder="请输入会议名称" custom-class="meeting-form-input flex-1 w-full"
-            align-right :no-border="true" size="16"
-            clearable
+            align-right :no-border="true" clearable
             @update:model-value="(value) => updateField('name', value)"
           />
         </view>
@@ -301,9 +351,8 @@ watch([userAccount, userName], () => {
         </text>
         <view class="flex flex-1 items-center justify-end gap-2">
           <wd-input
-            :model-value="hostDisplayText" placeholder="请选择主持人"
-            custom-class="meeting-form-input flex-1 w-full" align-right :no-border="true"
-            readonly
+            :model-value="hostDisplayText" placeholder="请选择主持人" custom-class="meeting-form-input flex-1 w-full"
+            align-right :no-border="true" readonly
           />
           <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
         </view>
@@ -316,8 +365,7 @@ watch([userAccount, userName], () => {
         <view class="flex flex-1 items-center justify-end gap-2" @click="openParticipantSheet">
           <wd-input
             :model-value="participantDisplayText" placeholder="请选择参会人"
-            custom-class="meeting-form-input flex-1 w-full" align-right :no-border="true"
-            readonly
+            custom-class="meeting-form-input flex-1 w-full" align-right :no-border="true" readonly
           />
           <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
         </view>
@@ -363,8 +411,7 @@ watch([userAccount, userName], () => {
       <view class="bg-white px-4 py-3">
         <wd-input
           :model-value="meeting.description" placeholder="请输入会议描述..." type="textarea" auto-height
-          custom-class="meeting-form-input w-full"
-          :no-border="true"
+          custom-class="meeting-form-input w-full" :no-border="true"
           @update:model-value="(value) => updateField('description', value)"
         />
       </view>
@@ -416,7 +463,7 @@ watch([userAccount, userName], () => {
           </view>
           <view class="mt-2 flex items-center justify-between text-3 text-#9aa0a6">
             <text>已选 {{ selectedHostIds.length }} 人</text>
-            <text>点击姓名可多选</text>
+            <text>点击姓名选择</text>
           </view>
           <view v-if="selectedHosts.length" class="my-3">
             <view class="flex flex-wrap gap-2">
@@ -431,7 +478,7 @@ watch([userAccount, userName], () => {
             </view>
           </view>
         </view>
-        <view class="picker-body px-4 pb-20">
+        <scroll-view class="picker-body px-4 pb-4" scroll-y :lower-threshold="40" @scrolltolower="handleLoadMore">
           <view v-if="userLoading" class="py-4 text-center text-3 text-#9aa0a6">
             正在加载...
           </view>
@@ -466,21 +513,19 @@ watch([userAccount, userName], () => {
               />
             </view>
           </view>
-        </view>
+          <view v-if="userLoadingMore" class="py-3 text-center text-3 text-#9aa0a6">
+            正在加载更多...
+          </view>
+          <view v-else-if="!userHasMore && userOptions.length" class="py-3 text-center text-3 text-#c2c6cc">
+            没有更多了
+          </view>
+        </scroll-view>
         <view class="picker-footer px-4">
-          <wd-button
-            custom-class="w-48%"
-            type="info"
-            @click="showHostSheet = false"
-          >
+          <wd-button custom-class="w-48%" type="info" @click="showHostSheet = false">
             取消
           </wd-button>
 
-          <wd-button
-            custom-class="w-48%"
-            type="primary"
-            @click="applyHostSelection"
-          >
+          <wd-button custom-class="w-48%" type="primary" @click="applyHostSelection">
             确认
           </wd-button>
         </view>
@@ -529,7 +574,7 @@ watch([userAccount, userName], () => {
             </view>
           </view>
         </view>
-        <view class="picker-body px-4 pb-20">
+        <scroll-view class="picker-body px-4 pb-4" scroll-y :lower-threshold="40" @scrolltolower="handleLoadMore">
           <view v-if="userLoading" class="py-4 text-center text-3 text-#9aa0a6">
             正在加载...
           </view>
@@ -564,21 +609,19 @@ watch([userAccount, userName], () => {
               />
             </view>
           </view>
-        </view>
+          <view v-if="userLoadingMore" class="py-3 text-center text-3 text-#9aa0a6">
+            正在加载更多...
+          </view>
+          <view v-else-if="!userHasMore && userOptions.length" class="py-3 text-center text-3 text-#c2c6cc">
+            没有更多了
+          </view>
+        </scroll-view>
         <view class="picker-footer px-4">
-          <wd-button
-            custom-class="w-48%"
-            type="info"
-            @click="showParticipantSheet = false"
-          >
+          <wd-button custom-class="w-48%" type="info" @click="showParticipantSheet = false">
             取消
           </wd-button>
 
-          <wd-button
-            custom-class="w-48%"
-            type="primary"
-            @click="applyParticipantSelection"
-          >
+          <wd-button custom-class="w-48%" type="primary" @click="applyParticipantSelection">
             确认
           </wd-button>
         </view>
@@ -591,7 +634,7 @@ watch([userAccount, userName], () => {
 .picker-sheet {
   display: flex;
   flex-direction: column;
-  max-height: 72vh;
+  height: 72vh;
 }
 
 .meeting-page {
@@ -606,7 +649,10 @@ watch([userAccount, userName], () => {
 }
 
 .picker-body {
-  overflow: auto;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .picker-footer {
@@ -614,7 +660,7 @@ watch([userAccount, userName], () => {
   bottom: 0;
   z-index: 2;
   background: #ffffff;
-   display: flex;
-    justify-content: space-between;
+  display: flex;
+  justify-content: space-between;
 }
 </style>

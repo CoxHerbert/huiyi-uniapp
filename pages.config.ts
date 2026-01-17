@@ -23,6 +23,9 @@ export default defineUniPages({
     name: 'meeting-create',
     style: {
       navigationBarTitleText: '创建会议',
+      usingComponents: {
+        'wd-calendar': 'wot-design-uni/components/wd-calendar/wd-calendar',
+      },
     },
   }, {
     path: 'pages/meeting/detail',
@@ -37,6 +40,9 @@ export default defineUniPages({
     name: 'meeting-edit',
     style: {
       navigationBarTitleText: '编辑会议',
+      usingComponents: {
+        'wd-calendar': 'wot-design-uni/components/wd-calendar/wd-calendar',
+      },
     },
   }, {
     path: 'pages/meeting/history-detail',
