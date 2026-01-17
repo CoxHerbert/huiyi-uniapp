@@ -7,6 +7,7 @@ interface MeetingInfo {
   type: string
   hosts: string[]
   participantNames?: string[]
+  users?: Array<{ realName: string, account: string }>
   startTime: string
   endTime: string
   date: string
@@ -178,6 +179,13 @@ function applyParticipantSelection() {
   updateField(
     'participantNames',
     selectedParticipants.value.map(participant => participant.name),
+  )
+  updateField(
+    'users',
+    selectedParticipants.value.map(participant => ({
+      realName: participant.name,
+      account: participant.account,
+    })),
   )
   showParticipantSheet.value = false
 }
