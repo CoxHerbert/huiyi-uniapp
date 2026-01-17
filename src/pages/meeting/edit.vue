@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch, watchEffect } from 'vue'
 import { getMeetingInfo, updateMeeting } from '@/api/meeting'
+import { useUserStore } from '@/store/user'
 import MeetingForm from './components/MeetingForm.vue'
 
 definePage({
@@ -28,6 +29,8 @@ interface MeetingInfoApi {
 const meetingId = ref('')
 const pageId = ref('')
 const MEETING_LIST_REFRESH_KEY = 'meeting-list-refresh'
+const userStore = useUserStore()
+const loginInfo = computed(() => userStore.loginInfo)
 
 const meetingForm = reactive({
   name: '',
@@ -186,6 +189,12 @@ watchEffect(() => {
   meetingForm.duration = durationLabel.value
 })
 
+watchEffect(() => {
+  if (!meetingForm.adminUserid && loginInfo.value?.account) {
+    meetingForm.adminUserid = loginInfo.value.account
+  }
+})
+
 /** 解析参与人字符串（支持 、 , ，） */
 function parseUserIds(value: string) {
   return value
@@ -234,7 +243,7 @@ function applyMeetingToForm(data: MeetingInfoApi) {
   }
 
   meetingForm.name = data.title ?? ''
-  meetingForm.adminUserid = data.admin_userid ?? ''
+  meetingForm.adminUserid = data.admin_userid ?? loginInfo.value?.account ?? ''
   meetingForm.location = data.location ?? ''
   meetingForm.description = data.description ?? ''
   meetingForm.password = data.settings?.password ?? ''

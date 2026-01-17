@@ -18,7 +18,7 @@ const MEETING_LIST_REFRESH_KEY = 'meeting-list-refresh'
 const meetingForm = reactive({
   name: '',
   type: '线上会议',
-  adminUserid: 'EW-M1',
+  adminUserid: '',
   startTime: '',
   endTime: '',
   date: '',
@@ -171,6 +171,12 @@ const durationLabel = computed(() => {
 
 watchEffect(() => {
   meetingForm.duration = durationLabel.value
+})
+
+watchEffect(() => {
+  if (!meetingForm.adminUserid && loginInfo.value?.account) {
+    meetingForm.adminUserid = loginInfo.value.account
+  }
 })
 
 /** 解析参与人字符串（支持 、 , ，） */

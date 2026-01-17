@@ -335,7 +335,7 @@ function goToDetail(meetingId: string, id: string) {
 </script>
 
 <template>
-  <view class="min-h-screen bg-#f6f7f9">
+  <view class="meeting-page min-h-screen bg-#f6f7f9">
     <view class="bg-white px-4 pb-2 pt-3">
       <view class="flex gap-4">
         <view class="flex flex-col items-center gap-2 rounded-3 py-3" @click="goToCreate">
@@ -442,5 +442,9 @@ function goToDetail(meetingId: string, id: string) {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.meeting-page {
+  font-size: 30rpx;
 }
 </style>

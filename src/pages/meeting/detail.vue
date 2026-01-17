@@ -199,7 +199,7 @@ async function handleCancelMeeting() {
 </script>
 
 <template>
-  <view class="min-h-screen bg-#f6f7f9">
+  <view class="meeting-page min-h-screen bg-#f6f7f9">
     <view class="bg-white px-4 pt-4">
       <view class="flex items-center justify-between">
         <text class="block text-3.5 text-#2f2f2f">
@@ -310,6 +310,10 @@ async function handleCancelMeeting() {
 .btn-wrap {
   display: flex;
   justify-content: space-between;
+}
+
+.meeting-page {
+  font-size: 30rpx;
 }
 
 .time-wrap {

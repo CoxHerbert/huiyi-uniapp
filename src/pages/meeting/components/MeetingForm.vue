@@ -36,11 +36,6 @@ const userLoading = ref(false)
 const userOptions = ref<Array<{ account: string, name: string }>>([])
 const selectedParticipantIds = ref<string[]>([])
 const participantExpanded = ref(false)
-const hiddenParticipantAccounts = new Set(['EW-M1', 'EW-M2', 'EW-M3', 'EW-M4', 'EW-M5', 'EW-M6'])
-const adminAccountOptions = Array.from(hiddenParticipantAccounts).map(account => ({
-  account,
-  name: account,
-}))
 let searchTimer: ReturnType<typeof setTimeout> | null = null
 
 function updateField<K extends keyof MeetingInfo>(key: K, value: MeetingInfo[K]) {
@@ -53,6 +48,7 @@ function openTypeSheet() {
 
 function openAdminSheet() {
   showAdminSheet.value = true
+  loadUsers()
 }
 
 function handleTypeSelect(option: { label: string, value: string }) {
@@ -119,7 +115,6 @@ function handleAdminSelect(option: { account: string, name: string }) {
 
 function openParticipantSheet() {
   selectedParticipantIds.value = parseUserIds(props.meeting.participants)
-    .filter(account => !hiddenParticipantAccounts.has(account))
   showParticipantSheet.value = true
   loadUsers()
 }
@@ -136,9 +131,7 @@ function toggleParticipant(account: string) {
 }
 
 function applyParticipantSelection() {
-  const cleaned = selectedParticipantIds.value.filter(account => !hiddenParticipantAccounts.has(account))
-  selectedParticipantIds.value = cleaned
-  updateField('participants', cleaned.join(','))
+  updateField('participants', selectedParticipantIds.value.join(','))
   showParticipantSheet.value = false
 }
 
@@ -164,11 +157,9 @@ const selectedParticipants = computed(() => {
   })
 })
 
-const participantOptions = computed(() => {
-  return userOptions.value.filter(option => !hiddenParticipantAccounts.has(option.account))
-})
+const participantOptions = computed(() => userOptions.value)
 
-const adminOptions = computed(() => adminAccountOptions)
+const adminOptions = computed(() => userOptions.value)
 
 const displayedSelectedParticipants = computed(() => {
   if (participantExpanded.value)
@@ -202,7 +193,7 @@ watch([userAccount, userName], () => {
 </script>
 
 <template>
-  <view class="min-h-screen bg-#f5f6f8 pb-8">
+  <view class="meeting-page min-h-screen bg-#f5f6f8 pb-8">
     <view class="">
       <slot name="title">
         <view class="mb-2 flex items-center justify-between bg-white px-4 py-3">
@@ -377,6 +368,9 @@ watch([userAccount, userName], () => {
               </view>
               <view class="flex flex-col">
                 <text class="text-3 text-#2f2f2f">
+                  {{ option.name || option.account }}
+                </text>
+                <text v-if="option.name && option.account" class="text-2.5 text-#9aa0a6">
                   {{ option.account }}
                 </text>
               </view>
@@ -501,6 +495,10 @@ watch([userAccount, userName], () => {
   display: flex;
   flex-direction: column;
   max-height: 72vh;
+}
+
+.meeting-page {
+  font-size: 30rpx;
 }
 
 .picker-header {

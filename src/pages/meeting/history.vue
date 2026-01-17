@@ -251,7 +251,7 @@ function goToHistoryDetail(meetingId: number | string) {
 </script>
 
 <template>
-  <view class="min-h-screen bg-#f6f7f9">
+  <view class="meeting-page min-h-screen bg-#f6f7f9">
     <!-- ✅ 搜索框（仅：会议名称 + 发起人） -->
     <view class="bg-white">
       <wd-search
@@ -337,5 +337,9 @@ function goToHistoryDetail(meetingId: number | string) {
   font-size: 24rpx;
   color: #666666;
   line-height: 24rpx;
+}
+
+.meeting-page {
+  font-size: 30rpx;
 }
 </style>
