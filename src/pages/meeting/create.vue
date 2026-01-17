@@ -19,6 +19,7 @@ const meetingForm = reactive({
   name: '',
   type: '线上会议',
   hosts: [] as string[],
+  participantNames: [] as string[],
   startTime: '',
   endTime: '',
   date: '',

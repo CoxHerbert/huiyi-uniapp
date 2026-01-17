@@ -6,6 +6,7 @@ interface MeetingInfo {
   name: string
   type: string
   hosts: string[]
+  participantNames?: string[]
   startTime: string
   endTime: string
   date: string
@@ -132,6 +133,10 @@ function toggleParticipant(account: string) {
 
 function applyParticipantSelection() {
   updateField('participants', selectedParticipantIds.value.join(','))
+  updateField(
+    'participantNames',
+    selectedParticipants.value.map(participant => participant.name),
+  )
   showParticipantSheet.value = false
 }
 
@@ -185,6 +190,8 @@ const hostDisplayText = computed(() => {
 })
 
 const participantDisplayText = computed(() => {
+  if (props.meeting.participantNames?.length)
+    return props.meeting.participantNames.join('、')
   const accounts = parseUserIds(props.meeting.participants)
   const names = accounts.map(account => getNameByAccount(account))
   return names.filter(Boolean).join('、')

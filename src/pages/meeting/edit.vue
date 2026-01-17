@@ -23,6 +23,7 @@ interface MeetingInfoApi {
   description?: string
   attendees?: { member?: MeetingMember[] }
   settings?: { password?: string, host?: string[] }
+  userName?: any
 }
 
 const meetingId = ref('')
@@ -36,6 +37,7 @@ const meetingForm = reactive({
   name: '',
   type: '',
   hosts: [] as string[],
+  participantNames: [] as string[],
   startTime: '',
   endTime: '',
   date: '',
@@ -203,11 +205,45 @@ function parseUserIds(value: string) {
     .filter(Boolean)
 }
 
+function parseUserNames(input: any): string[] {
+  if (input === null || input === undefined || input === '')
+    return []
+
+  if (Array.isArray(input))
+    return input.map((x: any) => String(x)).filter(Boolean)
+
+  if (typeof input === 'string') {
+    const str = input.trim()
+    if (!str)
+      return []
+
+    if (str.startsWith('[')) {
+      try {
+        const arr = JSON.parse(str)
+        if (Array.isArray(arr))
+          return arr.map((x: any) => String(x)).filter(Boolean)
+      }
+      catch (e) {
+        // ignore
+      }
+    }
+
+    return str.split(/[,，]/).map(s => s.trim()).filter(Boolean)
+  }
+
+  return [String(input)].filter(Boolean)
+}
+
+function shouldFilterAttendee(userid?: string) {
+  return typeof userid === 'string' && /^EW-M[1-6]$/.test(userid)
+}
+
 function resolveAttendeeIds(attendees?: { member?: MeetingMember[] }) {
   const members = attendees?.member ?? []
   return Array.isArray(members)
     ? members
         .map(item => item?.userid)
+        .filter(userid => !shouldFilterAttendee(userid))
         .filter((value): value is string => !!value)
     : []
 }
@@ -232,6 +268,7 @@ function applyMeetingToForm(data: MeetingInfoApi) {
 
   const attendeeIds = resolveAttendeeIds(data.attendees)
   meetingForm.participants = attendeeIds.join(',')
+  meetingForm.participantNames = parseUserNames(data.userName)
 }
 
 async function loadMeetingInfo() {
