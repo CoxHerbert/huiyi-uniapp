@@ -420,14 +420,15 @@ watch([userAccount, userName], () => {
             <text>已选 {{ selectedParticipantIds.length }} 人</text>
             <text>点击姓名可多选</text>
           </view>
-          <view v-if="selectedParticipants.length" class="mt-3">
+          <view v-if="selectedParticipants.length" class="my-3">
             <view class="flex flex-wrap gap-2">
               <view
                 v-for="person in displayedSelectedParticipants" :key="person.account"
                 class="flex items-center gap-1 rounded-full bg-#eef2ff px-2 py-1 text-2.5 text-#4f7bff"
+                @click="toggleSelectedUser(person.account)"
               >
                 <text>{{ person.name }}</text>
-                <wd-icon name="close" size="10px" color="#4f7bff" @click="toggleSelectedUser(person.account)" />
+                <wd-icon name="close" size="10px" color="#4f7bff" />
               </view>
             </view>
             <view v-if="shouldShowToggle" class="mt-2 text-right text-2.5 text-#4f7bff">
