@@ -664,7 +664,7 @@ watch([userAccount, userName], () => {
 .picker-sheet {
   display: flex;
   flex-direction: column;
-  max-height: 72vh;
+  height: 72vh;
 }
 
 .meeting-page {
@@ -680,7 +680,8 @@ watch([userAccount, userName], () => {
 
 .picker-body {
   flex: 1;
-  height: 0;
+  min-height: 0;
+  width: 100%;
 }
 
 .picker-footer {
