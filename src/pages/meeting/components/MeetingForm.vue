@@ -299,7 +299,7 @@ watch([userAccount, userName], () => {
         />
       </view> -->
 
-      <view class="flex items-center justify-between bg-white px-4 py-3">
+      <view class="mb-2 flex items-center justify-between bg-white px-4 py-3">
         <text class="text-3 text-#8a8f99">
           地点
         </text>
@@ -309,7 +309,7 @@ watch([userAccount, userName], () => {
         />
       </view>
 
-      <view class="mb-2 flex items-center justify-between bg-white px-4 py-3">
+      <!-- <view class="mb-2 flex items-center justify-between bg-white px-4 py-3">
         <text class="text-3 text-#8a8f99">
           会议密码
         </text>
@@ -317,7 +317,7 @@ watch([userAccount, userName], () => {
           :model-value="meeting.password" placeholder="请设置会议密码" custom-class="meeting-form-input flex-1 w-full"
           align-right :no-border="true" @update:model-value="(value) => updateField('password', value)"
         />
-      </view>
+      </view> -->
 
       <!-- <view class="mb-2 flex items-center justify-between bg-white px-4 py-3">
         <text class="text-3 text-#8a8f99">
@@ -329,7 +329,7 @@ watch([userAccount, userName], () => {
       <view class="bg-white px-4 py-3">
         <wd-input
           :model-value="meeting.description" placeholder="请输入会议描述..." type="textarea" auto-height
-          custom-class="meeting-form-input w-full" align-right
+          custom-class="meeting-form-input w-full"
           :no-border="true"
           @update:model-value="(value) => updateField('description', value)"
         />

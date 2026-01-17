@@ -253,7 +253,7 @@ function goToHistoryDetail(meetingId: number | string) {
 <template>
   <view class="min-h-screen bg-#f6f7f9">
     <!-- ✅ 搜索框（仅：会议名称 + 发起人） -->
-    <view class="mt-3 bg-white">
+    <view class="bg-white">
       <wd-search
         v-model="keyword"
         placeholder="会议名称、发起人"
