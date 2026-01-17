@@ -291,7 +291,7 @@ async function handleCancelMeeting() {
         </view>
       </view>
 
-      <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-4">
+      <!-- <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-4">
         <text class="text-3 text-#8a8f99">
           地点
         </text>
@@ -307,7 +307,7 @@ async function handleCancelMeeting() {
         <text class="text-3 text-#2f2f2f">
           {{ meetingDetail.password }}
         </text>
-      </view>
+      </view> -->
 
       <view class="flex items-center justify-between px-4 py-4">
         <text class="text-3 text-#8a8f99">

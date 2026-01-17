@@ -358,7 +358,7 @@ function goToDetail(meetingId: string, id: string) {
             <view class="h-16 w-16 flex items-center justify-center rounded-3 text-#3f5fff">
               <image src="@/static/预约会议.svg" />
             </view>
-            <text class="text-4 text-#333333">
+            <text class="text-3 text-#333333 fw-600">
               预约会议
             </text>
           </view>
@@ -367,7 +367,7 @@ function goToDetail(meetingId: string, id: string) {
             <view class="h-16 w-16 flex items-center justify-center rounded-3 text-#3f5fff">
               <image src="@/static/历史会议.svg" />
             </view>
-            <text class="text-4 text-#333333">
+            <text class="text-3 text-#333333 fw-600">
               历史会议
             </text>
           </view>

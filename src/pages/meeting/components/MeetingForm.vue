@@ -291,14 +291,13 @@ watch([userAccount, userName], () => {
   <view class="meeting-page min-h-screen bg-#f5f6f8 pb-8">
     <view class="">
       <slot name="title">
-        <view class="mb-2 flex items-center justify-between bg-white px-4 py-3">
+        <view class="mb-2 flex items-center justify-between bg-white px-3 py-4">
           <text class="text-4 text-#8a8f99">
             会议标题
           </text>
           <wd-input
             :model-value="meeting.name" placeholder="请输入会议名称" custom-class="meeting-form-input flex-1 w-full"
-            align-right :no-border="true" size="16"
-            clearable
+            align-right :no-border="true" clearable
             @update:model-value="(value) => updateField('name', value)"
           />
         </view>
@@ -352,9 +351,8 @@ watch([userAccount, userName], () => {
         </text>
         <view class="flex flex-1 items-center justify-end gap-2">
           <wd-input
-            :model-value="hostDisplayText" placeholder="请选择主持人"
-            custom-class="meeting-form-input flex-1 w-full" align-right :no-border="true"
-            readonly
+            :model-value="hostDisplayText" placeholder="请选择主持人" custom-class="meeting-form-input flex-1 w-full"
+            align-right :no-border="true" readonly
           />
           <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
         </view>
@@ -367,8 +365,7 @@ watch([userAccount, userName], () => {
         <view class="flex flex-1 items-center justify-end gap-2" @click="openParticipantSheet">
           <wd-input
             :model-value="participantDisplayText" placeholder="请选择参会人"
-            custom-class="meeting-form-input flex-1 w-full" align-right :no-border="true"
-            readonly
+            custom-class="meeting-form-input flex-1 w-full" align-right :no-border="true" readonly
           />
           <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
         </view>
@@ -414,8 +411,7 @@ watch([userAccount, userName], () => {
       <view class="bg-white px-4 py-3">
         <wd-input
           :model-value="meeting.description" placeholder="请输入会议描述..." type="textarea" auto-height
-          custom-class="meeting-form-input w-full"
-          :no-border="true"
+          custom-class="meeting-form-input w-full" :no-border="true"
           @update:model-value="(value) => updateField('description', value)"
         />
       </view>
@@ -482,12 +478,7 @@ watch([userAccount, userName], () => {
             </view>
           </view>
         </view>
-        <scroll-view
-          class="picker-body px-4 pb-20"
-          scroll-y
-          :lower-threshold="40"
-          @scrolltolower="handleLoadMore"
-        >
+        <scroll-view class="picker-body px-4 pb-4" scroll-y :lower-threshold="40" @scrolltolower="handleLoadMore">
           <view v-if="userLoading" class="py-4 text-center text-3 text-#9aa0a6">
             正在加载...
           </view>
@@ -530,19 +521,11 @@ watch([userAccount, userName], () => {
           </view>
         </scroll-view>
         <view class="picker-footer px-4">
-          <wd-button
-            custom-class="w-48%"
-            type="info"
-            @click="showHostSheet = false"
-          >
+          <wd-button custom-class="w-48%" type="info" @click="showHostSheet = false">
             取消
           </wd-button>
 
-          <wd-button
-            custom-class="w-48%"
-            type="primary"
-            @click="applyHostSelection"
-          >
+          <wd-button custom-class="w-48%" type="primary" @click="applyHostSelection">
             确认
           </wd-button>
         </view>
@@ -591,12 +574,7 @@ watch([userAccount, userName], () => {
             </view>
           </view>
         </view>
-        <scroll-view
-          class="picker-body px-4 pb-20"
-          scroll-y
-          :lower-threshold="40"
-          @scrolltolower="handleLoadMore"
-        >
+        <scroll-view class="picker-body px-4 pb-4" scroll-y :lower-threshold="40" @scrolltolower="handleLoadMore">
           <view v-if="userLoading" class="py-4 text-center text-3 text-#9aa0a6">
             正在加载...
           </view>
@@ -639,19 +617,11 @@ watch([userAccount, userName], () => {
           </view>
         </scroll-view>
         <view class="picker-footer px-4">
-          <wd-button
-            custom-class="w-48%"
-            type="info"
-            @click="showParticipantSheet = false"
-          >
+          <wd-button custom-class="w-48%" type="info" @click="showParticipantSheet = false">
             取消
           </wd-button>
 
-          <wd-button
-            custom-class="w-48%"
-            type="primary"
-            @click="applyParticipantSelection"
-          >
+          <wd-button custom-class="w-48%" type="primary" @click="applyParticipantSelection">
             确认
           </wd-button>
         </view>
@@ -682,6 +652,7 @@ watch([userAccount, userName], () => {
   flex: 1;
   min-height: 0;
   width: 100%;
+  box-sizing: border-box;
 }
 
 .picker-footer {
@@ -689,7 +660,7 @@ watch([userAccount, userName], () => {
   bottom: 0;
   z-index: 2;
   background: #ffffff;
-   display: flex;
-    justify-content: space-between;
+  display: flex;
+  justify-content: space-between;
 }
 </style>

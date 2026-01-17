@@ -194,7 +194,7 @@ onLoad((options) => {
             </text>
           </view>
         </view>
-        <view class="flex items-center justify-between py-2">
+        <!-- <view class="flex items-center justify-between py-2">
           <text class="text-3 text-#8a8f99">
             地点
           </text>
@@ -209,7 +209,7 @@ onLoad((options) => {
           <text class="text-3 text-#2f2f2f">
             {{ historyDetail.password }}
           </text>
-        </view>
+        </view> -->
         <view class="py-2">
           <text class="text-3 text-#8a8f99">
             会议描述
