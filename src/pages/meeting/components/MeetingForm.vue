@@ -301,13 +301,13 @@ watch([userAccount, userName], () => {
           <wd-input
             :model-value="meeting.hosts.join(',')" placeholder="请选择主持人"
             custom-class="meeting-form-input flex-1 w-full" align-right :no-border="true"
-            disabled
+            readonly
           />
           <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
         </view>
       </view>
 
-      <view class="flex items-center justify-between bg-white px-4 py-3" @click="openAdminSheet">
+      <view class="flex items-center justify-between bg-white px-3 py-4" @click="openAdminSheet">
         <view class="flex items-center gap-1">
           <text class="text-3 text-#ff4d4f">
             *
@@ -317,14 +317,14 @@ watch([userAccount, userName], () => {
           </text>
         </view>
         <view class="flex items-center gap-2">
-          <text class="text-3" :class="meeting.adminUserid ? 'text-#2f2f2f' : 'text-#c2c6cc'">
+          <text class="text-3.5" :class="meeting.adminUserid ? 'text-#2f2f2f' : 'text-#c2c6cc'">
             {{ meeting.adminUserid || '请选择管理员' }}
           </text>
           <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
         </view>
       </view>
 
-      <view class="mb-2 flex items-center justify-between bg-white px-4 pb-3">
+      <view class="mb-2 flex items-center justify-between bg-white px-3 py-4">
         <text class="text-3 text-#8a8f99">
           参会人
         </text>
@@ -332,7 +332,7 @@ watch([userAccount, userName], () => {
           <wd-input
             :model-value="meeting.participants" placeholder="请选择参会人"
             custom-class="meeting-form-input flex-1 w-full" align-right :no-border="true"
-            disabled
+            readonly
             @update:model-value="(value) => updateField('participants', value)"
           />
           <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
