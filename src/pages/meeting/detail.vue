@@ -18,6 +18,8 @@ interface MeetingInfoApi {
   meeting_code?: string
   location?: string
   description?: string
+  status?: number | string
+  statusClass?: string
   settings?: { password?: string }
   attendees?: { member?: MeetingMember[] }
   // 接口实际可能返回 JSON 字符串 / 数组 / 逗号字符串，这里用 any 兼容
@@ -31,6 +33,9 @@ const MEETING_DETAIL_REFRESH_KEY = 'meeting-detail-refresh'
 const MEETING_LIST_REFRESH_KEY = 'meeting-list-refresh'
 const meetingDetail = reactive({
   title: '-',
+  status: '',
+  statusClass: '',
+  statusCode: undefined as number | undefined,
   startTime: '--:--',
   endTime: '--:--',
   date: '-',
@@ -47,7 +52,7 @@ const meetingDetail = reactive({
   durationText: '--',
 
   tipTitle: '温馨提示',
-  tipContent: '此小程序仅作会议预约，请从企业微信“会议”功能进入会议。',
+  tipContent: '此小程序仅作会议预约，请从企业微信“会议”功能进入会议。只有"待开始"的会议才允许进行编辑',
 })
 
 const loading = ref(false)
@@ -64,6 +69,32 @@ function formatCNDate(d: Date) {
 }
 function safeText(v: any, fallback = '-') {
   return v === null || v === undefined || v === '' ? fallback : String(v)
+}
+
+const statusMeta = new Map<number, { label: string, className: string }>([
+  [1, { label: '待开始', className: 'bg-#fff4e5 text-#ff9f1a' }],
+  [2, { label: '会议中', className: 'bg-#e8f7f0 text-#1e8e5a' }],
+  [3, { label: '已结束', className: 'bg-#f1f2f4 text-#8a8f99' }],
+  [4, { label: '已取消', className: 'bg-#fdeaea text-#ff4d4f' }],
+  [5, { label: '已过期', className: 'bg-#f1f2f4 text-#8a8f99' }],
+])
+const statusLabelClass = new Map<string, string>([
+  ['待开始', 'bg-#fff4e5 text-#ff9f1a'],
+  ['待进入', 'bg-#e7edff text-#3f5fff'],
+])
+
+function getStatusMeta(status?: string | number) {
+  if (typeof status === 'number')
+    return statusMeta.get(status)
+  const parsed = Number(status)
+  if (!Number.isNaN(parsed))
+    return statusMeta.get(parsed)
+  if (typeof status === 'string') {
+    const className = statusLabelClass.get(status)
+    if (className)
+      return { label: status, className }
+  }
+  return null
 }
 
 /** ✅ 秒 -> 友好时长文本 */
@@ -126,6 +157,19 @@ function applyMeetingToView(m: MeetingInfoApi) {
   meetingDetail.location = safeText(m.location)
   meetingDetail.description = safeText(m.description)
   meetingDetail.password = safeText(m.settings?.password)
+
+  const statusRaw = m.status
+  const statusStyle = getStatusMeta(statusRaw)
+  const statusCode = typeof statusRaw === 'number' ? statusRaw : Number(statusRaw)
+  meetingDetail.statusCode = Number.isFinite(statusCode) ? statusCode : undefined
+  if (statusStyle) {
+    meetingDetail.status = statusStyle.label
+    meetingDetail.statusClass = m.statusClass || statusStyle.className
+  }
+  else {
+    meetingDetail.status = statusRaw ? String(statusRaw) : ''
+    meetingDetail.statusClass = m.statusClass || ''
+  }
 
   meetingDetail.startTime = start ? formatHM(start) : '--:--'
   meetingDetail.endTime = end ? formatHM(end) : '--:--'
@@ -222,9 +266,17 @@ async function handleCancelMeeting() {
   <view class="min-h-screen bg-#f6f7f9">
     <view class="bg-white px-4 pt-4 fw-600">
       <view class="flex items-center justify-between">
-        <text class="block text-4 text-#000">
-          会议标题：{{ meetingDetail.title }}
-        </text>
+        <view class="flex items-center gap-2">
+          <view
+            v-if="meetingDetail.status" class="rounded-full px-2 py-0.5 text-3 leading-4"
+            :class="meetingDetail.statusClass"
+          >
+            {{ meetingDetail.status }}
+          </view>
+          <text class="block text-4 text-#000">
+            {{ meetingDetail.title }}
+          </text>
+        </view>
         <wd-loading v-if="loading" size="18px" />
       </view>
 
@@ -336,8 +388,8 @@ async function handleCancelMeeting() {
         {{ meetingDetail.tipContent }}
       </text>
     </view>
-
     <view
+      v-if="meetingDetail.status === '待开始'"
       class="btn-wrap fixed bottom-0 left-0 right-0 z-10 border-t border-#f0f1f2 bg-white px-4 py-3 pb-[calc(12px+env(safe-area-inset-bottom))]"
     >
       <wd-button
