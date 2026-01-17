@@ -1,95 +1,84 @@
 <script setup lang="ts">
-import { getMeetingInfo } from '@/api/meeting'
+import { cancelMeeting, getMeetingInfo } from '@/api/meeting'
 
 definePage({
-  name: 'meeting-history-detail',
+  name: 'meeting-detail',
   style: {
-    navigationBarTitleText: '历史会议详情',
+    navigationBarTitleText: '会议详情',
   },
 })
 
+interface MeetingMember { userid: string, status?: number }
 interface MeetingInfoApi {
   title?: string
-  meeting_start?: number
-  meeting_duration?: number
+  meeting_start?: number // 秒级时间戳
+  meeting_duration?: number // 秒
   admin_userid?: string
   createUserName?: string
   meeting_code?: string
   location?: string
   description?: string
   settings?: { password?: string }
-  userName: Array<string>
+  attendees?: { member?: MeetingMember[] }
+  // 接口实际可能返回 JSON 字符串 / 数组 / 逗号字符串，这里用 any 兼容
+  userName?: any
 }
 
 const meetingId = ref('')
-const loading = ref(false)
+const pageId = ref('')
 
-const historyDetail = reactive({
+const MEETING_DETAIL_REFRESH_KEY = 'meeting-detail-refresh'
+const MEETING_LIST_REFRESH_KEY = 'meeting-list-refresh'
+const meetingDetail = reactive({
   title: '-',
-  timeRange: '-',
-  meetingNo: '-',
+  startTime: '--:--',
+  endTime: '--:--',
+  date: '-',
+  timezone: '(GMT+08:00) 中国标准时间 北京',
   host: '-',
-  joinTime: '--',
-  duration: '--',
-  userName: [],
+  attendees: [] as string[],
+  meetingNo: '-',
+  userName: [] as string[],
   location: '-',
   description: '-',
   password: '-',
+
+  // ✅ 新增：动态时长文本
+  durationText: '--',
+
+  tipTitle: '温馨提示',
+  tipContent: '此小程序仅作会议预约，请从企业微信“会议”功能进入会议。',
 })
+
+const loading = ref(false)
+const canceling = ref(false)
 
 function pad2(n: number) {
   return String(n).padStart(2, '0')
 }
-
 function formatHM(d: Date) {
   return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`
 }
-
 function formatCNDate(d: Date) {
   return `${d.getFullYear()}年${pad2(d.getMonth() + 1)}月${pad2(d.getDate())}日`
 }
-
-function formatMDHM(d: Date) {
-  return `${pad2(d.getMonth() + 1)}/${pad2(d.getDate())} ${formatHM(d)}`
+function safeText(v: any, fallback = '-') {
+  return v === null || v === undefined || v === '' ? fallback : String(v)
 }
 
-function formatHMS(totalSeconds: number) {
-  const safe = Math.max(0, Math.floor(totalSeconds))
-  const h = Math.floor(safe / 3600)
-  const m = Math.floor((safe % 3600) / 60)
-  const s = safe % 60
-  return `${pad2(h)}:${pad2(m)}:${pad2(s)}`
-}
+/** ✅ 秒 -> 友好时长文本 */
+function formatDuration(sec: any) {
+  const s = Math.max(0, Number(sec || 0))
+  if (!s)
+    return '--'
 
-function applyMeetingToView(m: MeetingInfoApi) {
-  const startSec = Number(m.meeting_start || 0)
-  const durationSec = Number(m.meeting_duration || 0)
-  const start = startSec ? new Date(startSec * 1000) : null
-  const end = startSec && durationSec ? new Date((startSec + durationSec) * 1000) : null
+  const min = Math.round(s / 60)
+  if (min < 60)
+    return `${min}分钟`
 
-  historyDetail.title = m.title || '-'
-  historyDetail.meetingNo = m.meeting_code || '-'
-  historyDetail.host = m.createUserName || m.admin_userid || '-'
-  historyDetail.location = m.location || '-'
-  historyDetail.description = m.description || '-'
-  historyDetail.password = m.settings?.password || '-'
-
-  if (start && end) {
-    historyDetail.timeRange = `${formatCNDate(start)} ${formatHM(start)}-${formatHM(end)}`
-    historyDetail.joinTime = formatMDHM(start)
-  }
-  else if (start) {
-    historyDetail.timeRange = `${formatCNDate(start)} ${formatHM(start)}`
-    historyDetail.joinTime = formatMDHM(start)
-  }
-  else {
-    historyDetail.timeRange = '-'
-    historyDetail.joinTime = '--'
-  }
-
-  historyDetail.duration = durationSec ? formatHMS(durationSec) : '--'
-  historyDetail.userName = parseUserName(m.userName)
-  console.log(historyDetail)
+  const h = Math.floor(min / 60)
+  const m = min % 60
+  return m ? `${h}小时${m}分钟` : `${h}小时`
 }
 
 /** ✅ 解析 userName：支持 JSON 字符串 / 数组 / 逗号字符串 */
@@ -124,7 +113,35 @@ function parseUserName(input: any): string[] {
   return [String(input)].filter(Boolean)
 }
 
-async function loadHistoryDetail() {
+function applyMeetingToView(m: MeetingInfoApi) {
+  const startSec = Number(m.meeting_start || 0)
+  const durSec = Number(m.meeting_duration || 0)
+
+  const start = startSec ? new Date(startSec * 1000) : null
+  const end = startSec && durSec ? new Date((startSec + durSec) * 1000) : null
+
+  meetingDetail.title = safeText(m.title)
+  meetingDetail.host = safeText(m.createUserName ?? m.admin_userid)
+  meetingDetail.meetingNo = safeText(m.meeting_code)
+  meetingDetail.location = safeText(m.location)
+  meetingDetail.description = safeText(m.description)
+  meetingDetail.password = safeText(m.settings?.password)
+
+  meetingDetail.startTime = start ? formatHM(start) : '--:--'
+  meetingDetail.endTime = end ? formatHM(end) : '--:--'
+  meetingDetail.date = start ? formatCNDate(start) : '-'
+
+  // ✅ 动态时长
+  meetingDetail.durationText = formatDuration(durSec)
+
+  // ✅ userName 处理成 UI 可用数组
+  meetingDetail.userName = parseUserName(m.userName)
+
+  const members = m.attendees?.member || []
+  meetingDetail.attendees = members.map(i => i.userid).filter(Boolean)
+}
+
+async function loadMeetingDetail() {
   if (!meetingId.value)
     return
   loading.value = true
@@ -134,8 +151,8 @@ async function loadHistoryDetail() {
     applyMeetingToView(data)
   }
   catch (error) {
-    console.error('fetch history detail failed', error)
-    uni.showToast({ title: '获取历史会议详情失败', icon: 'none' })
+    console.error('fetch meeting detail failed', error)
+    uni.showToast({ title: '获取会议详情失败', icon: 'none' })
   }
   finally {
     loading.value = false
@@ -143,152 +160,241 @@ async function loadHistoryDetail() {
 }
 
 onLoad((options) => {
-  if (options?.meetingId)
+  if (options?.meetingId) {
     meetingId.value = String(options.meetingId)
-  loadHistoryDetail()
+    pageId.value = String(options.id)
+  }
+
+  loadMeetingDetail()
 })
+
+onShow(() => {
+  const shouldRefresh = uni.getStorageSync(MEETING_DETAIL_REFRESH_KEY)
+  if (shouldRefresh) {
+    uni.removeStorageSync(MEETING_DETAIL_REFRESH_KEY)
+    loadMeetingDetail()
+  }
+})
+
+function goToEdit() {
+  if (!meetingId.value)
+    return
+  uni.navigateTo({ url: `/pages/meeting/edit?meetingId=${meetingId.value}&id=${pageId.value}` })
+}
+
+async function handleCancelMeeting() {
+  if (!meetingId.value || canceling.value)
+    return
+
+  const ok = await new Promise<boolean>((resolve) => {
+    uni.showModal({
+      title: '确认取消会议？',
+      content: '取消后参会人将无法加入该会议。',
+      confirmText: '取消会议',
+      confirmColor: '#E53935',
+      success: r => resolve(!!r.confirm),
+      fail: () => resolve(false),
+    })
+  })
+  if (!ok)
+    return
+
+  canceling.value = true
+  try {
+    await cancelMeeting(meetingId.value)
+    uni.showToast({ title: '已取消会议', icon: 'none' })
+    uni.setStorageSync(MEETING_LIST_REFRESH_KEY, true)
+    setTimeout(() => {
+      uni.navigateBack()
+    }, 500)
+  }
+  catch (error) {
+    console.error('cancel meeting failed', error)
+    uni.showToast({ title: '取消会议失败', icon: 'none' })
+  }
+  finally {
+    canceling.value = false
+  }
+}
 </script>
 
 <template>
-  <view class="meeting-page min-h-screen bg-#f6f7f9">
-    <view class="mt-4 bg-white px-4 py-4">
+  <view class="min-h-screen bg-#f6f7f9">
+    <view class="bg-white px-4 pt-4 fw-600">
       <view class="flex items-center justify-between">
-        <text class="title">
-          {{ historyDetail.title }}
+        <text class="block text-4 text-#000">
+          会议标题：{{ meetingDetail.title }}
         </text>
         <wd-loading v-if="loading" size="18px" />
       </view>
-      <view class="desc-text mt-4">
-        {{ historyDetail.timeRange }}
+
+      <view class="mt-4 flex items-center justify-between">
+        <view class="text-center">
+          <text class="block text-5 text-#2f2f2f font-600">
+            {{ meetingDetail.startTime }}
+          </text>
+          <text class="text-2.5 text-#9aa0a6">
+            {{ meetingDetail.date }}
+          </text>
+        </view>
+
+        <view class="time-wrap">
+          <view class="duration-wrap gap-3">
+            <view class="line" />
+            <text class="duration-text">
+              {{ meetingDetail.durationText }}
+            </text>
+            <view class="line" />
+          </view>
+
+          <text class="timezone">
+            {{ meetingDetail.timezone }}
+          </text>
+        </view>
+
+        <view class="text-center">
+          <text class="block text-5 text-#2f2f2f font-600">
+            {{ meetingDetail.endTime }}
+          </text>
+          <text class="text-3 text-#9aa0a6">
+            {{ meetingDetail.date }}
+          </text>
+        </view>
       </view>
-      <view class="desc-text mt-2">
-        会议号：{{ historyDetail.meetingNo }}
+    </view>
+
+    <view class="rounded-4 bg-white">
+      <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-4">
+        <text class="text-4 text-#8a8f99">
+          发起人
+        </text>
+        <view class="flex items-center gap-2">
+          <text class="text-4 text-#2f2f2f">
+            {{ meetingDetail.host }}
+          </text>
+        </view>
       </view>
 
-      <view class="border-t border-#f0f1f2 pt-4">
-        <view class="flex items-center justify-between py-2">
-          <text class="text-3 text-#8a8f99">
-            发起人
-          </text>
-          <view class="flex items-center gap-2">
-            <text class="text-3 text-#2f2f2f">
-              {{ historyDetail.host }}
-            </text>
-          </view>
-        </view>
-        <view class="flex items-center justify-between py-2">
-          <text class="text-3 text-#8a8f99">
-            参会人
-          </text>
-          <view class="flex items-center gap-2">
-            <view class="flex">
-              <view
-                v-for="(person, index) in historyDetail.userName" :key="`${person}-${index}`"
-                class="h-7 w-7 flex items-center justify-center border-2 border-white rounded-2 bg-#4f7bff text-3 text-white font-700 -ml-1"
-              >
-                {{ person?.slice(0, 1) }}
-              </view>
+      <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-2">
+        <text class="text-4 text-#8a8f99">
+          参会人
+        </text>
+        <view class="flex items-center gap-2">
+          <view class="flex">
+            <view
+              v-for="(person, index) in meetingDetail.userName" :key="`${person}-${index}`"
+              class="h-7 w-7 flex items-center justify-center border-2 border-white rounded-2 bg-#4f7bff text-3 text-white font-700 -ml-1"
+            >
+              {{ person?.slice(0, 1) }}
             </view>
-            <text class="text-3 text-#9aa0a6">
-              共{{ historyDetail.userName.length }}人
-            </text>
           </view>
         </view>
-        <!-- <view class="flex items-center justify-between py-2">
-          <text class="text-3 text-#8a8f99">
-            地点
-          </text>
-          <text class="text-3 text-#2f2f2f">
-            {{ historyDetail.location }}
-          </text>
-        </view>
-        <view class="flex items-center justify-between py-2">
-          <text class="text-3 text-#8a8f99">
-            会议密码
-          </text>
-          <text class="text-3 text-#2f2f2f">
-            {{ historyDetail.password }}
-          </text>
-        </view> -->
-        <view class="py-2">
-          <text class="text-3 text-#8a8f99">
-            会议描述
-          </text>
-          <text class="desc-text mt-2 block">
-            {{ historyDetail.description }}
-          </text>
-        </view>
       </view>
-    </view>
-    <view class="meet-time">
-      <view class="left">
-        <text class="time">
-          {{ historyDetail.joinTime }}
+
+      <!-- <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-4">
+        <text class="text-3 text-#8a8f99">
+          地点
         </text>
-        <text class="desc">
-          入会时间
+        <text class="text-3 text-#2f2f2f">
+          {{ meetingDetail.location }}
         </text>
       </view>
-      <view class="h-8 w-px bg-#f0f1f2" />
-      <view class="right">
-        <text class="time">
-          {{ historyDetail.duration }}
+
+      <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-4">
+        <text class="text-3 text-#8a8f99">
+          会议密码
         </text>
-        <text class="desc">
-          入会时长
+        <text class="text-3 text-#2f2f2f">
+          {{ meetingDetail.password }}
+        </text>
+      </view> -->
+
+      <view class="flex items-center justify-between px-4 py-4">
+        <text class="text-4 text-#8a8f99">
+          会议号
+        </text>
+        <text class="text-4 text-#2f2f2f">
+          {{ meetingDetail.meetingNo }}
         </text>
       </view>
     </view>
+
+    <view class="mx-4 mt-4 rounded-4 bg-white px-4 py-4">
+      <text class="text-4 text-#8a8f99">
+        会议描述
+      </text>
+      <text class="mt-2 block text-3 text-#2f2f2f">
+        {{ meetingDetail.description }}
+      </text>
+    </view>
+
+    <view class="mx-4 mt-6 rounded-4 bg-white px-6 py-5 text-center">
+      <text class="block text-3 text-#8a8f99">
+        {{ meetingDetail.tipTitle }}
+      </text>
+      <text class="mt-2 block text-2.5 text-#c2c6cc">
+        {{ meetingDetail.tipContent }}
+      </text>
+    </view>
+
+    <!-- <view
+      class="btn-wrap fixed bottom-0 left-0 right-0 z-10 border-t border-#f0f1f2 bg-white px-4 py-3 pb-[calc(12px+env(safe-area-inset-bottom))]"
+    >
+      <wd-button
+        custom-class="w-48%" type="error" plain :loading="canceling" :round="false"
+        @click="handleCancelMeeting"
+      >
+        取消会议
+      </wd-button>
+      <wd-button type="primary" custom-class="w-48%" block :round="false" @click="goToEdit">
+        编辑会议
+      </wd-button>
+    </view> -->
   </view>
 </template>
 
 <style scoped>
-.meet-time {
-  padding: 32rpx 0;
-  margin-top: 24rpx;
+.btn-wrap {
   display: flex;
   justify-content: space-between;
-  background: #FFFFFF;
 }
 
-.title {
-  font-weight: 600;
-  font-size: 36rpx;
-  color: #333333;
-  line-height: 36rpx;
-}
-
-.desc-text {
-  font-weight: 400;
-  font-size: 28rpx;
-  color: #333333;
-  line-height: 28rpx;
-}
-
-.left,
-.right {
-  display: flex;
+.time-wrap {
+  display: inline-flex;
   flex-direction: column;
   align-items: center;
-  flex: 1;
 }
 
-.time {
-  font-weight: 500;
-  font-size: 32rpx;
-  color: #333333;
-  line-height: 32rpx;
-}
-
-.desc {
-  margin-top: 18rpx;
-  font-weight: 400;
+.duration-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 108rpx;
+  height: 56rpx;
+  background: #F6F8FA;
+  border-radius: 8rpx;
   font-size: 24rpx;
-  color: #666666;
+  color: #333333;
   line-height: 24rpx;
 }
 
-.meeting-page {
-  font-size: 30rpx;
+.timezone {
+  margin-top: 10rpx;
+  font-weight: 400;
+  font-size: 20rpx;
+  color: #333333;
+  line-height: 20rpx;
+}
+
+.duration-wrap {
+  padding: 0 16rpx;
+  display: flex;
+  align-items: center;
+}
+
+.line {
+  width: 56rpx;
+  height: 2rpx;
+  background: #DADBE0;
 }
 </style>

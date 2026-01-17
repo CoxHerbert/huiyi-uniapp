@@ -5,6 +5,8 @@ definePage({
   name: 'meeting',
   style: {
     navigationBarTitleText: '会议',
+    enablePullDownRefresh: false, // ✅ 关键：不用原生下拉
+    backgroundColor: '#f6f7f9',
   },
 })
 
@@ -26,7 +28,7 @@ interface MeetingItem {
   userName?: string
   meetingId?: string
   createUserName?: string
-  _sortKey?: number // ✅ 用于排序：毫秒级时间戳
+  _sortKey?: number
 }
 
 interface MeetingSection {
@@ -36,7 +38,24 @@ interface MeetingSection {
 
 const meetingSections = ref<MeetingSection[]>([])
 const MEETING_LIST_REFRESH_KEY = 'meeting-list-refresh'
-const refreshing = ref(false)
+const loading = ref(false)
+
+/** ✅ scroll-view 相关：iOS 卡回弹必备 */
+const scrollTop = ref(0)
+const lastScrollTop = ref(0)
+const refresherTriggered = ref(false)
+
+function onScroll(e: any) {
+  lastScrollTop.value = Number(e?.detail?.scrollTop || 0)
+}
+
+/** scroll-top 必须“发生变化”才会生效 */
+function forceScrollToTop() {
+  scrollTop.value = lastScrollTop.value || 1
+  nextTick(() => {
+    scrollTop.value = 0
+  })
+}
 
 const statusMeta = new Map<number, { label: string, className: string }>([
   [1, { label: '已创建', className: 'bg-#e7edff text-#3f5fff' }],
@@ -50,13 +69,11 @@ const statusLabelClass = new Map<string, string>([
 ])
 
 function getStatusMeta(status?: string | number) {
-  if (typeof status === 'number') {
+  if (typeof status === 'number')
     return statusMeta.get(status)
-  }
   const parsed = Number(status)
-  if (!Number.isNaN(parsed)) {
+  if (!Number.isNaN(parsed))
     return statusMeta.get(parsed)
-  }
   if (typeof status === 'string') {
     const className = statusLabelClass.get(status)
     if (className)
@@ -75,6 +92,7 @@ function formatDateLabel(value: Date) {
   const tomorrow = new Date()
   tomorrow.setDate(today.getDate() + 1)
   dayAfterTomorrow.setDate(today.getDate() + 2)
+
   const dateLabel = `${value.getMonth() + 1}月${value.getDate()}日`
   const valueKey = value.toDateString()
   if (valueKey === today.toDateString())
@@ -130,7 +148,6 @@ function deriveStatus(record: any, startTimestamp?: number) {
   return isCreator ? '待开始' : '待进入'
 }
 
-/** 根据开始时间判断 上午/下午（12:00 及以后算下午） */
 function getAmPmLabel(item: MeetingItem) {
   const ts = item.meetingStart
   if (typeof ts === 'number') {
@@ -146,31 +163,23 @@ function getAmPmLabel(item: MeetingItem) {
   return ''
 }
 
-/** ✅ 将各种 createTime 统一转成毫秒时间戳，用于倒叙排序（越大越新） */
 function toMillis(value: any) {
   if (value === undefined || value === null || value === '')
     return 0
-
-  // number / numeric string
   const n = Number(value)
   if (Number.isFinite(n)) {
-    // 秒级时间戳（通常 10 位）→ 转毫秒
     if (n > 0 && n < 1e12)
       return n * 1000
     return n
   }
-
-  // date string
   if (typeof value === 'string') {
     const d = new Date(value.replace(/-/g, '/'))
     const t = d.getTime()
     return Number.isNaN(t) ? 0 : t
   }
-
   return 0
 }
 
-/** ✅ 排序键：优先创建时间，其次用会议开始时间兜底 */
 function getRecordSortKey(record: any) {
   const createRaw
     = record?.create_time
@@ -180,26 +189,19 @@ function getRecordSortKey(record: any) {
       ?? record?.createAt
       ?? record?.createAtTime
       ?? record?.createdTime
-
   const createKey = toMillis(createRaw)
   if (createKey)
     return createKey
 
-  // 兜底：用会议开始时间
-  const startRaw
-    = record?.meeting_start
-      ?? record?.meetingStart
-      ?? record?.start_time
-
+  const startRaw = record?.meeting_start ?? record?.meetingStart ?? record?.start_time
   return toMillis(startRaw)
 }
 
 function normalizeMeetingSections(list: any[]): MeetingSection[] {
   if (!Array.isArray(list))
     return []
-  if (list.length > 0 && Array.isArray(list[0]?.items)) {
+  if (list.length > 0 && Array.isArray(list[0]?.items))
     return list as MeetingSection[]
-  }
 
   const grouped = new Map<string, MeetingItem[]>()
 
@@ -233,9 +235,7 @@ function normalizeMeetingSections(list: any[]): MeetingSection[] {
             const arr = JSON.parse(record.userName)
             return Array.isArray(arr) ? arr.join(',') : ''
           }
-          catch (e) {
-            return ''
-          }
+          catch { return '' }
         })()
       : ''
 
@@ -257,7 +257,7 @@ function normalizeMeetingSections(list: any[]): MeetingSection[] {
       isCreator: Boolean(record?.is_creator ?? record?.isCreator ?? record?.role === 'creator'),
       meetingId: record?.meetingId,
       userName,
-      _sortKey: sortKey, // ✅ 创建时间（毫秒）
+      _sortKey: sortKey,
     }
 
     const derivedStatus = getStatusMeta(item.status)
@@ -269,52 +269,49 @@ function normalizeMeetingSections(list: any[]): MeetingSection[] {
 
     if (!grouped.has(dateLabel))
       grouped.set(dateLabel, [])
-    grouped.get(dateLabel)?.push(item)
+    grouped.get(dateLabel)!.push(item)
   })
 
-  // ✅ 分组内：按创建时间倒叙
   const sections = Array.from(grouped.entries()).map(([date, items]) => {
     const sortedItems = [...items].sort((a, b) => (b._sortKey ?? 0) - (a._sortKey ?? 0))
     const maxKey = sortedItems[0]?._sortKey ?? 0
     return { date, items: sortedItems, _maxKey: maxKey }
   })
 
-  // ✅ 分组间：按该分组最新创建时间倒叙
   sections.sort((a: any, b: any) => (b._maxKey ?? 0) - (a._maxKey ?? 0))
-
-  // 去掉内部字段
   return sections.map(({ date, items }) => ({ date, items }))
 }
 
 async function loadMeetingList() {
+  if (loading.value)
+    return
+  loading.value = true
   try {
     const response = await getMeetingList({ type: 1 })
     const list = response?.data?.data?.records || response?.data?.data || []
-    if (Array.isArray(list) && list.length > 0) {
-      meetingSections.value = normalizeMeetingSections(list)
-    }
-    else {
-      meetingSections.value = []
-    }
+    meetingSections.value = Array.isArray(list) && list.length > 0 ? normalizeMeetingSections(list) : []
   }
-  catch (error) {
-    console.error('fetch meeting list failed', error)
+  catch (e) {
+    console.error('fetch meeting list failed', e)
     meetingSections.value = []
+  }
+  finally {
+    loading.value = false
   }
 }
 
-/** ✅ 是否有数据：任意分组 items 有长度即可 */
 const hasMeetingData = computed(() => {
   if (!Array.isArray(meetingSections.value) || meetingSections.value.length === 0)
     return false
   return meetingSections.value.some(s => Array.isArray(s.items) && s.items.length > 0)
 })
 
-onLoad(() => {
-  loadMeetingList()
-})
+onLoad(() => { loadMeetingList() })
 
 onShow(() => {
+  // ✅ 返回/切 tab 回来，强制复位到顶部（防止 iOS 残留回弹空白）
+  setTimeout(() => forceScrollToTop(), 0)
+
   const shouldRefresh = uni.getStorageSync(MEETING_LIST_REFRESH_KEY)
   if (shouldRefresh) {
     uni.removeStorageSync(MEETING_LIST_REFRESH_KEY)
@@ -323,36 +320,60 @@ onShow(() => {
 })
 
 async function handleRefresh() {
-  if (refreshing.value)
+  if (refresherTriggered.value)
     return
-  refreshing.value = true
-  await loadMeetingList()
-  refreshing.value = false
+  refresherTriggered.value = true
+
+  try {
+    await loadMeetingList()
+  }
+  finally {
+    // ✅ iOS：triggered 直接 false 有时不生效，必须 nextTick + 延迟
+    await nextTick()
+    setTimeout(() => {
+      refresherTriggered.value = false
+      forceScrollToTop()
+    }, 60)
+  }
 }
 
-function goToCreate() {
-  uni.navigateTo({ url: '/pages/meeting/create' })
-}
-
-function goToHistory() {
-  uni.navigateTo({ url: '/pages/meeting/history' })
-}
-
+function goToCreate() { uni.navigateTo({ url: '/pages/meeting/create' }) }
+function goToHistory() { uni.navigateTo({ url: '/pages/meeting/history' }) }
 function goToDetail(meetingId: string, id: string) {
   uni.navigateTo({ url: `/pages/meeting/detail?meetingId=${meetingId}&id=${id}` })
+}
+function resetRefresher() {
+  refresherTriggered.value = false
+  forceScrollToTop()
+}
+
+function handleRefresherRestore() {
+  // 用户松手，回弹结束
+  resetRefresher()
+}
+
+function handleRefresherAbort() {
+  // 系统中断刷新（iOS 很常见）
+  resetRefresher()
 }
 </script>
 
 <template>
-  <view class="meeting-page min-h-screen bg-#f6f7f9">
+  <view class="meeting-page bg-#f6f7f9">
     <scroll-view
       class="meeting-scroll"
       scroll-y
+      enhanced
+      bounces="false"
+      :scroll-top="scrollTop"
       refresher-enabled
-      :refresher-triggered="refreshing"
+      :refresher-triggered="refresherTriggered"
+      @scroll="onScroll"
       @refresherrefresh="handleRefresh"
+      @refresherrestore="handleRefresherRestore"
+      @refresherabort="handleRefresherAbort"
     >
-      <view class="meeting-scroll-content">
+      <view class="meeting-content">
         <view class="bg-white px-4 pb-2 pt-3">
           <view class="flex gap-4">
             <view class="flex flex-col items-center gap-2 rounded-3 py-3" @click="goToCreate">
@@ -380,18 +401,13 @@ function goToDetail(meetingId: string, id: string) {
             预约会议列表
           </text>
 
-          <!-- ✅ 空状态 -->
-          <view
-            v-if="!hasMeetingData"
-            class="flex flex-col items-center justify-center py-14 text-center"
-          >
+          <view v-if="!hasMeetingData" class="flex flex-col items-center justify-center py-14 text-center">
             <image class="h-40 w-40 opacity-80" src="@/static/empty.png" mode="aspectFit" />
             <text class="mt-3 text-3 text-#9aa0a6">
               暂无数据
             </text>
           </view>
 
-          <!-- ✅ 有数据才渲染列表 -->
           <view v-else>
             <view v-for="section in meetingSections" :key="section.date" class="mb-4">
               <view class="mb-2 flex items-center gap-2 text-3 text-#9aa0a6">
@@ -400,16 +416,13 @@ function goToDetail(meetingId: string, id: string) {
               </view>
 
               <view
-                v-for="item in section.items"
-                :key="item.id"
-                class="meet-item mb-3 rounded-4 bg-white py-3"
+                v-for="item in section.items" :key="item.id" class="meet-item mb-3 rounded-4 bg-white py-3"
                 @click="goToDetail(item.meetingId as any, item.id as any)"
               >
                 <view>
                   <view class="flex items-center gap-2">
                     <view
-                      v-if="item.status"
-                      class="rounded-full px-2 py-0.5 text-3 leading-4"
+                      v-if="item.status" class="rounded-full px-2 py-0.5 text-3 leading-4"
                       :class="item.statusClass"
                     >
                       {{ item.status }}
@@ -446,6 +459,7 @@ function goToDetail(meetingId: string, id: string) {
                     </text>
                   </view>
                 </view>
+
                 <wd-icon name="arrow-right" size="22px" />
               </view>
             </view>
@@ -457,25 +471,28 @@ function goToDetail(meetingId: string, id: string) {
 </template>
 
 <style scoped>
-.meet-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+page {
+  height: 100%;
+  background: #f6f7f9;
 }
 
+/* ✅ 用 fixed 锁死容器高度，iOS 不会算错 */
 .meeting-page {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  overflow: hidden;
   font-size: 30rpx;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
 }
 
 .meeting-scroll {
-  flex: 1;
+  height: 100%;
 }
 
-.meeting-scroll-content {
-  padding-bottom: calc(24rpx + 110rpx + env(safe-area-inset-bottom));
+.meeting-content {
+  padding-bottom: 110rpx; /* 给 tabbar 留位置 */
   box-sizing: border-box;
 }
 </style>

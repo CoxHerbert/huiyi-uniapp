@@ -92,7 +92,7 @@
     "custom": true,
     "customize": true,
     "overlay": true,
-    "height": "0",
+    "height": "60",
     "color": "@tabColor",
     "selectedColor": "@tabSelectedColor",
     "backgroundColor": "@tabBgColor",
