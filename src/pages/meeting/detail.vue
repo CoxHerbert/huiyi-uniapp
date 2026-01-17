@@ -22,7 +22,7 @@ interface MeetingInfoApi {
 
 const meetingId = ref('')
 const pageId = ref('')
-const MEETING_LIST_REFRESH_KEY = 'meeting-list-refresh'
+
 const MEETING_DETAIL_REFRESH_KEY = 'meeting-detail-refresh'
 const meetingDetail = reactive({
   title: '-',
@@ -192,10 +192,7 @@ async function handleCancelMeeting() {
   try {
     await cancelMeeting(meetingId.value)
     uni.showToast({ title: '已取消会议', icon: 'none' })
-    uni.setStorageSync(MEETING_LIST_REFRESH_KEY, true)
-    setTimeout(() => {
-      uni.navigateBack()
-    }, 800)
+    await loadMeetingDetail()
   }
   catch (error) {
     console.error('cancel meeting failed', error)
@@ -208,11 +205,11 @@ async function handleCancelMeeting() {
 </script>
 
 <template>
-  <view class="meeting-page min-h-screen bg-#f6f7f9">
-    <view class="bg-white px-4 pt-4">
+  <view class="min-h-screen bg-#f6f7f9">
+    <view class="bg-white px-4 pt-4 fw-600">
       <view class="flex items-center justify-between">
-        <text class="block text-3.5 text-#2f2f2f">
-          {{ meetingDetail.title }}
+        <text class="block text-4 text-#000">
+          会议标题：{{ meetingDetail.title }}
         </text>
         <wd-loading v-if="loading" size="18px" />
       </view>
@@ -222,7 +219,7 @@ async function handleCancelMeeting() {
           <text class="block text-5 text-#2f2f2f font-600">
             {{ meetingDetail.startTime }}
           </text>
-          <text class="text-3 text-#9aa0a6">
+          <text class="text-2.5 text-#9aa0a6">
             {{ meetingDetail.date }}
           </text>
         </view>
@@ -294,7 +291,7 @@ async function handleCancelMeeting() {
       <text class="block text-3 text-#8a8f99">
         {{ meetingDetail.tipTitle }}
       </text>
-      <text class="mt-2 block text-3 text-#c2c6cc">
+      <text class="mt-2 block text-2.5 text-#c2c6cc">
         {{ meetingDetail.tipContent }}
       </text>
     </view>
@@ -319,10 +316,6 @@ async function handleCancelMeeting() {
 .btn-wrap {
   display: flex;
   justify-content: space-between;
-}
-
-.meeting-page {
-  font-size: 30rpx;
 }
 
 .time-wrap {

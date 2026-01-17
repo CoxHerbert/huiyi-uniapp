@@ -19,7 +19,6 @@ interface MeetingInfoApi {
   title?: string
   meeting_start?: number
   meeting_duration?: number
-  admin_userid?: string
   location?: string
   description?: string
   attendees?: { member?: MeetingMember[] }
@@ -36,7 +35,6 @@ const loginInfo = computed(() => userStore.loginInfo)
 const meetingForm = reactive({
   name: '',
   type: '',
-  adminUserid: '',
   hosts: [] as string[],
   startTime: '',
   endTime: '',
@@ -205,24 +203,6 @@ function parseUserIds(value: string) {
     .filter(Boolean)
 }
 
-/** 参与人 + 管理员合并，管理员强制存在，且去重（保持顺序） */
-function mergeParticipantsWithAdmin(participants: string, adminUserid: string) {
-  const list = parseUserIds(participants)
-  const merged = [adminUserid, ...list].filter(Boolean)
-
-  const uniq: string[] = []
-  for (const id of merged) {
-    if (!uniq.includes(id))
-      uniq.push(id)
-  }
-  return uniq
-}
-
-/** 最终参与人（保证包含管理员、去重） */
-const participantsWithAdmin = computed(() => {
-  return mergeParticipantsWithAdmin(meetingForm.participants, meetingForm.adminUserid)
-})
-
 function resolveAttendeeIds(attendees?: { member?: MeetingMember[] }) {
   const members = attendees?.member ?? []
   return Array.isArray(members)
@@ -245,14 +225,13 @@ function applyMeetingToForm(data: MeetingInfoApi) {
   }
 
   meetingForm.name = data.title ?? ''
-  meetingForm.adminUserid = data.admin_userid ?? ''
-  meetingForm.hosts = data.settings?.host ?? (meetingForm.adminUserid ? [meetingForm.adminUserid] : [])
+  meetingForm.hosts = data.settings?.host ?? []
   meetingForm.location = data.location ?? ''
   meetingForm.description = data.description ?? ''
   meetingForm.password = data.settings?.password ?? ''
 
   const attendeeIds = resolveAttendeeIds(data.attendees)
-  meetingForm.participants = mergeParticipantsWithAdmin(attendeeIds.join(','), meetingForm.adminUserid).join(',')
+  meetingForm.participants = attendeeIds.join(',')
 }
 
 async function loadMeetingInfo() {
@@ -271,14 +250,11 @@ async function loadMeetingInfo() {
 
 /** 转成服务端接收格式（统一在这里维护字段映射） */
 function toServerPayload() {
-  const ids = participantsWithAdmin.value.length
-    ? participantsWithAdmin.value
-    : [meetingForm.adminUserid].filter(Boolean)
+  const ids = parseUserIds(meetingForm.participants)
 
   return {
     id: pageId.value,
     meetingId: meetingId.value,
-    admin_userid: meetingForm.adminUserid,
     title: meetingForm.name,
     meeting_start: meetingStartTimestamp.value,
     meeting_duration: meetingDurationSeconds.value,
@@ -298,15 +274,6 @@ const updateMeetingPayload = computed(() => toServerPayload())
 
 async function handleSave() {
   try {
-    if (!meetingForm.adminUserid) {
-      uni.showToast({ title: '请选择管理员', icon: 'none' })
-      return
-    }
-
-    // ✅ 提交前：把 adminUserid 拼进 participants（去重后回写）
-    meetingForm.participants = participantsWithAdmin.value.join(',')
-
-    // ✅ 再按服务端接收格式提交
     await updateMeeting(updateMeetingPayload.value)
     uni.showToast({ title: '会议已更新', icon: 'none' })
     uni.setStorageSync(MEETING_LIST_REFRESH_KEY, true)
@@ -338,7 +305,7 @@ onLoad((options) => {
   >
     <template #time>
       <view class="mb-2 border-#f0f1f2 bg-white px-4 py-3">
-        <!-- <view class="mb-4 flex items-center justify-between">
+        <view class="mb-4 flex items-center justify-between">
           <text class="text-3 text-#8a8f99">
             会议日期
           </text>
@@ -350,7 +317,7 @@ onLoad((options) => {
               <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
             </view>
           </wd-datetime-picker>
-        </view> -->
+        </view>
         <view class="flex items-center justify-center">
           <view class="flex items-center gap-6">
             <view class="text-center">
