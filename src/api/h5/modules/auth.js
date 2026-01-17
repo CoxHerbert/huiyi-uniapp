@@ -36,7 +36,6 @@ export default {
     })
   },
   loginByUsername(tenantId, deptId, roleId, username, password, type, key, code) {
-    console.log(tenantId, deptId, roleId, username, password, type, key, code)
     return request({
       url: '/blade-auth/oauth/token',
       method: 'post',

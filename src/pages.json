@@ -71,18 +71,6 @@
       },
       "layout": "tabbar"
     },
-    // #ifdef MP-WEIXIN
-    {
-      "path": "pages/settings/index",
-      "type": "page",
-      "name": "settings",
-      "layout": "tabbar",
-      "style": {
-        "navigationBarTitleText": "我的"
-      }
-    },
-    // #endif
-    // #ifdef H5
     {
       "path": "pages/settings/index",
       "type": "page",
@@ -92,7 +80,6 @@
         "navigationBarTitleText": "我的"
       }
     }
-    // #endif
   ],
   "subPackages": [],
   "tabBar": {
