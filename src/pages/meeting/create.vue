@@ -179,6 +179,16 @@ watchEffect(() => {
   }
 })
 
+watchEffect(() => {
+  const account = loginInfo.value?.account
+  if (!account)
+    return
+  const participantIds = parseUserIds(meetingForm.participants)
+  if (!participantIds.includes(account)) {
+    meetingForm.participants = [...participantIds, account].join(',')
+  }
+})
+
 /** 解析参与人字符串（支持 、 , ，） */
 function parseUserIds(value: string) {
   return value
