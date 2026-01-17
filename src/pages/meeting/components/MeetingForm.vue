@@ -165,6 +165,10 @@ const participantOptions = computed(() => {
   return userOptions.value.filter(option => !hiddenParticipantAccounts.has(option.account))
 })
 
+const adminOptions = computed(() => {
+  return userOptions.value.filter(option => hiddenParticipantAccounts.has(option.account))
+})
+
 const displayedSelectedParticipants = computed(() => {
   if (participantExpanded.value)
     return selectedParticipants.value
@@ -380,11 +384,11 @@ watch([userAccount, userName], () => {
           <view v-if="userLoading" class="py-4 text-center text-2.5 text-#9aa0a6">
             正在加载...
           </view>
-          <view v-else-if="userOptions.length === 0" class="py-4 text-center text-2.5 text-#9aa0a6">
+          <view v-else-if="adminOptions.length === 0" class="py-4 text-center text-2.5 text-#9aa0a6">
             暂无人员数据
           </view>
           <view
-            v-for="option in userOptions" :key="option.account"
+            v-for="option in adminOptions" :key="option.account"
             class="flex items-center justify-between rounded-3 px-2 py-3 hover:bg-#f6f7fb"
             @click="handleAdminSelect(option)"
           >
