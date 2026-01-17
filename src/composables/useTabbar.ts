@@ -8,7 +8,7 @@ export interface TabbarItem {
 
 const tabbarItems = ref<TabbarItem[]>([
   { name: 'meeting', value: null, active: true, title: '会议', icon: 'calendar' },
-  { name: 'settings', value: null, active: false, title: '基础设置', icon: 'setting' },
+  { name: 'settings', value: null, active: false, title: '我的', icon: 'user' },
 ])
 
 export function useTabbar() {

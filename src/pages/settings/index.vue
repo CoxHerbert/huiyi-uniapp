@@ -3,9 +3,13 @@ definePage({
   name: 'settings',
   layout: 'tabbar',
   style: {
-    navigationBarTitleText: '基础设置',
+    navigationBarTitleText: '我的',
   },
 })
+
+const router = useRouter()
+const userStore = useUserStore()
+const authStore = useAuthStore()
 
 const {
   theme,
@@ -27,15 +31,76 @@ const isDark = computed({
   },
 })
 
+const userInfo = computed(() => userStore.userInfo || {})
+const loginInfo = computed(() => userStore.loginInfo || {})
+
+const displayName = computed(() => {
+  const user = userInfo.value
+  const login = loginInfo.value
+  return (
+    user.real_name
+    || user.realName
+    || user.user_name
+    || user.userName
+    || login.real_name
+    || login.realName
+    || login.user_name
+    || login.userName
+    || login.nick_name
+    || login.nickName
+    || login.account
+    || user.account
+    || '-'
+  )
+})
+
+const employeeNumber = computed(() => {
+  const user = userInfo.value
+  const login = loginInfo.value
+  return (
+    user.account
+    || user.userCode
+    || user.jobNo
+    || user.userId
+    || user.user_id
+    || login.account
+    || login.userCode
+    || login.jobNo
+    || login.userId
+    || login.user_id
+    || '-'
+  )
+})
+
 // 处理主题色选择
 function handleThemeColorSelect(option: any) {
   selectThemeColor(option)
+}
+
+function handleLogout() {
+  uni.showModal({
+    title: '退出登录',
+    content: '确认要退出登录吗？',
+    success: (res) => {
+      if (res.confirm) {
+        authStore.logout()
+        router.replaceAll({ name: 'login' })
+      }
+    },
+  })
 }
 </script>
 
 <template>
   <view class="box-border py-3">
-    <demo-block title="基础设置" transparent>
+    <demo-block title="我的" transparent>
+      <wd-cell-group border custom-class="rounded-2! overflow-hidden">
+        <wd-cell title="姓名" :value="displayName" />
+        <wd-cell title="工号" :value="employeeNumber" />
+      </wd-cell-group>
+    </demo-block>
+
+    <demo-block title="主题设置" transparent>
       <wd-cell-group border custom-class="rounded-2! overflow-hidden">
         <wd-cell title="暗黑模式">
           <wd-switch v-model="isDark" size="18px" />
@@ -49,6 +114,12 @@ function handleThemeColorSelect(option: any) {
             <text>{{ currentThemeColor.name }}</text>
           </view>
         </wd-cell>
+      </wd-cell-group>
+    </demo-block>
+
+    <demo-block title="退出登录" transparent>
+      <wd-cell-group border custom-class="rounded-2! overflow-hidden">
+        <wd-cell title="退出登录" is-link @click="handleLogout" />
       </wd-cell-group>
     </demo-block>
 
