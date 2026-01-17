@@ -291,13 +291,14 @@ watch([userAccount, userName], () => {
   <view class="meeting-page min-h-screen bg-#f5f6f8 pb-8">
     <view class="">
       <slot name="title">
-        <view class="mb-2 flex items-center justify-between bg-white px-3 py-4">
+        <view class="mb-2 flex items-center justify-between bg-white px-3">
           <text class="text-4 text-#8a8f99">
             会议标题
           </text>
           <wd-input
             :model-value="meeting.name" placeholder="请输入会议名称" custom-class="meeting-form-input flex-1 w-full"
             align-right :no-border="true" clearable
+            size="large"
             @update:model-value="(value) => updateField('name', value)"
           />
         </view>
@@ -345,27 +346,27 @@ watch([userAccount, userName], () => {
         </view>
       </slot>
 
-      <view class="mb-2 flex items-center justify-between bg-white px-4 py-3" @click="openHostSheet">
-        <text class="text-3 text-#8a8f99">
+      <view class="mb-2 flex items-center justify-between bg-white px-3" @click="openHostSheet">
+        <text class="text-4 text-#8a8f99">
           主持人
         </text>
         <view class="flex flex-1 items-center justify-end gap-2">
           <wd-input
             :model-value="hostDisplayText" placeholder="请选择主持人" custom-class="meeting-form-input flex-1 w-full"
-            align-right :no-border="true" readonly
+            align-right :no-border="true" readonly size="large"
           />
           <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
         </view>
       </view>
 
-      <view class="mb-2 flex items-center justify-between bg-white px-3 py-4">
-        <text class="text-3 text-#8a8f99">
+      <view class="mb-2 flex items-center justify-between bg-white px-3">
+        <text class="text-4 text-#8a8f99">
           参会人
         </text>
         <view class="flex flex-1 items-center justify-end gap-2" @click="openParticipantSheet">
           <wd-input
             :model-value="participantDisplayText" placeholder="请选择参会人"
-            custom-class="meeting-form-input flex-1 w-full" align-right :no-border="true" readonly
+            custom-class="meeting-form-input flex-1 w-full" align-right :no-border="true" readonly size="large"
           />
           <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
         </view>
@@ -381,13 +382,13 @@ watch([userAccount, userName], () => {
         />
       </view> -->
 
-      <view class="mb-2 flex items-center justify-between bg-white px-4 py-3">
-        <text class="text-3 text-#8a8f99">
+      <view class="mb-2 flex items-center justify-between bg-white px-3">
+        <text class="text-4 text-#8a8f99">
           地点
         </text>
         <wd-input
           :model-value="meeting.location" placeholder="添加地点" custom-class="meeting-form-input flex-1 w-full"
-          align-right :no-border="true" @update:model-value="(value) => updateField('location', value)"
+          align-right :no-border="true" size="large" @update:model-value="(value) => updateField('location', value)"
         />
       </view>
 
@@ -408,11 +409,11 @@ watch([userAccount, userName], () => {
         <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
       </view> -->
 
-      <view class="bg-white px-4 py-3">
+      <view class="bg-white px-3">
         <wd-input
           :model-value="meeting.description" placeholder="请输入会议描述..." type="textarea" auto-height
           custom-class="meeting-form-input w-full" :no-border="true"
-          @update:model-value="(value) => updateField('description', value)"
+          size="large" @update:model-value="(value) => updateField('description', value)"
         />
       </view>
     </view>
