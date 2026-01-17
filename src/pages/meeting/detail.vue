@@ -72,10 +72,11 @@ function safeText(v: any, fallback = '-') {
 }
 
 const statusMeta = new Map<number, { label: string, className: string }>([
-  [1, { label: '已创建', className: 'bg-#e7edff text-#3f5fff' }],
-  [2, { label: '进行中', className: 'bg-#e8f7f0 text-#1e8e5a' }],
+  [1, { label: '待开始', className: 'bg-#fff4e5 text-#ff9f1a' }],
+  [2, { label: '会议中', className: 'bg-#e8f7f0 text-#1e8e5a' }],
   [3, { label: '已结束', className: 'bg-#f1f2f4 text-#8a8f99' }],
   [4, { label: '已取消', className: 'bg-#fdeaea text-#ff4d4f' }],
+  [5, { label: '已过期', className: 'bg-#f1f2f4 text-#8a8f99' }],
 ])
 const statusLabelClass = new Map<string, string>([
   ['待开始', 'bg-#fff4e5 text-#ff9f1a'],
