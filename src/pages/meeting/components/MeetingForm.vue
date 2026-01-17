@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { getUserList } from '@/api/user'
+import { useUserStore } from '@/store/user'
 
 interface MeetingInfo {
   name: string
@@ -23,6 +24,8 @@ const emit = defineEmits<{
   (event: 'update:meeting', value: MeetingInfo): void
 }>()
 
+const userStore = useUserStore()
+const loginInfo = computed(() => userStore.loginInfo)
 const showTypeSheet = ref(false)
 const showHostSheet = ref(false)
 const showParticipantSheet = ref(false)
@@ -48,7 +51,7 @@ function openTypeSheet() {
 }
 
 function openHostSheet() {
-  selectedHostIds.value = [...props.meeting.hosts]
+  selectedHostIds.value = props.meeting.hosts.slice(0, 1)
   showHostSheet.value = true
   loadUsers()
 }
@@ -135,16 +138,11 @@ function applyParticipantSelection() {
 function toggleHost(account: string) {
   if (!account)
     return
-  if (selectedHostIds.value.includes(account)) {
-    selectedHostIds.value = selectedHostIds.value.filter(id => id !== account)
-  }
-  else {
-    selectedHostIds.value = [...selectedHostIds.value, account]
-  }
+  selectedHostIds.value = selectedHostIds.value.includes(account) ? [] : [account]
 }
 
 function applyHostSelection() {
-  updateField('hosts', [...selectedHostIds.value])
+  updateField('hosts', selectedHostIds.value.slice(0, 1))
   showHostSheet.value = false
 }
 
@@ -176,6 +174,8 @@ const optionNameMap = computed(() => new Map(
 ))
 
 function getNameByAccount(account: string) {
+  if (account && account === loginInfo.value?.account && loginInfo.value?.real_name)
+    return loginInfo.value.real_name
   return optionNameMap.value.get(account) || account
 }
 
@@ -416,7 +416,7 @@ watch([userAccount, userName], () => {
           </view>
           <view class="mt-2 flex items-center justify-between text-3 text-#9aa0a6">
             <text>已选 {{ selectedHostIds.length }} 人</text>
-            <text>点击姓名可多选</text>
+            <text>点击姓名选择</text>
           </view>
           <view v-if="selectedHosts.length" class="my-3">
             <view class="flex flex-wrap gap-2">
