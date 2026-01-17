@@ -18,7 +18,7 @@ const MEETING_LIST_REFRESH_KEY = 'meeting-list-refresh'
 const meetingForm = reactive({
   name: '',
   type: '线上会议',
-  adminUserid: 'EW-M1',
+  adminUserid: '',
   startTime: '',
   endTime: '',
   date: '',
@@ -173,6 +173,12 @@ watchEffect(() => {
   meetingForm.duration = durationLabel.value
 })
 
+watchEffect(() => {
+  if (!meetingForm.adminUserid && loginInfo.value?.account) {
+    meetingForm.adminUserid = loginInfo.value.account
+  }
+})
+
 /** 解析参与人字符串（支持 、 , ，） */
 function parseUserIds(value: string) {
   return value
@@ -279,7 +285,7 @@ async function handleCreate() {
                   <text class="block text-5 text-#2f2f2f font-600">
                     {{ meetingForm.startTime }}
                   </text>
-                  <text class="text-2.5 text-#9aa0a6">
+                  <text class="text-3 text-#9aa0a6">
                     {{ meetingForm.date }}
                   </text>
                 </view>
@@ -302,7 +308,7 @@ async function handleCreate() {
                   <text class="block text-5 text-#2f2f2f font-600">
                     {{ meetingForm.endTime }}
                   </text>
-                  <text class="text-2.5 text-#9aa0a6">
+                  <text class="text-3 text-#9aa0a6">
                     {{ meetingForm.date }}
                   </text>
                 </view>

@@ -140,7 +140,7 @@ onLoad((options) => {
 </script>
 
 <template>
-  <view class="min-h-screen bg-#f6f7f9">
+  <view class="meeting-page min-h-screen bg-#f6f7f9">
     <view class="mt-4 bg-white px-4 py-4">
       <view class="flex items-center justify-between">
         <text class="title">
@@ -179,7 +179,7 @@ onLoad((options) => {
                 {{ person?.slice(0, 1) }}
               </view>
             </view>
-            <text class="text-2.5 text-#9aa0a6">
+            <text class="text-3 text-#9aa0a6">
               共{{ historyDetail.userName.length }}人
             </text>
           </view>
@@ -252,5 +252,9 @@ onLoad((options) => {
   font-size: 24rpx;
   color: #666666;
   line-height: 24rpx;
+}
+
+.meeting-page {
+  font-size: 30rpx;
 }
 </style>

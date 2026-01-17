@@ -251,7 +251,7 @@ function goToHistoryDetail(meetingId: number | string) {
 </script>
 
 <template>
-  <view class="min-h-screen bg-#f6f7f9">
+  <view class="meeting-page min-h-screen bg-#f6f7f9">
     <!-- ✅ 搜索框（仅：会议名称 + 发起人） -->
     <view class="bg-white">
       <wd-search
@@ -268,7 +268,7 @@ function goToHistoryDetail(meetingId: number | string) {
 
     <view>
       <view v-for="section in filteredSections" :key="section.date" class="mb-4">
-        <view class="flex items-center justify-between bg-#E0E0E0 px-3 py-1 text-2.5 text-#333333">
+        <view class="flex items-center justify-between bg-#E0E0E0 px-3 py-1 text-3 text-#333333">
           <text>{{ section.date }}</text>
           <text>{{ section.year }}</text>
         </view>
@@ -304,7 +304,7 @@ function goToHistoryDetail(meetingId: number | string) {
       </view>
 
       <!-- ✅ 无结果 -->
-      <view v-if="filteredSections.length === 0" class="py-10 text-center text-2.5 text-#999999">
+      <view v-if="filteredSections.length === 0" class="py-10 text-center text-#999999">
         暂无匹配的会议
       </view>
     </view>
@@ -337,5 +337,9 @@ function goToHistoryDetail(meetingId: number | string) {
   font-size: 24rpx;
   color: #666666;
   line-height: 24rpx;
+}
+
+.meeting-page {
+  font-size: 30rpx;
 }
 </style>
