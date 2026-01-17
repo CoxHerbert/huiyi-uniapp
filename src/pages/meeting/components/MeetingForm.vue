@@ -225,9 +225,12 @@ watch([userAccount, userName], () => {
     <view class="">
       <slot name="title">
         <view class="mb-2 flex items-center justify-between bg-white px-4 py-3">
+          <text class="text-3 text-#8a8f99">
+            会议标题
+          </text>
           <wd-input
             :model-value="meeting.name" placeholder="请输入会议名称" custom-class="meeting-form-input flex-1 w-full"
-            :no-border="true" size="16"
+            align-right :no-border="true" size="16"
             @update:model-value="(value) => updateField('name', value)"
           />
           <wd-icon class="ml-1" name="close" size="16" color="#c4c7cc" @click="meeting.name = ''" />
