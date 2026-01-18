@@ -24,6 +24,8 @@ interface MeetingInfoApi {
   attendees?: { member?: MeetingMember[] }
   settings?: { password?: string, host?: string[] }
   userName?: any
+  users?: any
+  hostUser?: any
 }
 
 const meetingId = ref('')
@@ -38,6 +40,8 @@ const meetingForm = reactive({
   type: '',
   hosts: [] as string[],
   participantNames: [] as string[],
+  users: [] as Array<{ realName: string, account: string }>,
+  hostUser: [] as Array<{ realName: string, account: string }>,
   startTime: '',
   endTime: '',
   date: '',
@@ -234,6 +238,46 @@ function parseUserNames(input: any): string[] {
   return [String(input)].filter(Boolean)
 }
 
+function parseUsers(input: any): Array<{ realName: string, account: string }> {
+  if (!input)
+    return []
+
+  if (Array.isArray(input)) {
+    return input
+      .map((item: any) => ({
+        realName: String(item?.realName ?? '').trim(),
+        account: String(item?.account ?? '').trim(),
+      }))
+      .filter(item => item.realName || item.account)
+  }
+
+  if (typeof input === 'string') {
+    const text = input.trim()
+    if (!text)
+      return []
+    try {
+      const parsed = JSON.parse(text)
+      if (Array.isArray(parsed)) {
+        return parsed
+          .map((item: any) => ({
+            realName: String(item?.realName ?? '').trim(),
+            account: String(item?.account ?? '').trim(),
+          }))
+          .filter(item => item.realName || item.account)
+      }
+    }
+    catch (error) {
+      return []
+    }
+  }
+
+  return []
+}
+
+function parseHostUsers(input: any): Array<{ realName: string, account: string }> {
+  return parseUsers(input)
+}
+
 function shouldFilterAttendee(userid?: string) {
   return typeof userid === 'string' && /^EW-M[1-6]$/.test(userid)
 }
@@ -261,14 +305,38 @@ function applyMeetingToForm(data: MeetingInfoApi) {
   }
 
   meetingForm.name = data.title ?? ''
-  meetingForm.hosts = data.settings?.host ?? []
+  const hostUsers = parseHostUsers(data.hostUser)
+  if (hostUsers.length) {
+    meetingForm.hostUser = hostUsers
+    meetingForm.hosts = hostUsers.map(user => user.account).filter(Boolean)
+  }
+  else {
+    meetingForm.hosts = data.settings?.host ?? []
+    meetingForm.hostUser = meetingForm.hosts.map(account => ({
+      account,
+      realName: '',
+    }))
+  }
   meetingForm.location = data.location ?? ''
   meetingForm.description = data.description ?? ''
   meetingForm.password = data.settings?.password ?? ''
 
-  const attendeeIds = resolveAttendeeIds(data.attendees)
-  meetingForm.participants = attendeeIds.join(',')
-  meetingForm.participantNames = parseUserNames(data.userName)
+  const users = parseUsers(data.users)
+  if (users.length) {
+    meetingForm.users = users
+    meetingForm.participants = users.map(user => user.account).filter(Boolean).join(',')
+    meetingForm.participantNames = users.map(user => user.realName).filter(Boolean)
+  }
+  else {
+    const attendeeIds = resolveAttendeeIds(data.attendees)
+    const names = parseUserNames(data.userName)
+    meetingForm.participants = attendeeIds.join(',')
+    meetingForm.participantNames = names
+    meetingForm.users = attendeeIds.map((account, index) => ({
+      account,
+      realName: names[index] || '',
+    }))
+  }
 }
 
 async function loadMeetingInfo() {
@@ -288,6 +356,29 @@ async function loadMeetingInfo() {
 /** 转成服务端接收格式（统一在这里维护字段映射） */
 function toServerPayload() {
   const ids = parseUserIds(meetingForm.participants)
+  const nameByAccount = new Map<string, string>()
+  meetingForm.users.forEach((user) => {
+    if (user.account)
+      nameByAccount.set(user.account, user.realName)
+  })
+  meetingForm.participantNames.forEach((name, index) => {
+    const account = ids[index]
+    if (account && name && !nameByAccount.has(account))
+      nameByAccount.set(account, name)
+  })
+  const users = ids.map(account => ({
+    account,
+    realName: nameByAccount.get(account) || '',
+  }))
+  const hostNameByAccount = new Map<string, string>()
+  meetingForm.hostUser.forEach((user) => {
+    if (user.account)
+      hostNameByAccount.set(user.account, user.realName)
+  })
+  const hostUser = meetingForm.hosts.map(account => ({
+    account,
+    realName: hostNameByAccount.get(account) || '',
+  }))
 
   return {
     id: pageId.value,
@@ -297,6 +388,8 @@ function toServerPayload() {
     meeting_duration: meetingDurationSeconds.value,
     description: meetingForm.description,
     location: meetingForm.location,
+    users: JSON.stringify(users),
+    hostUser: JSON.stringify(hostUser),
     invitees: {
       userid: ids,
     },

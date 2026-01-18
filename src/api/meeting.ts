@@ -7,6 +7,8 @@ export interface CreateMeetingPayload {
   meeting_duration: number
   description?: string
   location?: string
+  users?: string
+  hostUser?: string
   invitees: {
     userid: string[]
   }
