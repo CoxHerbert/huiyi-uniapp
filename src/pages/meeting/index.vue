@@ -239,6 +239,15 @@ function normalizeMeetingSections(list: any[]): MeetingSection[] {
           catch { return '' }
         })()
       : ''
+    const hostUser = record?.hostUser
+      ? (() => {
+          try {
+            const arr = JSON.parse(record.hostUser).map((u: any) => u.realName)
+            return Array.isArray(arr) ? arr.join(',') : ''
+          }
+          catch { return '' }
+        })()
+      : ''
 
     const item: MeetingItem = {
       id: record?.id,
@@ -258,6 +267,8 @@ function normalizeMeetingSections(list: any[]): MeetingSection[] {
       isCreator: Boolean(record?.is_creator ?? record?.isCreator ?? record?.role === 'creator'),
       meetingId: record?.meetingId,
       userName,
+      hostUser,
+      hostUserStr: record.hostUser,
       _sortKey: sortKey,
     }
 
@@ -340,8 +351,8 @@ async function handleRefresh() {
 
 function goToCreate() { uni.navigateTo({ url: '/pages/meeting/create' }) }
 function goToHistory() { uni.navigateTo({ url: '/pages/meeting/history' }) }
-function goToDetail(meetingId: string, id: string) {
-  uni.navigateTo({ url: `/pages/meeting/detail?meetingId=${meetingId}&id=${id}` })
+function goToDetail(meetingId: string, id: string, hostUserStr: string) {
+  uni.navigateTo({ url: `/pages/meeting/detail?meetingId=${meetingId}&id=${id}&hostUserStr=${hostUserStr}` })
 }
 function resetRefresher() {
   refresherTriggered.value = false
@@ -422,7 +433,7 @@ function handleRefresherAbort() {
                 v-for="item in section.items"
                 :key="item.id"
                 class="meet-card mb-3"
-                @click="goToDetail(item.meetingId as any, item.id as any)"
+                @click="goToDetail(item.meetingId as any, item.id as any, item.hostUserStr as any)"
               >
                 <!-- 标题行 -->
                 <view class="meet-card__header">
@@ -455,22 +466,21 @@ function handleRefresherAbort() {
                       · {{ item.duration }}
                     </text>
                   </view>
-
-                  <text v-if="item.tip" class="meet-tip">
-                    {{ item.tip }}
-                  </text>
-                  <view class="meet-kv__row">
-                    <text class="meet-kv__k">
-                      创建者
-                    </text>
-                    <text class="meet-kv__v">
-                      {{ item.createUserName || '-' }}
-                    </text>
+                  <view class="meet-localion">
+                    {{ item.location }}
                   </view>
                 </view>
 
                 <!-- 摘要信息 -->
                 <view class="meet-kv">
+                  <view class="meet-kv__row">
+                    <text class="meet-kv__k">
+                      主持人
+                    </text>
+                    <text class="meet-kv__v meet-kv__v--truncate">
+                      {{ item.hostUser || '-' }}
+                    </text>
+                  </view>
                   <view class="meet-kv__row">
                     <text class="meet-kv__k">
                       参会人
@@ -578,8 +588,9 @@ page {
 .meet-card__sub {
   margin-top: 14rpx;
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 10rpx;
+  justify-content: space-between;
 }
 
 .meet-time {

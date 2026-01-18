@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { getUserList } from '@/api/user'
+import type { UserOption } from './UserPickerSheet.vue'
+import { computed, reactive, ref } from 'vue'
 import { useUserStore } from '@/store/user'
+import UserPickerSheet from './UserPickerSheet.vue'
 
 interface MeetingInfo {
   name: string
@@ -29,25 +31,19 @@ const emit = defineEmits<{
 
 const userStore = useUserStore()
 const loginInfo = computed(() => userStore.loginInfo)
+
 const showTypeSheet = ref(false)
 const showHostSheet = ref(false)
 const showParticipantSheet = ref(false)
+
 const meetingTypeOptions = [
   { label: '线上会议', value: '线上会议' },
   { label: '线下会议', value: '线下会议' },
 ]
-const userAccount = ref('')
-const userName = ref('')
-const userLoading = ref(false)
-const userLoadingMore = ref(false)
-const userOptions = ref<Array<{ account: string, name: string }>>([])
-const userPage = ref(1)
-const userHasMore = ref(true)
-const userPageSize = 20
+
+/** 仅用于给选择器传默认值（打开时同步 meeting 数据） */
 const selectedParticipantIds = ref<string[]>([])
 const selectedHostIds = ref<string[]>([])
-const participantExpanded = ref(false)
-let searchTimer: ReturnType<typeof setTimeout> | null = null
 
 function updateField<K extends keyof MeetingInfo>(key: K, value: MeetingInfo[K]) {
   emit('update:meeting', { ...props.meeting, [key]: value })
@@ -57,249 +53,77 @@ function openTypeSheet() {
   showTypeSheet.value = true
 }
 
-function resetUserPaging() {
-  userPage.value = 1
-  userHasMore.value = true
-  userOptions.value = []
-}
-
-function openHostSheet() {
-  selectedHostIds.value = props.meeting.hosts.slice(0, 1)
-  showHostSheet.value = true
-  resetUserPaging()
-  loadUsers()
-}
-
 function handleTypeSelect(option: { label: string, value: string }) {
   updateField('type', option.value)
   showTypeSheet.value = false
 }
 
-function resolveUserAccount(record: any) {
-  return String(
-    record?.account
-    ?? record?.userCode
-    ?? record?.jobNumber
-    ?? record?.workNo
-    ?? record?.workCode
-    ?? record?.userid
-    ?? record?.userId
-    ?? record?.id
-    ?? '',
-  ).trim()
-}
-
-function resolveUserName(record: any) {
-  return String(
-    record?.name
-    ?? record?.realName
-    ?? record?.username
-    ?? record?.userName
-    ?? '',
-  ).trim()
-}
-
-async function loadUsers(isLoadMore = false) {
-  if (userLoading.value || userLoadingMore.value)
-    return
-  if (isLoadMore && !userHasMore.value)
-    return
-  try {
-    if (isLoadMore)
-      userLoadingMore.value = true
-    else
-      userLoading.value = true
-    const account = userAccount.value.trim()
-    const name = userName.value.trim()
-    const params = account || name
-      ? { account, realName: name }
-      : {}
-    const response = await getUserList({
-      ...params,
-      current: userPage.value,
-      size: userPageSize,
-    })
-    const records = response?.data?.data?.records || response?.data?.data || []
-    const nextOptions = Array.isArray(records)
-      ? records
-          .map((item: any) => ({
-            account: resolveUserAccount(item),
-            name: resolveUserName(item),
-          }))
-          .filter(item => item.account || item.name)
-      : []
-    if (isLoadMore)
-      userOptions.value = [...userOptions.value, ...nextOptions]
-    else
-      userOptions.value = nextOptions
-    const total = Number(response?.data?.data?.total || 0)
-    if (total) {
-      userHasMore.value = userOptions.value.length < total
-    }
-    else {
-      userHasMore.value = nextOptions.length >= userPageSize
-    }
-    if (userHasMore.value)
-      userPage.value += 1
-  }
-  catch (error) {
-    console.error('fetch user list failed', error)
-    if (!isLoadMore)
-      userOptions.value = []
-  }
-  finally {
-    userLoading.value = false
-    userLoadingMore.value = false
-  }
-}
-
-function openParticipantSheet() {
-  selectedParticipantIds.value = parseUserIds(props.meeting.participants)
-  showParticipantSheet.value = true
-  resetUserPaging()
-  loadUsers()
-}
-
-function handleLoadMore() {
-  loadUsers(true)
-}
-
-function toggleParticipant(account: string) {
-  if (!account)
-    return
-  if (selectedParticipantIds.value.includes(account)) {
-    selectedParticipantIds.value = selectedParticipantIds.value.filter(id => id !== account)
-  }
-  else {
-    selectedParticipantIds.value = [...selectedParticipantIds.value, account]
-  }
-}
-
-function applyParticipantSelection() {
-  updateField('participants', selectedParticipantIds.value.join(','))
-  updateField(
-    'participantNames',
-    selectedParticipants.value.map(participant => participant.name),
-  )
-  updateField(
-    'users',
-    selectedParticipants.value.map(participant => ({
-      realName: participant.name,
-      account: participant.account,
-    })),
-  )
-  showParticipantSheet.value = false
-}
-
-function toggleHost(account: string) {
-  if (!account)
-    return
-  selectedHostIds.value = selectedHostIds.value.includes(account) ? [] : [account]
-}
-
-function applyHostSelection() {
-  updateField('hosts', selectedHostIds.value.slice(0, 1))
-  updateField(
-    'hostUser',
-    selectedHosts.value.map(host => ({
-      realName: host.name,
-      account: host.account,
-    })),
-  )
-  showHostSheet.value = false
-}
-
 function parseUserIds(value: string) {
-  return value
+  return (value || '')
     .split(/[、,，]/)
     .map(item => item.trim())
     .filter(Boolean)
 }
 
-const selectedParticipants = computed(() => {
-  if (!selectedParticipantIds.value.length)
-    return []
-  const optionMap = new Map(
-    userOptions.value.map(option => [option.account, option]),
+function openHostSheet() {
+  selectedHostIds.value = (props.meeting.hosts || []).slice(0, 1)
+  showHostSheet.value = true
+}
+
+function openParticipantSheet() {
+  selectedParticipantIds.value = parseUserIds(props.meeting.participants)
+  showParticipantSheet.value = true
+}
+
+/** 选择器确认：主持人 */
+function onHostConfirm(payload: { selectedIds: string[], selectedUsers: UserOption[] }) {
+  const ids = (payload.selectedIds || []).slice(0, 1)
+  selectedHostIds.value = ids
+
+  updateField('hosts', ids)
+  updateField(
+    'hostUser',
+    (payload.selectedUsers || []).slice(0, 1).map(u => ({ realName: u.name, account: u.account })),
   )
-  return selectedParticipantIds.value.map((account) => {
-    const option = optionMap.get(account)
-    return {
-      account,
-      name: option?.name || account,
-    }
-  })
-})
+}
 
-const participantOptions = computed(() => userOptions.value)
-const optionNameMap = computed(() => new Map(
-  userOptions.value.map(option => [option.account, option.name || option.account]),
-))
+/** 选择器确认：参会人 */
+function onParticipantConfirm(payload: { selectedIds: string[], selectedUsers: UserOption[] }) {
+  const ids = payload.selectedIds || []
+  selectedParticipantIds.value = ids
 
+  updateField('participants', ids.join(','))
+  updateField('participantNames', (payload.selectedUsers || []).map(u => u.name))
+  updateField(
+    'users',
+    (payload.selectedUsers || []).map(u => ({ realName: u.name, account: u.account })),
+  )
+}
+
+/** 展示：如果当前账号是登录人且有 real_name，优先展示登录人姓名 */
 function getNameByAccount(account: string) {
   if (account && account === loginInfo.value?.account && loginInfo.value?.real_name)
     return loginInfo.value.real_name
-  return optionNameMap.value.get(account) || account
+  return account
 }
 
 const hostDisplayText = computed(() => {
-  const names = props.meeting.hosts.map(account => getNameByAccount(account))
+  // 优先使用 hostUser（更稳定，不依赖反查）
+  if (props.meeting.hostUser?.length)
+    return props.meeting.hostUser.map(u => u.realName || u.account).filter(Boolean).join('、')
+
+  const names = (props.meeting.hosts || []).map(account => getNameByAccount(account))
   return names.filter(Boolean).join('、')
 })
 
 const participantDisplayText = computed(() => {
+  // ✅ 优先使用 participantNames（来自选择器确认写入）
   if (props.meeting.participantNames?.length)
     return props.meeting.participantNames.join('、')
+
+  // 退化：显示账号（不依赖子组件 userOptions）
   const accounts = parseUserIds(props.meeting.participants)
-  const names = accounts.map(account => getNameByAccount(account))
-  return names.filter(Boolean).join('、')
-})
-
-const selectedHosts = computed(() => {
-  if (!selectedHostIds.value.length)
-    return []
-  const optionMap = new Map(
-    userOptions.value.map(option => [option.account, option]),
-  )
-  return selectedHostIds.value.map((account) => {
-    const option = optionMap.get(account)
-    return {
-      account,
-      name: option?.name || account,
-    }
-  })
-})
-
-const displayedSelectedParticipants = computed(() => {
-  if (participantExpanded.value)
-    return selectedParticipants.value
-  return selectedParticipants.value.slice(0, 6)
-})
-
-const shouldShowToggle = computed(() => selectedParticipants.value.length > 6)
-
-function toggleSelectedUser(account: string) {
-  toggleParticipant(account)
-}
-
-function toggleParticipantExpanded() {
-  participantExpanded.value = !participantExpanded.value
-}
-
-function resetUserSearch() {
-  userAccount.value = ''
-  userName.value = ''
-  resetUserPaging()
-  loadUsers()
-}
-
-watch([userAccount, userName], () => {
-  if (searchTimer)
-    clearTimeout(searchTimer)
-  searchTimer = setTimeout(() => {
-    resetUserPaging()
-    loadUsers()
-  }, 300)
+  return accounts.map(a => getNameByAccount(a)).filter(Boolean).join('、')
 })
 </script>
 
@@ -312,15 +136,21 @@ watch([userAccount, userName], () => {
             会议标题
           </text>
           <wd-input
-            :model-value="meeting.name" placeholder="请输入会议名称" custom-class="meeting-form-input flex-1 w-full"
-            align-right :no-border="true" clearable
+            :model-value="meeting.name"
+            placeholder="请输入会议名称"
+            custom-class="meeting-form-input flex-1 w-full"
+            align-right
+            :no-border="true"
+            clearable
             size="large"
             @update:model-value="(value) => updateField('name', value)"
           />
         </view>
       </slot>
 
-      <!-- <view class="mb-2 flex items-center justify-between bg-white px-4 py-3" @click="openTypeSheet">
+      <!-- 会议类型（如需启用，取消注释即可） -->
+      <!--
+      <view class="mb-2 flex items-center justify-between bg-white px-4 py-3" @click="openTypeSheet">
         <text class="text-3 text-#8a8f99">
           会议类型
         </text>
@@ -330,7 +160,8 @@ watch([userAccount, userName], () => {
           </text>
           <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
         </view>
-      </view> -->
+      </view>
+      -->
 
       <slot name="time">
         <view class="mb-2 bg-white px-4 py-3">
@@ -368,8 +199,13 @@ watch([userAccount, userName], () => {
         </text>
         <view class="flex flex-1 items-center justify-end gap-2">
           <wd-input
-            :model-value="hostDisplayText" placeholder="请选择主持人" custom-class="meeting-form-input flex-1 w-full"
-            align-right :no-border="true" readonly size="large"
+            :model-value="hostDisplayText"
+            placeholder="请选择主持人"
+            custom-class="meeting-form-input flex-1 w-full"
+            align-right
+            :no-border="true"
+            readonly
+            size="large"
           />
           <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
         </view>
@@ -381,55 +217,45 @@ watch([userAccount, userName], () => {
         </text>
         <view class="flex flex-1 items-center justify-end gap-2" @click="openParticipantSheet">
           <wd-input
-            :model-value="participantDisplayText" placeholder="请选择参会人"
-            custom-class="meeting-form-input flex-1 w-full" align-right :no-border="true" readonly size="large"
+            :model-value="participantDisplayText"
+            placeholder="请选择参会人"
+            custom-class="meeting-form-input flex-1 w-full"
+            align-right
+            :no-border="true"
+            readonly
+            size="large"
           />
           <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
         </view>
       </view>
 
-      <!-- <view class="flex items-center justify-between bg-white px-4 py-3">
-        <text class="text-3 text-#8a8f99">
-          会议室
-        </text>
-        <wd-input
-          :model-value="meeting.room" placeholder="选择会议室" custom-class="meeting-form-input flex-1 w-full"
-          align-right :no-border="true" @update:model-value="(value) => updateField('room', value)"
-        />
-      </view> -->
-
+      <!-- 会议地点 -->
       <view class="mb-2 flex items-center justify-between bg-white px-3">
         <text class="text-4 text-#8a8f99">
-          地点
+          会议地点
         </text>
         <wd-input
-          :model-value="meeting.location" placeholder="添加地点" custom-class="meeting-form-input flex-1 w-full"
-          align-right :no-border="true" size="large" @update:model-value="(value) => updateField('location', value)"
+          :model-value="meeting.location"
+          placeholder="添加会议地点"
+          custom-class="meeting-form-input flex-1 w-full"
+          align-right
+          :no-border="true"
+          size="large"
+          @update:model-value="(value) => updateField('location', value)"
         />
       </view>
 
-      <!-- <view class="mb-2 flex items-center justify-between bg-white px-4 py-3">
-        <text class="text-3 text-#8a8f99">
-          会议密码
-        </text>
-        <wd-input
-          :model-value="meeting.password" placeholder="请设置会议密码" custom-class="meeting-form-input flex-1 w-full"
-          align-right :no-border="true" @update:model-value="(value) => updateField('password', value)"
-        />
-      </view> -->
-
-      <!-- <view class="mb-2 flex items-center justify-between bg-white px-4 py-3">
-        <text class="text-3 text-#8a8f99">
-          添加会议附件
-        </text>
-        <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
-      </view> -->
-
+      <!-- 描述 -->
       <view class="bg-white px-3">
         <wd-input
-          :model-value="meeting.description" placeholder="请输入会议描述..." type="textarea" auto-height
-          custom-class="meeting-form-input w-full" :no-border="true"
-          size="large" @update:model-value="(value) => updateField('description', value)"
+          :model-value="meeting.description"
+          placeholder="请输入会议描述..."
+          type="textarea"
+          auto-height
+          custom-class="meeting-form-input w-full"
+          :no-border="true"
+          size="large"
+          @update:model-value="(value) => updateField('description', value)"
         />
       </view>
     </view>
@@ -442,10 +268,12 @@ watch([userAccount, userName], () => {
       </wd-button>
     </view>
 
+    <!-- 会议类型 ActionSheet（如启用类型选择，取消注释上面的入口即可） -->
     <wd-action-sheet v-model="showTypeSheet" title="会议类型" :close-on-click-action="true">
       <view class="px-4 pb-4">
         <view
-          v-for="option in meetingTypeOptions" :key="option.value"
+          v-for="option in meetingTypeOptions"
+          :key="option.value"
           class="flex items-center justify-between border-b border-#f0f1f2 py-3 last:border-b-0"
           @click="handleTypeSelect(option)"
         >
@@ -458,226 +286,28 @@ watch([userAccount, userName], () => {
       <wd-gap :height="50" />
     </wd-action-sheet>
 
-    <wd-action-sheet v-model="showHostSheet" title="选择主持人" :close-on-click-action="true">
-      <view class="picker-sheet">
-        <view class="picker-header px-4 pt-3">
-          <view class="flex items-center gap-2 rounded-3 bg-#f3f4f6 px-3 py-2">
-            <wd-icon name="search" size="16px" color="#9aa0a6" />
-            <wd-input
-              v-model="userAccount" placeholder="搜索账号" custom-class="meeting-form-input w-full" align-right
-              :no-border="true"
-            />
-            <wd-input
-              v-model="userName" placeholder="搜索姓名" custom-class="meeting-form-input w-full" align-right
-              :no-border="true"
-            />
-            <view
-              class="h-6 w-6 flex items-center justify-center rounded-full bg-white text-#c4c7cc"
-              @click="resetUserSearch"
-            >
-              <wd-icon name="close" size="12px" color="#c4c7cc" />
-            </view>
-          </view>
-          <view class="mt-2 flex items-center justify-between text-3 text-#9aa0a6">
-            <text>已选 {{ selectedHostIds.length }} 人</text>
-            <text>点击姓名选择</text>
-          </view>
-          <view v-if="selectedHosts.length" class="my-3">
-            <view class="flex flex-wrap gap-2">
-              <view
-                v-for="person in selectedHosts" :key="person.account"
-                class="flex items-center gap-1 rounded-full bg-#eef2ff px-2 py-1 text-3 text-#4f7bff"
-                @click="toggleHost(person.account)"
-              >
-                <text>{{ person.name }}</text>
-                <wd-icon name="close" size="10px" color="#4f7bff" />
-              </view>
-            </view>
-          </view>
-        </view>
-        <scroll-view class="picker-body px-4 pb-4" scroll-y :lower-threshold="40" @scrolltolower="handleLoadMore">
-          <view v-if="userLoading" class="py-4 text-center text-3 text-#9aa0a6">
-            正在加载...
-          </view>
-          <view v-else-if="userOptions.length === 0" class="py-4 text-center text-3 text-#9aa0a6">
-            暂无人员数据
-          </view>
-          <view
-            v-for="option in participantOptions" :key="option.account"
-            class="flex items-center justify-between rounded-3 px-2 py-3 hover:bg-#f6f7fb"
-            @click="toggleHost(option.account)"
-          >
-            <view class="flex items-center gap-3">
-              <view class="h-8 w-8 flex items-center justify-center rounded-2 bg-#eef2ff text-3 text-#4f7bff font-600">
-                {{ (option.name || option.account).slice(0, 1) }}
-              </view>
-              <view class="flex flex-col">
-                <text class="text-3 text-#2f2f2f">
-                  {{ option.name || option.account }}
-                </text>
-                <text v-if="option.name && option.account" class="text-3 text-#9aa0a6">
-                  {{ option.account }}
-                </text>
-              </view>
-            </view>
-            <view
-              class="h-6 w-6 flex items-center justify-center border border-#e3e6ee rounded-full"
-              :class="selectedHostIds.includes(option.account) ? 'bg-#4f7bff text-white border-#4f7bff' : 'bg-white text-transparent'"
-            >
-              <wd-icon
-                name="check" size="12px"
-                :color="selectedHostIds.includes(option.account) ? '#ffffff' : '#ffffff'"
-              />
-            </view>
-          </view>
-          <view v-if="userLoadingMore" class="py-3 text-center text-3 text-#9aa0a6">
-            正在加载更多...
-          </view>
-          <view v-else-if="!userHasMore && userOptions.length" class="py-3 text-center text-3 text-#c2c6cc">
-            没有更多了
-          </view>
-        </scroll-view>
-        <view class="picker-footer px-4">
-          <wd-button custom-class="w-48%" type="info" @click="showHostSheet = false">
-            取消
-          </wd-button>
+    <!-- ✅ 主持人选择器（单选） -->
+    <UserPickerSheet
+      v-model="showHostSheet"
+      title="选择主持人"
+      mode="single"
+      :default-selected="selectedHostIds"
+      @confirm="onHostConfirm"
+    />
 
-          <wd-button custom-class="w-48%" type="primary" @click="applyHostSelection">
-            确认
-          </wd-button>
-        </view>
-      </view>
-    </wd-action-sheet>
-
-    <wd-action-sheet v-model="showParticipantSheet" title="选择参会人" :close-on-click-action="true">
-      <view class="picker-sheet">
-        <view class="picker-header px-4 pt-3">
-          <view class="flex items-center gap-2 rounded-3 bg-#f3f4f6 px-3 py-2">
-            <wd-icon name="search" size="16px" color="#9aa0a6" />
-            <wd-input
-              v-model="userAccount" placeholder="搜索账号" custom-class="meeting-form-input w-full" align-right
-              :no-border="true"
-            />
-            <wd-input
-              v-model="userName" placeholder="搜索姓名" custom-class="meeting-form-input w-full" align-right
-              :no-border="true"
-            />
-            <view
-              class="h-6 w-6 flex items-center justify-center rounded-full bg-white text-#c4c7cc"
-              @click="resetUserSearch"
-            >
-              <wd-icon name="close" size="12px" color="#c4c7cc" />
-            </view>
-          </view>
-          <view class="mt-2 flex items-center justify-between text-3 text-#9aa0a6">
-            <text>已选 {{ selectedParticipantIds.length }} 人</text>
-            <text>点击姓名可多选</text>
-          </view>
-          <view v-if="selectedParticipants.length" class="my-3">
-            <view class="flex flex-wrap gap-2">
-              <view
-                v-for="person in displayedSelectedParticipants" :key="person.account"
-                class="flex items-center gap-1 rounded-full bg-#eef2ff px-2 py-1 text-3 text-#4f7bff"
-                @click="toggleSelectedUser(person.account)"
-              >
-                <text>{{ person.name }}</text>
-                <wd-icon name="close" size="10px" color="#4f7bff" />
-              </view>
-            </view>
-            <view v-if="shouldShowToggle" class="mt-2 text-right text-3 text-#4f7bff">
-              <text @click="toggleParticipantExpanded">
-                {{ participantExpanded ? '收起' : '展开' }}
-              </text>
-            </view>
-          </view>
-        </view>
-        <scroll-view class="picker-body px-4 pb-4" scroll-y :lower-threshold="40" @scrolltolower="handleLoadMore">
-          <view v-if="userLoading" class="py-4 text-center text-3 text-#9aa0a6">
-            正在加载...
-          </view>
-          <view v-else-if="userOptions.length === 0" class="py-4 text-center text-3 text-#9aa0a6">
-            暂无人员数据
-          </view>
-          <view
-            v-for="option in participantOptions" :key="option.account"
-            class="flex items-center justify-between rounded-3 px-2 py-3 hover:bg-#f6f7fb"
-            @click="toggleParticipant(option.account)"
-          >
-            <view class="flex items-center gap-3">
-              <view class="h-8 w-8 flex items-center justify-center rounded-2 bg-#eef2ff text-3 text-#4f7bff font-600">
-                {{ (option.name || option.account).slice(0, 1) }}
-              </view>
-              <view class="flex flex-col">
-                <text class="text-3 text-#2f2f2f">
-                  {{ option.name || option.account }}
-                </text>
-                <text v-if="option.name && option.account" class="text-3 text-#9aa0a6">
-                  {{ option.account }}
-                </text>
-              </view>
-            </view>
-            <view
-              class="h-6 w-6 flex items-center justify-center border border-#e3e6ee rounded-full"
-              :class="selectedParticipantIds.includes(option.account) ? 'bg-#4f7bff text-white border-#4f7bff' : 'bg-white text-transparent'"
-            >
-              <wd-icon
-                name="check" size="12px"
-                :color="selectedParticipantIds.includes(option.account) ? '#ffffff' : '#ffffff'"
-              />
-            </view>
-          </view>
-          <view v-if="userLoadingMore" class="py-3 text-center text-3 text-#9aa0a6">
-            正在加载更多...
-          </view>
-          <view v-else-if="!userHasMore && userOptions.length" class="py-3 text-center text-3 text-#c2c6cc">
-            没有更多了
-          </view>
-        </scroll-view>
-        <view class="picker-footer px-4">
-          <wd-button custom-class="w-48%" type="info" @click="showParticipantSheet = false">
-            取消
-          </wd-button>
-
-          <wd-button custom-class="w-48%" type="primary" @click="applyParticipantSelection">
-            确认
-          </wd-button>
-        </view>
-      </view>
-    </wd-action-sheet>
+    <!-- ✅ 参会人选择器（多选） -->
+    <UserPickerSheet
+      v-model="showParticipantSheet"
+      title="选择参会人"
+      mode="multiple"
+      :default-selected="selectedParticipantIds"
+      @confirm="onParticipantConfirm"
+    />
   </view>
 </template>
 
 <style scoped>
-.picker-sheet {
-  display: flex;
-  flex-direction: column;
-  height: 72vh;
-}
-
 .meeting-page {
   font-size: 30rpx;
-}
-
-.picker-header {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  background: #ffffff;
-}
-
-.picker-body {
-  flex: 1;
-  min-height: 0;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.picker-footer {
-  position: sticky;
-  bottom: 0;
-  z-index: 2;
-  background: #ffffff;
-  display: flex;
-  justify-content: space-between;
 }
 </style>
