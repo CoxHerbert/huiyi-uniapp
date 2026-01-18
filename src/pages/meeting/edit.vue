@@ -25,6 +25,7 @@ interface MeetingInfoApi {
   settings?: { password?: string, host?: string[] }
   userName?: any
   users?: any
+  hostUser?: any
 }
 
 const meetingId = ref('')
@@ -40,6 +41,7 @@ const meetingForm = reactive({
   hosts: [] as string[],
   participantNames: [] as string[],
   users: [] as Array<{ realName: string, account: string }>,
+  hostUser: [] as Array<{ realName: string, account: string }>,
   startTime: '',
   endTime: '',
   date: '',
@@ -272,6 +274,10 @@ function parseUsers(input: any): Array<{ realName: string, account: string }> {
   return []
 }
 
+function parseHostUsers(input: any): Array<{ realName: string, account: string }> {
+  return parseUsers(input)
+}
+
 function shouldFilterAttendee(userid?: string) {
   return typeof userid === 'string' && /^EW-M[1-6]$/.test(userid)
 }
@@ -299,7 +305,18 @@ function applyMeetingToForm(data: MeetingInfoApi) {
   }
 
   meetingForm.name = data.title ?? ''
-  meetingForm.hosts = data.settings?.host ?? []
+  const hostUsers = parseHostUsers(data.hostUser)
+  if (hostUsers.length) {
+    meetingForm.hostUser = hostUsers
+    meetingForm.hosts = hostUsers.map(user => user.account).filter(Boolean)
+  }
+  else {
+    meetingForm.hosts = data.settings?.host ?? []
+    meetingForm.hostUser = meetingForm.hosts.map(account => ({
+      account,
+      realName: '',
+    }))
+  }
   meetingForm.location = data.location ?? ''
   meetingForm.description = data.description ?? ''
   meetingForm.password = data.settings?.password ?? ''
@@ -353,6 +370,15 @@ function toServerPayload() {
     account,
     realName: nameByAccount.get(account) || '',
   }))
+  const hostNameByAccount = new Map<string, string>()
+  meetingForm.hostUser.forEach((user) => {
+    if (user.account)
+      hostNameByAccount.set(user.account, user.realName)
+  })
+  const hostUser = meetingForm.hosts.map(account => ({
+    account,
+    realName: hostNameByAccount.get(account) || '',
+  }))
 
   return {
     id: pageId.value,
@@ -363,6 +389,7 @@ function toServerPayload() {
     description: meetingForm.description,
     location: meetingForm.location,
     users: JSON.stringify(users),
+    hostUser: JSON.stringify(hostUser),
     invitees: {
       userid: ids,
     },

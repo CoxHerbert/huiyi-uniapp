@@ -8,6 +8,7 @@ interface MeetingInfo {
   hosts: string[]
   participantNames?: string[]
   users?: Array<{ realName: string, account: string }>
+  hostUser?: Array<{ realName: string, account: string }>
   startTime: string
   endTime: string
   date: string
@@ -198,6 +199,13 @@ function toggleHost(account: string) {
 
 function applyHostSelection() {
   updateField('hosts', selectedHostIds.value.slice(0, 1))
+  updateField(
+    'hostUser',
+    selectedHosts.value.map(host => ({
+      realName: host.name,
+      account: host.account,
+    })),
+  )
   showHostSheet.value = false
 }
 
