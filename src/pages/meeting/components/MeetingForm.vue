@@ -243,11 +243,24 @@ function getNameByAccount(account: string) {
 }
 
 const hostDisplayText = computed(() => {
-  const names = props.meeting.hosts.map(account => getNameByAccount(account))
+  const hostUsers = props.meeting.hostUser ?? []
+  if (hostUsers.length) {
+    const names = hostUsers.map(user => user.realName || getNameByAccount(user.account))
+    return names.filter(Boolean).join('、')
+  }
+  const accounts = props.meeting.hosts.length
+    ? props.meeting.hosts
+    : hostUsers.map(user => user.account)
+  const names = accounts.map(account => getNameByAccount(account))
   return names.filter(Boolean).join('、')
 })
 
 const participantDisplayText = computed(() => {
+  const users = props.meeting.users ?? []
+  if (users.length) {
+    const names = users.map(user => user.realName || getNameByAccount(user.account))
+    return names.filter(Boolean).join('、')
+  }
   if (props.meeting.participantNames?.length)
     return props.meeting.participantNames.join('、')
   const accounts = parseUserIds(props.meeting.participants)
