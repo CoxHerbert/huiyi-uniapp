@@ -400,7 +400,7 @@ function handleRefresherAbort() {
 
         <!-- 列表区 -->
         <view class="mt-4 bg-white px-4 pb-4 pt-2">
-          <text class="mb-3 mt-4 block text-4 text-#2f2f2f font-600">
+          <text class="mb-3 mt-1 block text-4 text-#2f2f2f font-600">
             未结束的会议
           </text>
 
@@ -459,10 +459,6 @@ function handleRefresherAbort() {
                   <text v-if="item.tip" class="meet-tip">
                     {{ item.tip }}
                   </text>
-                </view>
-
-                <!-- 摘要信息 -->
-                <view class="meet-kv">
                   <view class="meet-kv__row">
                     <text class="meet-kv__k">
                       创建者
@@ -471,7 +467,10 @@ function handleRefresherAbort() {
                       {{ item.createUserName || '-' }}
                     </text>
                   </view>
+                </view>
 
+                <!-- 摘要信息 -->
+                <view class="meet-kv">
                   <view class="meet-kv__row">
                     <text class="meet-kv__k">
                       参会人
