@@ -18,6 +18,8 @@ const props = defineProps<{
   mode: PickMode
   /** 默认选中的 account 列表 */
   defaultSelected?: string[]
+  /** 默认选中的人员信息（用于回显姓名） */
+  defaultSelectedUsers?: UserOption[]
 }>()
 
 const emit = defineEmits<{
@@ -151,7 +153,15 @@ function togglePick(account: string) {
 const selectedUsers = computed<UserOption[]>(() => {
   if (!selectedIds.value.length)
     return []
-  const map = new Map(userOptions.value.map(o => [o.account, o]))
+  const map = new Map<string, UserOption>()
+  ;(props.defaultSelectedUsers || []).forEach((user) => {
+    if (user?.account)
+      map.set(user.account, user)
+  })
+  userOptions.value.forEach((option) => {
+    if (option?.account)
+      map.set(option.account, option)
+  })
   return selectedIds.value.map((account) => {
     const option = map.get(account)
     return { account, name: option?.name || account }

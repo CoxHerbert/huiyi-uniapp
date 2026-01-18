@@ -203,13 +203,33 @@ watchEffect(() => {
 })
 
 watchEffect(() => {
+  const loginAccount = loginInfo.value?.account
+  if (!loginAccount)
+    return
+  if (!meetingForm.hostUser.length) {
+    meetingForm.hostUser = [{
+      account: loginAccount,
+      realName: loginInfo.value?.real_name || '',
+    }]
+  }
+})
+
+watchEffect(() => {
   const account = loginInfo.value?.account
   if (!account)
     return
-  const participantIds = parseUserIds(meetingForm.participants)
-  if (!participantIds.includes(account)) {
-    meetingForm.participants = [...participantIds, account].join(',')
+  if (!meetingForm.users.some(user => user.account === account)) {
+    meetingForm.users = [
+      ...meetingForm.users,
+      { account, realName: loginInfo.value?.real_name || '' },
+    ]
   }
+  const ids = meetingForm.users.map(user => user.account).filter(Boolean)
+  if (ids.length)
+    meetingForm.participants = ids.join(',')
+  meetingForm.participantNames = meetingForm.users
+    .map(user => user.realName)
+    .filter(Boolean)
 })
 
 /** 解析参与人字符串（支持 、 , ，） */
@@ -266,9 +286,10 @@ function buildHostUsers() {
 
 /** 转成服务端接收格式（统一在这里维护字段映射） */
 function toServerPayload() {
-  const ids = parseUserIds(meetingForm.participants)
-  const users = buildUsers()
-  const hostUser = buildHostUsers()
+  const users = meetingForm.users.length ? meetingForm.users : buildUsers()
+  const hostUser = meetingForm.hostUser.length ? meetingForm.hostUser : buildHostUsers()
+  const ids = users.map(user => user.account).filter(Boolean)
+  const hostIds = hostUser.map(user => user.account).filter(Boolean)
 
   return {
     title: meetingForm.name,
@@ -283,7 +304,7 @@ function toServerPayload() {
     },
     settings: {
       password: meetingForm.password,
-      host: meetingForm.hosts,
+      host: hostIds,
       remind_scope: 1,
     },
   }

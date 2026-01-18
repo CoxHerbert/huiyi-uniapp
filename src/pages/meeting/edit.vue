@@ -355,30 +355,15 @@ async function loadMeetingInfo() {
 
 /** 转成服务端接收格式（统一在这里维护字段映射） */
 function toServerPayload() {
-  const ids = parseUserIds(meetingForm.participants)
-  const nameByAccount = new Map<string, string>()
-  meetingForm.users.forEach((user) => {
-    if (user.account)
-      nameByAccount.set(user.account, user.realName)
-  })
-  meetingForm.participantNames.forEach((name, index) => {
-    const account = ids[index]
-    if (account && name && !nameByAccount.has(account))
-      nameByAccount.set(account, name)
-  })
-  const users = ids.map(account => ({
-    account,
-    realName: nameByAccount.get(account) || '',
-  }))
-  const hostNameByAccount = new Map<string, string>()
-  meetingForm.hostUser.forEach((user) => {
-    if (user.account)
-      hostNameByAccount.set(user.account, user.realName)
-  })
-  const hostUser = meetingForm.hosts.map(account => ({
-    account,
-    realName: hostNameByAccount.get(account) || '',
-  }))
+  const fallbackIds = parseUserIds(meetingForm.participants)
+  const users = meetingForm.users.length
+    ? meetingForm.users
+    : fallbackIds.map(account => ({ account, realName: '' }))
+  const hostUser = meetingForm.hostUser.length
+    ? meetingForm.hostUser
+    : meetingForm.hosts.map(account => ({ account, realName: '' }))
+  const ids = users.map(user => user.account).filter(Boolean)
+  const hostIds = hostUser.map(user => user.account).filter(Boolean)
 
   return {
     id: pageId.value,
@@ -395,7 +380,7 @@ function toServerPayload() {
     },
     settings: {
       password: meetingForm.password,
-      host: meetingForm.hosts,
+      host: hostIds,
     },
   }
 }
