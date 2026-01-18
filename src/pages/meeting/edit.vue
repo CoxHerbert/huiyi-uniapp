@@ -30,6 +30,7 @@ interface MeetingInfoApi {
 
 const meetingId = ref('')
 const pageId = ref('')
+const hostUserArr = ref('')
 const MEETING_LIST_REFRESH_KEY = 'meeting-list-refresh'
 const MEETING_DETAIL_REFRESH_KEY = 'meeting-detail-refresh'
 const userStore = useUserStore()
@@ -305,7 +306,7 @@ function applyMeetingToForm(data: MeetingInfoApi) {
   }
 
   meetingForm.name = data.title ?? ''
-  const hostUsers = parseHostUsers(data.hostUser)
+  const hostUsers = parseHostUsers(hostUserArr.value)
   if (hostUsers.length) {
     meetingForm.hostUser = hostUsers
     meetingForm.hosts = hostUsers.map(user => user.account).filter(Boolean)
@@ -355,30 +356,15 @@ async function loadMeetingInfo() {
 
 /** 转成服务端接收格式（统一在这里维护字段映射） */
 function toServerPayload() {
-  const ids = parseUserIds(meetingForm.participants)
-  const nameByAccount = new Map<string, string>()
-  meetingForm.users.forEach((user) => {
-    if (user.account)
-      nameByAccount.set(user.account, user.realName)
-  })
-  meetingForm.participantNames.forEach((name, index) => {
-    const account = ids[index]
-    if (account && name && !nameByAccount.has(account))
-      nameByAccount.set(account, name)
-  })
-  const users = ids.map(account => ({
-    account,
-    realName: nameByAccount.get(account) || '',
-  }))
-  const hostNameByAccount = new Map<string, string>()
-  meetingForm.hostUser.forEach((user) => {
-    if (user.account)
-      hostNameByAccount.set(user.account, user.realName)
-  })
-  const hostUser = meetingForm.hosts.map(account => ({
-    account,
-    realName: hostNameByAccount.get(account) || '',
-  }))
+  const fallbackIds = parseUserIds(meetingForm.participants)
+  const users = meetingForm.users.length
+    ? meetingForm.users
+    : fallbackIds.map(account => ({ account, realName: '' }))
+  const hostUser = meetingForm.hostUser.length
+    ? meetingForm.hostUser
+    : meetingForm.hosts.map(account => ({ account, realName: '' }))
+  const ids = users.map(user => user.account).filter(Boolean)
+  const hostIds = hostUser.map(user => user.account).filter(Boolean)
 
   return {
     id: pageId.value,
@@ -395,7 +381,7 @@ function toServerPayload() {
     },
     settings: {
       password: meetingForm.password,
-      host: meetingForm.hosts,
+      host: hostIds,
     },
   }
 }
@@ -422,6 +408,7 @@ onLoad((options) => {
   if (options?.meetingId) {
     meetingId.value = String(options.meetingId)
     pageId.value = String(options.id)
+    hostUserArr.value = options.hostUserStr
   }
 
   loadMeetingInfo()

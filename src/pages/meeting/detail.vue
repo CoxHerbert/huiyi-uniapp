@@ -30,6 +30,7 @@ interface MeetingInfoApi {
 const meetingId = ref('')
 const pageId = ref('')
 const hostUser = ref('')
+const hostUserStr = ref('')
 
 const MEETING_DETAIL_REFRESH_KEY = 'meeting-detail-refresh'
 const MEETING_LIST_REFRESH_KEY = 'meeting-list-refresh'
@@ -226,6 +227,7 @@ onLoad((options) => {
           catch { return '' }
         })()
       : ''
+    hostUserStr.value = options.hostUserStr
   }
 
   loadMeetingDetail()
@@ -242,7 +244,7 @@ onShow(() => {
 function goToEdit() {
   if (!meetingId.value)
     return
-  uni.navigateTo({ url: `/pages/meeting/edit?meetingId=${meetingId.value}&id=${pageId.value}` })
+  uni.navigateTo({ url: `/pages/meeting/edit?meetingId=${meetingId.value}&id=${pageId.value}&hostUserStr=${hostUserStr.value}` })
 }
 
 async function handleCancelMeeting() {

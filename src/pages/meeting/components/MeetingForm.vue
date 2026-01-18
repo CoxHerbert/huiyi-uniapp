@@ -66,12 +66,18 @@ function parseUserIds(value: string) {
 }
 
 function openHostSheet() {
-  selectedHostIds.value = (props.meeting.hosts || []).slice(0, 1)
+  const hostIds = (props.meeting.hostUser || [])
+    .map(user => user.account)
+    .filter(Boolean)
+  selectedHostIds.value = (hostIds.length ? hostIds : props.meeting.hosts || []).slice(0, 1)
   showHostSheet.value = true
 }
 
 function openParticipantSheet() {
-  selectedParticipantIds.value = parseUserIds(props.meeting.participants)
+  const userIds = (props.meeting.users || [])
+    .map(user => user.account)
+    .filter(Boolean)
+  selectedParticipantIds.value = userIds.length ? userIds : parseUserIds(props.meeting.participants)
   showParticipantSheet.value = true
 }
 
@@ -117,9 +123,12 @@ const hostDisplayText = computed(() => {
 })
 
 const participantDisplayText = computed(() => {
-  // ✅ 优先使用 participantNames（来自选择器确认写入）
-  if (props.meeting.participantNames?.length)
-    return props.meeting.participantNames.join('、')
+  if (props.meeting.users?.length) {
+    return props.meeting.users
+      .map(user => user.realName || user.account)
+      .filter(Boolean)
+      .join('、')
+  }
 
   // 退化：显示账号（不依赖子组件 userOptions）
   const accounts = parseUserIds(props.meeting.participants)
@@ -292,6 +301,7 @@ const participantDisplayText = computed(() => {
       title="选择主持人"
       mode="single"
       :default-selected="selectedHostIds"
+      :default-selected-users="(meeting.hostUser || []).map(user => ({ account: user.account, name: user.realName || user.account }))"
       @confirm="onHostConfirm"
     />
 
@@ -301,6 +311,7 @@ const participantDisplayText = computed(() => {
       title="选择参会人"
       mode="multiple"
       :default-selected="selectedParticipantIds"
+      :default-selected-users="(meeting.users || []).map(user => ({ account: user.account, name: user.realName || user.account }))"
       @confirm="onParticipantConfirm"
     />
   </view>
