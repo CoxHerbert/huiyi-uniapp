@@ -20,6 +20,7 @@ const meetingForm = reactive({
   type: '线上会议',
   hosts: [] as string[],
   participantNames: [] as string[],
+  users: [] as Array<{ realName: string, account: string }>,
   startTime: '',
   endTime: '',
   date: '',
@@ -218,9 +219,35 @@ function parseUserIds(value: string) {
     .filter(Boolean)
 }
 
+function buildUsers() {
+  const ids = parseUserIds(meetingForm.participants)
+  const nameByAccount = new Map<string, string>()
+
+  meetingForm.users.forEach((user) => {
+    if (user.account)
+      nameByAccount.set(user.account, user.realName)
+  })
+
+  meetingForm.participantNames.forEach((name, index) => {
+    const account = ids[index]
+    if (account && name && !nameByAccount.has(account))
+      nameByAccount.set(account, name)
+  })
+
+  const loginAccount = loginInfo.value?.account
+  if (loginAccount && !nameByAccount.has(loginAccount))
+    nameByAccount.set(loginAccount, loginInfo.value?.real_name || '')
+
+  return ids.map(account => ({
+    account,
+    realName: nameByAccount.get(account) || '',
+  }))
+}
+
 /** 转成服务端接收格式（统一在这里维护字段映射） */
 function toServerPayload() {
   const ids = parseUserIds(meetingForm.participants)
+  const users = buildUsers()
 
   return {
     title: meetingForm.name,
@@ -228,6 +255,7 @@ function toServerPayload() {
     meeting_duration: meetingDurationSeconds.value,
     description: meetingForm.description,
     location: meetingForm.location,
+    users: JSON.stringify(users),
     invitees: {
       userid: ids,
     },

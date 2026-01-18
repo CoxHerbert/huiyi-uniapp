@@ -343,16 +343,16 @@ async function handleCancelMeeting() {
         </view>
       </view>
 
-      <!-- <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-4">
-        <text class="text-3 text-#8a8f99">
+      <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-4">
+        <text class="text-4 text-#8a8f99">
           地点
         </text>
-        <text class="text-3 text-#2f2f2f">
+        <text class="text-4 text-#2f2f2f">
           {{ meetingDetail.location }}
         </text>
       </view>
 
-      <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-4">
+      <!-- <view class="flex items-center justify-between border-b border-#f0f1f2 px-4 py-4">
         <text class="text-3 text-#8a8f99">
           会议密码
         </text>
@@ -448,5 +448,15 @@ async function handleCancelMeeting() {
   width: 56rpx;
   height: 2rpx;
   background: #DADBE0;
+}
+
+/* ✅ 小程序里 text 换行：长文本/长英文/长数字都能断 */
+.desc {
+  display: block;              /* 关键：让 text 真正按块布局 */
+  width: 100%;
+  white-space: pre-wrap;       /* 保留换行，同时自动折行 */
+  word-break: break-all;       /* 超长连续字符强制断开（会议链接/长串ID） */
+  overflow-wrap: anywhere;     /* H5 更强的断行能力（不影响小程序） */
+  line-height: 1.6;
 }
 </style>
