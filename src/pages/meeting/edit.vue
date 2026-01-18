@@ -30,6 +30,7 @@ interface MeetingInfoApi {
 
 const meetingId = ref('')
 const pageId = ref('')
+const hostUserArr = ref('')
 const MEETING_LIST_REFRESH_KEY = 'meeting-list-refresh'
 const MEETING_DETAIL_REFRESH_KEY = 'meeting-detail-refresh'
 const userStore = useUserStore()
@@ -305,7 +306,7 @@ function applyMeetingToForm(data: MeetingInfoApi) {
   }
 
   meetingForm.name = data.title ?? ''
-  const hostUsers = parseHostUsers(data.hostUser)
+  const hostUsers = parseHostUsers(hostUserArr.value)
   if (hostUsers.length) {
     meetingForm.hostUser = hostUsers
     meetingForm.hosts = hostUsers.map(user => user.account).filter(Boolean)
@@ -407,6 +408,7 @@ onLoad((options) => {
   if (options?.meetingId) {
     meetingId.value = String(options.meetingId)
     pageId.value = String(options.id)
+    hostUserArr.value = options.hostUserStr
   }
 
   loadMeetingInfo()

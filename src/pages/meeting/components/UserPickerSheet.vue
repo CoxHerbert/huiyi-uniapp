@@ -256,7 +256,6 @@ watch([userAccount, userName], () => {
           <text>已选 {{ selectedIds.length }} 人</text>
           <text>{{ mode === 'single' ? '点击姓名选择' : '点击姓名可多选' }}</text>
         </view>
-
         <view v-if="selectedUsers.length" class="my-3">
           <view class="flex flex-wrap gap-2">
             <view
