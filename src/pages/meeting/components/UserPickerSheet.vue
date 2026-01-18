@@ -14,8 +14,10 @@ const props = defineProps<{
   modelValue: boolean
   /** 弹窗标题 */
   title?: string
-  /** single=单选(主持人) multiple=多选(参会人) */
+  /** single=单选 multiple=多选 */
   mode: PickMode
+  /** 最多可选择人数（仅 multiple 有效） */
+  maxSelected?: number
   /** 默认选中的 account 列表 */
   defaultSelected?: string[]
   /** 默认选中的人员信息（用于回显姓名） */
@@ -146,6 +148,13 @@ function togglePick(account: string) {
     selectedIds.value = selectedIds.value.filter(id => id !== account)
   }
   else {
+    if (props.maxSelected && selectedIds.value.length >= props.maxSelected) {
+      uni.showToast({
+        title: `最多选择${props.maxSelected}人`,
+        icon: 'none',
+      })
+      return
+    }
     selectedIds.value = [...selectedIds.value, account]
   }
 }
@@ -192,6 +201,9 @@ function close() {
 }
 
 function confirm() {
+  if (props.mode === 'multiple' && props.maxSelected && selectedIds.value.length > props.maxSelected) {
+    selectedIds.value = selectedIds.value.slice(0, props.maxSelected)
+  }
   emit('confirm', {
     selectedIds: selectedIds.value.slice(),
     selectedUsers: selectedUsers.value.slice(),
@@ -205,7 +217,10 @@ watch(
   (v) => {
     if (!v)
       return
-    selectedIds.value = (props.defaultSelected || []).filter(Boolean)
+    const nextSelected = (props.defaultSelected || []).filter(Boolean)
+    selectedIds.value = props.mode === 'multiple' && props.maxSelected
+      ? nextSelected.slice(0, props.maxSelected)
+      : nextSelected
     expanded.value = false
     resetUserPaging()
     loadUsers()
@@ -254,7 +269,10 @@ watch([userAccount, userName], () => {
 
         <view class="mt-2 flex items-center justify-between text-3 text-#9aa0a6">
           <text>已选 {{ selectedIds.length }} 人</text>
-          <text>{{ mode === 'single' ? '点击姓名选择' : '点击姓名可多选' }}</text>
+          <text>
+            {{ mode === 'single' ? '点击姓名选择' : '点击姓名可多选' }}
+            <text v-if="mode === 'multiple' && maxSelected">（最多 {{ maxSelected }} 人）</text>
+          </text>
         </view>
         <view v-if="selectedUsers.length" class="my-3">
           <view class="flex flex-wrap gap-2">
