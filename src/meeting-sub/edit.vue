@@ -73,6 +73,15 @@ function formatTime(value: Date) {
   return `${padTime(value.getHours())}:${padTime(value.getMinutes())}`
 }
 
+function formatDateTimeForPicker(value: Date) {
+  const year = value.getFullYear()
+  const month = padTime(value.getMonth() + 1)
+  const day = padTime(value.getDate())
+  const hour = padTime(value.getHours())
+  const minute = padTime(value.getMinutes())
+  return `${year}-${month}-${day} ${hour}:${minute}`
+}
+
 function formatTimeFromMinutes(totalMinutes: number) {
   const clamped = Math.min(Math.max(totalMinutes, 0), 23 * 60 + 59)
   const hour = Math.floor(clamped / 60)
@@ -108,22 +117,11 @@ function initDefaultDateTime() {
 
 initDefaultDateTime()
 
-const minEndTime = computed(() => {
-  const minTime = addMinutesToTime(meetingForm.startTime, MIN_DURATION_MINUTES)
-  const { hour, minute } = parseTime(minTime)
-  return { hour, minute }
-})
-
-const minStartTime = computed(() => {
-  const todayLabel = formatDate(new Date())
-  if (meetingForm.date !== todayLabel)
-    return { hour: 0, minute: 0 }
+const minStartDateTime = computed(() => {
   const now = new Date()
-  const minStartMinutes = Math.min(
-    now.getHours() * 60 + now.getMinutes() + MIN_START_OFFSET_MINUTES,
-    23 * 60 + 59,
-  )
-  return { hour: Math.floor(minStartMinutes / 60), minute: minStartMinutes % 60 }
+  now.setSeconds(0, 0)
+  now.setMinutes(now.getMinutes() + MIN_START_OFFSET_MINUTES)
+  return now.getTime()
 })
 
 function parseDate(value: string) {
@@ -131,6 +129,41 @@ function parseDate(value: string) {
   const parsed = new Date(normalized)
   return Number.isNaN(parsed.getTime()) ? null : parsed
 }
+
+function parseDateTimeValue(value: string | number) {
+  const normalized = String(value).replace(/-/g, '/')
+  const parsed = new Date(normalized)
+  return Number.isNaN(parsed.getTime()) ? null : parsed
+}
+
+function displayRangeFormat(items: Record<string, any>[]) {
+  if (!items.length)
+    return ''
+  const [year, month, date, hour, minute] = items
+  return `${year.label}/${month.label}/${date.label} ${hour.label}:${minute.label}`
+}
+
+const meetingRange = computed<[string, string]>({
+  get() {
+    if (!meetingForm.date || !meetingForm.startTime || !meetingForm.endTime)
+      return ['', '']
+    const startAt = new Date(`${meetingForm.date} ${meetingForm.startTime}`)
+    const endAt = new Date(`${meetingForm.date} ${meetingForm.endTime}`)
+    return [formatDateTimeForPicker(startAt), formatDateTimeForPicker(endAt)]
+  },
+  set(value) {
+    if (!Array.isArray(value) || value.length < 2)
+      return
+    const [startValue, endValue] = value
+    const startAt = parseDateTimeValue(startValue)
+    const endAt = parseDateTimeValue(endValue)
+    if (!startAt || !endAt)
+      return
+    meetingForm.date = formatDate(startAt)
+    meetingForm.startTime = formatTime(startAt)
+    meetingForm.endTime = formatTime(endAt)
+  },
+})
 
 function ensureDateNotPast() {
   const today = new Date()
@@ -422,63 +455,41 @@ onLoad((options) => {
   >
     <template #time>
       <view class="mb-2 border-#f0f1f2 bg-white px-4 py-3">
-        <view class="mb-4 flex items-center justify-between">
-          <text class="text-3 text-#8a8f99">
-            会议日期
-          </text>
-          <wd-calendar v-model="meetingForm.date">
-            <view class="flex items-center gap-2">
-              <text class="text-3 text-#2f2f2f">
-                {{ meetingForm.date }}
-              </text>
-              <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
-            </view>
-          </wd-calendar>
-        </view>
-        <view class="flex items-center justify-center">
-          <view class="flex items-center gap-6">
-            <view class="text-center">
-              <wd-datetime-picker
-                v-model="meetingForm.startTime"
-                type="time"
-                :use-second="false"
-                :min-hour="minStartTime.hour"
-                :min-minute="minStartTime.minute"
-              >
-                <view class="text-center">
-                  <text class="block text-5 text-#2f2f2f font-600">
-                    {{ meetingForm.startTime }}
-                  </text>
-                  <text class="text-3 text-#9aa0a6">
-                    {{ meetingForm.date }}
-                  </text>
-                </view>
-              </wd-datetime-picker>
-            </view>
-            <view class="duration-label gap-4">
-              <view class="line" />
-              <text class="block bg-#F6F8FA px-1 py-2 text-3 text-#9aa0a6">
-                {{ durationLabel }}
-              </text>
-              <view class="line" />
-            </view>
-            <view class="text-center">
-              <wd-datetime-picker
-                v-model="meetingForm.endTime" type="time" :use-second="false"
-                :min-hour="minEndTime.hour" :min-minute="minEndTime.minute"
-              >
-                <view class="text-center">
-                  <text class="block text-5 text-#2f2f2f font-600">
-                    {{ meetingForm.endTime }}
-                  </text>
-                  <text class="text-3 text-#9aa0a6">
-                    {{ meetingForm.date }}
-                  </text>
-                </view>
-              </wd-datetime-picker>
+        <wd-datetime-picker
+          v-model="meetingRange"
+          type="datetime"
+          :use-second="false"
+          :min-date="minStartDateTime"
+          :display-format="displayRangeFormat"
+        >
+          <view class="flex items-center justify-center">
+            <view class="flex items-center gap-6">
+              <view class="text-center">
+                <text class="block text-5 text-#2f2f2f font-600">
+                  {{ meetingForm.startTime }}
+                </text>
+                <text class="text-3 text-#9aa0a6">
+                  {{ meetingForm.date }}
+                </text>
+              </view>
+              <view class="duration-label gap-4">
+                <view class="line" />
+                <text class="block bg-#F6F8FA px-1 py-2 text-3 text-#9aa0a6">
+                  {{ durationLabel }}
+                </text>
+                <view class="line" />
+              </view>
+              <view class="text-center">
+                <text class="block text-5 text-#2f2f2f font-600">
+                  {{ meetingForm.endTime }}
+                </text>
+                <text class="text-3 text-#9aa0a6">
+                  {{ meetingForm.date }}
+                </text>
+              </view>
             </view>
           </view>
-        </view>
+        </wd-datetime-picker>
       </view>
     </template>
   </MeetingForm>
