@@ -82,7 +82,7 @@ function initDefaultDateTime() {
   const startMinutes = Math.min(nowMinutes + MIN_START_OFFSET_MINUTES, 23 * 60 + 59)
   meetingForm.date = formatDate(now)
   meetingForm.startTime = formatTimeFromMinutes(startMinutes)
-  meetingForm.endTime = addMinutesToTime(meetingForm.startTime, 30)
+  meetingForm.endTime = addMinutesToTime(meetingForm.startTime, MIN_DURATION_MINUTES)
   meetingForm.name = `${loginInfo.value?.real_name || ''}预定的会议`
 }
 
@@ -123,7 +123,7 @@ const minStartTime = computed(() => {
     now.getHours() * 60 + now.getMinutes() + MIN_START_OFFSET_MINUTES,
     23 * 60 + 59,
   )
-  return { hour: Math.floor(minStartMinutes / 60), minute: 0 }
+  return { hour: Math.floor(minStartMinutes / 60), minute: minStartMinutes % 60 }
 })
 
 function parseDate(value: string) {
