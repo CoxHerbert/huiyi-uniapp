@@ -84,7 +84,7 @@ function applyMeetingToView(m: MeetingInfoApi) {
   const statusStyle = getStatusMeta(statusRaw)
   if (statusStyle) {
     meetingDetail.status = statusStyle.label
-    meetingDetail.statusClass = m.statusClass || statusStyle.className
+    meetingDetail.statusClass = statusStyle.className
   }
   else {
     meetingDetail.status = statusRaw ? String(statusRaw) : ''
@@ -370,6 +370,32 @@ async function handleCancelMeeting() {
   width: 56rpx;
   height: 2rpx;
   background: #DADBE0;
+}
+
+.status-badge--pending {
+  background-color: #fff4e5;
+  color: #ff9f1a;
+}
+
+.status-badge--ongoing {
+  background-color: #e8f7f0;
+  color: #1e8e5a;
+}
+
+.status-badge--finished,
+.status-badge--expired {
+  background-color: #f1f2f4;
+  color: #8a8f99;
+}
+
+.status-badge--canceled {
+  background-color: #fdeaea;
+  color: #ff4d4f;
+}
+
+.status-badge--waiting {
+  background-color: #e7edff;
+  color: #3f5fff;
 }
 /* ✅ 小程序里 text 换行：长文本/长英文/长数字都能断 */
 .desc {

@@ -82,54 +82,86 @@ function initDefaultDateTime() {
   const startMinutes = Math.min(nowMinutes + MIN_START_OFFSET_MINUTES, 23 * 60 + 59)
   meetingForm.date = formatDate(now)
   meetingForm.startTime = formatTimeFromMinutes(startMinutes)
-  meetingForm.endTime = addMinutesToTime(meetingForm.startTime, 30)
+  meetingForm.endTime = addMinutesToTime(meetingForm.startTime, MIN_DURATION_MINUTES)
   meetingForm.name = `${loginInfo.value?.real_name || ''}预定的会议`
 }
 
 initDefaultDateTime()
 
-const minEndTime = computed(() => {
-  const minTime = addMinutesToTime(meetingForm.startTime, MIN_DURATION_MINUTES)
-  const { hour, minute } = parseTime(minTime)
-  return { hour, minute }
-})
-
-const minMeetingDate = computed(() => {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  return today.getTime()
-})
-
-const calendarDate = computed<number | null>({
-  get() {
-    const parsed = parseDate(meetingForm.date)
-    return parsed ? parsed.getTime() : null
-  },
-  set(value) {
-    if (!value) {
-      meetingForm.date = ''
-      return
-    }
-    meetingForm.date = formatDate(new Date(value))
-  },
-})
-
-const minStartTime = computed(() => {
-  const todayLabel = formatDate(new Date())
-  if (meetingForm.date !== todayLabel)
-    return { hour: 0, minute: 0 }
+const minStartDateTime = computed(() => {
   const now = new Date()
-  const minStartMinutes = Math.min(
-    now.getHours() * 60 + now.getMinutes() + MIN_START_OFFSET_MINUTES,
-    23 * 60 + 59,
-  )
-  return { hour: Math.floor(minStartMinutes / 60), minute: 0 }
+  now.setSeconds(0, 0)
+  now.setMinutes(now.getMinutes() + MIN_START_OFFSET_MINUTES)
+  return now.getTime()
 })
 
 function parseDate(value: string) {
   const normalized = value.replace(/-/g, '/')
   const parsed = new Date(normalized)
   return Number.isNaN(parsed.getTime()) ? null : parsed
+}
+
+function parseDateTimeValue(value: string | number) {
+  if (typeof value === 'number') {
+    const parsed = new Date(value)
+    return Number.isNaN(parsed.getTime()) ? null : parsed
+  }
+  const normalized = String(value).replace(/-/g, '/')
+  const parsed = new Date(normalized)
+  return Number.isNaN(parsed.getTime()) ? null : parsed
+}
+
+function displayRangeFormat(items: Record<string, any>[]) {
+  if (!items.length)
+    return ''
+  const [year, month, date, hour, minute] = items
+  return `${year.label}/${month.label}/${date.label} ${hour.label}:${minute.label}`
+}
+
+const meetingRange = computed<[number, number]>({
+  get() {
+    if (!meetingForm.date || !meetingForm.startTime || !meetingForm.endTime)
+      return [0, 0]
+    const startAt = new Date(`${meetingForm.date} ${meetingForm.startTime}`)
+    const endAt = new Date(`${meetingForm.date} ${meetingForm.endTime}`)
+    return [startAt.getTime(), endAt.getTime()]
+  },
+  set(value) {
+    if (!Array.isArray(value) || value.length < 2)
+      return
+    const [startValue, endValue] = value
+    const startAt = parseDateTimeValue(startValue)
+    const endAt = parseDateTimeValue(endValue)
+    if (!startAt || !endAt)
+      return
+    meetingForm.date = formatDate(startAt)
+    meetingForm.startTime = formatTime(startAt)
+    meetingForm.endTime = formatTime(endAt)
+  },
+})
+
+function validateRangeSelection(
+  value: Array<string | number>,
+  resolve: (isPass: boolean) => void,
+) {
+  if (!Array.isArray(value) || value.length < 2) {
+    resolve(false)
+    return
+  }
+  const [startValue, endValue] = value
+  const startAt = parseDateTimeValue(startValue)
+  const endAt = parseDateTimeValue(endValue)
+  if (!startAt || !endAt) {
+    resolve(false)
+    return
+  }
+  const diff = endAt.getTime() - startAt.getTime()
+  if (diff < MIN_DURATION_MINUTES * 60 * 1000) {
+    uni.showToast({ title: `结束时间需晚于开始时间至少${MIN_DURATION_MINUTES}分钟`, icon: 'none' })
+    resolve(false)
+    return
+  }
+  resolve(true)
 }
 
 function ensureDateNotPast() {
@@ -334,61 +366,43 @@ async function handleCreate() {
   >
     <template #time>
       <view class="mb-2 bg-white px-4 py-3">
-        <view class="mb-4 flex items-center justify-between">
-          <text class="text-3 text-#8a8f99">
-            会议日期
-          </text>
-          <wd-calendar v-model="calendarDate" :min-date="minMeetingDate">
-            <view class="flex items-center gap-2">
-              <text class="text-3 text-#2f2f2f">
-                {{ meetingForm.date }}
-              </text>
-              <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
-            </view>
-          </wd-calendar>
-        </view>
-        <view class="flex items-center justify-center">
-          <view class="flex items-center gap-6">
-            <view class="text-center">
-              <wd-datetime-picker
-                v-model="meetingForm.startTime" type="time" :use-second="false"
-                :min-hour="minStartTime.hour" :min-minute="minStartTime.minute"
-              >
-                <view class="text-center">
-                  <text class="block text-5 text-#2f2f2f font-600">
-                    {{ meetingForm.startTime }}
-                  </text>
-                  <text class="text-3 text-#9aa0a6">
-                    {{ meetingForm.date }}
-                  </text>
-                </view>
-              </wd-datetime-picker>
-            </view>
-            <view class="duration-wrap gap-3">
-              <view class="line" />
-              <text class="duration-text">
-                {{ durationLabel }}
-              </text>
-              <view class="line" />
-            </view>
+        <wd-datetime-picker
+          v-model="meetingRange"
+          type="datetime"
+          :use-second="false"
+          :min-date="minStartDateTime"
+          :display-format="displayRangeFormat"
+          :before-confirm="validateRangeSelection"
+        >
+          <view class="flex items-center justify-center">
+            <view class="flex items-center gap-6">
+              <view class="text-center">
+                <text class="block text-5 text-#2f2f2f font-600">
+                  {{ meetingForm.startTime }}
+                </text>
+                <text class="text-3 text-#9aa0a6">
+                  {{ meetingForm.date }}
+                </text>
+              </view>
+              <view class="duration-wrap gap-3">
+                <view class="line" />
+                <text class="duration-text">
+                  {{ durationLabel }}
+                </text>
+                <view class="line" />
+              </view>
 
-            <view class="text-center">
-              <wd-datetime-picker
-                v-model="meetingForm.endTime" type="time" :use-second="false"
-                :min-hour="minEndTime.hour" :min-minute="minEndTime.minute"
-              >
-                <view class="text-center">
-                  <text class="block text-5 text-#2f2f2f font-600">
-                    {{ meetingForm.endTime }}
-                  </text>
-                  <text class="text-3 text-#9aa0a6">
-                    {{ meetingForm.date }}
-                  </text>
-                </view>
-              </wd-datetime-picker>
+              <view class="text-center">
+                <text class="block text-5 text-#2f2f2f font-600">
+                  {{ meetingForm.endTime }}
+                </text>
+                <text class="text-3 text-#9aa0a6">
+                  {{ meetingForm.date }}
+                </text>
+              </view>
             </view>
           </view>
-        </view>
+        </wd-datetime-picker>
       </view>
     </template>
   </MeetingForm>

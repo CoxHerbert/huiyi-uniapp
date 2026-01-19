@@ -109,8 +109,7 @@ function normalizeHistoryList(list: any[]): HistoryItem[] {
     const derivedStatus = getStatusMeta(item.status)
     if (derivedStatus) {
       item.status = derivedStatus.label
-      if (!item.statusClass)
-        item.statusClass = derivedStatus.className
+      item.statusClass = derivedStatus.className
     }
 
     return item
@@ -323,6 +322,32 @@ function goToHistoryDetail(meetingId: number | string) {
   line-height: 28rpx;
   font-weight: 600;
   white-space: nowrap;
+}
+
+.status-badge--pending {
+  background-color: #fff4e5;
+  color: #ff9f1a;
+}
+
+.status-badge--ongoing {
+  background-color: #e8f7f0;
+  color: #1e8e5a;
+}
+
+.status-badge--finished,
+.status-badge--expired {
+  background-color: #f1f2f4;
+  color: #8a8f99;
+}
+
+.status-badge--canceled {
+  background-color: #fdeaea;
+  color: #ff4d4f;
+}
+
+.status-badge--waiting {
+  background-color: #e7edff;
+  color: #3f5fff;
 }
 
 /* 时间 & 提示 */

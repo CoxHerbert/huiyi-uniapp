@@ -8,6 +8,18 @@ import {
 } from 'unocss'
 
 export default defineConfig({
+  safelist: [
+    'bg-#fff4e5',
+    'text-#ff9f1a',
+    'bg-#e8f7f0',
+    'text-#1e8e5a',
+    'bg-#f1f2f4',
+    'text-#8a8f99',
+    'bg-#fdeaea',
+    'text-#ff4d4f',
+    'bg-#e7edff',
+    'text-#3f5fff',
+  ],
   presets: [
     presetUni({
       attributify: false,
