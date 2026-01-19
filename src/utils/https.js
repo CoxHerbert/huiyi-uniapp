@@ -1,9 +1,9 @@
 import { Base64 } from 'js-base64'
 import website from '@/config/website'
 import { useAuthStore } from '@/store/auth'
+import { getCurrentPath } from '@/utils'
 import { getToken, removeRefreshToken, removeToken } from '@/utils/auth' // 你已改成 uni.getStorageSync 的版本也没问题
 import crypto from '@/utils/crypto'
-import { getCurrentPath } from '@/utils'
 import { serialize, tansParams } from '@/utils/util'
 import { isURL, validatenull } from '@/utils/validate'
 
