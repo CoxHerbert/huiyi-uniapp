@@ -15,6 +15,8 @@ interface LoginForm {
   type?: string
   key?: string
   code?: string
+  phone?: string
+  codeId?: string
 }
 
 function readStorage<T>(key: string, fallback: T) {
@@ -85,6 +87,32 @@ export const useAuthStore = defineStore('auth', {
         form.type,
         form.key,
         form.code,
+      )
+      const payload = (response as UniApp.RequestSuccessCallbackResult)?.data || {}
+      const accessToken = (payload as Record<string, any>).access_token || (payload as Record<string, any>).access_token
+      const refreshToken = (payload as Record<string, any>).refresh_token || (payload as Record<string, any>).refresh_token
+
+      this.setTokenPair({ accessToken, refreshToken })
+
+      const userStore = useUserStore()
+      const loginInfo = extractLoginInfo(payload) || {
+        access_token: accessToken,
+        refresh_token: refreshToken,
+        user: (payload as Record<string, any>).user,
+      }
+
+      userStore.mergeLoginInfo(loginInfo)
+      await userStore.refreshPermissionData()
+
+      return payload
+    },
+
+    async loginByPhone(form: LoginForm) {
+      const response = await h5Apis.auth.loginByPhone(
+        form.tenantId || '000000',
+        encrypt(form.phone || ''),
+        form.code,
+        form.codeId,
       )
       const payload = (response as UniApp.RequestSuccessCallbackResult)?.data || {}
       const accessToken = (payload as Record<string, any>).access_token || (payload as Record<string, any>).access_token
