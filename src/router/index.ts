@@ -44,22 +44,27 @@ router.beforeEach((to, from, next) => {
 
   // 演示：对受保护页面的简单拦截
   if (!auth.isLogin && !isPublicRoute(to)) {
-    const { confirm: showConfirm } = useGlobalMessage()
     const redirect = resolveRedirectPath(to)
 
     return new Promise<void>((resolve, reject) => {
-      showConfirm({
+      uni.showModal({
         title: '提示',
-        msg: '未登录，请前往登录后访问',
-        confirmButtonText: '去登录',
-        cancelButtonText: '取消',
-        success() {
-          next({
-            path: '/pages/login/index',
-            navType: 'replaceAll',
-            query: redirect ? { redirect } : undefined,
-          })
-          resolve()
+        content: '未登录，请前往登录后访问',
+        confirmText: '去登录',
+        cancelText: '取消',
+        success(res) {
+          if (res.confirm) {
+            next({
+              path: '/pages/login/index',
+              navType: 'replaceAll',
+              query: redirect ? { redirect } : undefined,
+            })
+            resolve()
+          }
+          else {
+            next(false)
+            reject(new Error('用户取消访问'))
+          }
         },
         fail() {
           next(false)
