@@ -32,7 +32,7 @@
       "layout": "tabbar"
     },
     {
-      "path": "pages/settings/index",
+      "path": "pages/mine/index",
       "type": "page",
       "name": "mine",
       "layout": "tabbar",
@@ -104,7 +104,7 @@
         "pagePath": "pages/meeting/index"
       },
       {
-        "pagePath": "pages/settings/index"
+        "pagePath": "pages/mine/index"
       }
     ]
   }

@@ -26,7 +26,7 @@ export default defineUniPages({
       navigationBarTitleText: '会议',
     },
   }, {
-    path: 'pages/settings/index',
+    path: 'pages/mine/index',
     type: 'page',
     name: 'mine',
     layout: 'tabbar',
@@ -110,7 +110,7 @@ export default defineUniPages({
         pagePath: 'pages/meeting/index',
       },
       {
-        pagePath: 'pages/settings/index',
+        pagePath: 'pages/mine/index',
       },
     ],
   },
