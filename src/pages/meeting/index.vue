@@ -223,8 +223,8 @@ async function handleRefresh() {
 
 function goToCreate() { uni.navigateTo({ url: '/pages/meeting/create' }) }
 function goToHistory() { uni.navigateTo({ url: '/pages/meeting/history' }) }
-function goToDetail(meetingId: string, id: string, hostUserStr: string) {
-  uni.navigateTo({ url: `/pages/meeting/detail?meetingId=${meetingId}&id=${id}&hostUserStr=${hostUserStr}` })
+function goToDetail(meetingId: string, id: string) {
+  uni.navigateTo({ url: `/pages/meeting/detail?meetingId=${meetingId}&id=${id}` })
 }
 function resetRefresher() {
   refresherTriggered.value = false
@@ -305,7 +305,7 @@ function handleRefresherAbort() {
                 v-for="item in section.items"
                 :key="item.id"
                 class="meet-card mb-3"
-                @click="goToDetail(item.meetingId as any, item.id as any, item.hostUserStr as any)"
+                @click="goToDetail(item.meetingId as any, item.id as any)"
               >
                 <!-- 标题行 -->
                 <view class="meet-card__header">

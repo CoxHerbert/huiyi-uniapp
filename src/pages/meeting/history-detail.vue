@@ -33,12 +33,11 @@ interface MeetingInfoApi {
   attendees?: { member?: MeetingMember[] }
   // 接口实际可能返回 JSON 字符串 / 数组 / 逗号字符串，这里用 any 兼容
   userName?: any
+  hostUser?: any
 }
 
 const meetingId = ref('')
 const pageId = ref('')
-const hostUser = ref('')
-
 const MEETING_DETAIL_REFRESH_KEY = 'meeting-detail-refresh'
 const MEETING_LIST_REFRESH_KEY = 'meeting-list-refresh'
 const meetingDetail = reactive({
@@ -75,7 +74,7 @@ function applyMeetingToView(m: MeetingInfoApi) {
   const end = startSec && durSec ? new Date((startSec + durSec) * 1000) : null
 
   meetingDetail.title = safeText(m.title)
-  meetingDetail.host = safeText(m.createUserName ?? m.admin_userid)
+  meetingDetail.host = parseHostUserName(m.hostUser) || safeText(m.createUserName ?? m.admin_userid)
   meetingDetail.meetingNo = safeText(m.meeting_code)
   meetingDetail.location = safeText(m.location)
   meetingDetail.description = safeText(m.description)
@@ -128,7 +127,6 @@ onLoad((options) => {
   if (options?.meetingId) {
     meetingId.value = String(options.meetingId)
     pageId.value = String(options.id)
-    hostUser.value = parseHostUserName(options.hostUserStr)
   }
 
   loadMeetingDetail()

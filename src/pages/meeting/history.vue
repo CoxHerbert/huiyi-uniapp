@@ -170,8 +170,8 @@ onLoad(() => {
   loadHistoryList()
 })
 
-function goToHistoryDetail(meetingId: number | string, hostUserStr: string) {
-  uni.navigateTo({ url: `/pages/meeting/history-detail?meetingId=${meetingId}&hostUserStr=${hostUserStr}` })
+function goToHistoryDetail(meetingId: number | string) {
+  uni.navigateTo({ url: `/pages/meeting/history-detail?meetingId=${meetingId}` })
 }
 </script>
 
@@ -205,7 +205,7 @@ function goToHistoryDetail(meetingId: number | string, hostUserStr: string) {
           v-for="item in filteredList"
           :key="item.id"
           class="meet-card mb-3"
-          @click="goToHistoryDetail(item.meetingId as any, item.hostUserStr as any)"
+          @click="goToHistoryDetail(item.meetingId as any)"
         >
           <!-- 标题行（同款：badge + title + arrow） -->
           <view class="meet-card__header">

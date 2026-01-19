@@ -38,8 +38,6 @@ interface MeetingInfoApi {
 
 const meetingId = ref('')
 const pageId = ref('')
-const hostUser = ref('')
-const hostUserStr = ref('')
 
 const MEETING_DETAIL_REFRESH_KEY = 'meeting-detail-refresh'
 const MEETING_LIST_REFRESH_KEY = 'meeting-list-refresh'
@@ -133,8 +131,6 @@ onLoad((options) => {
   if (options?.meetingId) {
     meetingId.value = String(options.meetingId)
     pageId.value = String(options.id)
-    hostUser.value = parseHostUserName(options.hostUserStr)
-    hostUserStr.value = options.hostUserStr
   }
 
   loadMeetingDetail()
@@ -151,7 +147,7 @@ onShow(() => {
 function goToEdit() {
   if (!meetingId.value)
     return
-  uni.navigateTo({ url: `/pages/meeting/edit?meetingId=${meetingId.value}&id=${pageId.value}&hostUserStr=${hostUserStr.value}` })
+  uni.navigateTo({ url: `/pages/meeting/edit?meetingId=${meetingId.value}&id=${pageId.value}` })
 }
 
 async function handleCancelMeeting() {
@@ -250,7 +246,7 @@ async function handleCancelMeeting() {
         </text>
         <view class="flex items-center gap-2">
           <text class="text-4 text-#2f2f2f">
-            {{ hostUser }}
+          {{ meetingDetail.hostUser }}
           </text>
         </view>
       </view>
