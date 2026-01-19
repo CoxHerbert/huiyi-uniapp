@@ -1,5 +1,14 @@
 <script setup lang="ts">
 import { cancelMeeting, getMeetingInfo } from '@/api/meeting'
+import {
+  formatCNDate,
+  formatDuration,
+  formatHM,
+  getStatusMeta,
+  parseHostUserName,
+  parseNameList,
+  safeText,
+} from '../pages/meeting/utils'
 
 definePage({
   name: 'meeting-detail',
@@ -24,12 +33,11 @@ interface MeetingInfoApi {
   attendees?: { member?: MeetingMember[] }
   // 接口实际可能返回 JSON 字符串 / 数组 / 逗号字符串，这里用 any 兼容
   userName?: any
+  hostUser?: any
 }
 
 const meetingId = ref('')
 const pageId = ref('')
-const hostUser = ref('')
-
 const MEETING_DETAIL_REFRESH_KEY = 'meeting-detail-refresh'
 const MEETING_LIST_REFRESH_KEY = 'meeting-list-refresh'
 const meetingDetail = reactive({
@@ -58,92 +66,6 @@ const meetingDetail = reactive({
 const loading = ref(false)
 const canceling = ref(false)
 
-function pad2(n: number) {
-  return String(n).padStart(2, '0')
-}
-function formatHM(d: Date) {
-  return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`
-}
-function formatCNDate(d: Date) {
-  return `${d.getFullYear()}年${pad2(d.getMonth() + 1)}月${pad2(d.getDate())}日`
-}
-function safeText(v: any, fallback = '-') {
-  return v === null || v === undefined || v === '' ? fallback : String(v)
-}
-
-const statusMeta = new Map<number, { label: string, className: string }>([
-  [1, { label: '待开始', className: 'bg-#fff4e5 text-#ff9f1a' }],
-  [2, { label: '会议中', className: 'bg-#e8f7f0 text-#1e8e5a' }],
-  [3, { label: '已结束', className: 'bg-#f1f2f4 text-#8a8f99' }],
-  [4, { label: '已取消', className: 'bg-#fdeaea text-#ff4d4f' }],
-  [5, { label: '已过期', className: 'bg-#f1f2f4 text-#8a8f99' }],
-])
-const statusLabelClass = new Map<string, string>([
-  ['待开始', 'bg-#fff4e5 text-#ff9f1a'],
-  ['待进入', 'bg-#e7edff text-#3f5fff'],
-])
-
-function getStatusMeta(status?: string | number) {
-  if (typeof status === 'number')
-    return statusMeta.get(status)
-  const parsed = Number(status)
-  if (!Number.isNaN(parsed))
-    return statusMeta.get(parsed)
-  if (typeof status === 'string') {
-    const className = statusLabelClass.get(status)
-    if (className)
-      return { label: status, className }
-  }
-  return null
-}
-
-/** ✅ 秒 -> 友好时长文本 */
-function formatDuration(sec: any) {
-  const s = Math.max(0, Number(sec || 0))
-  if (!s)
-    return '--'
-
-  const min = Math.round(s / 60)
-  if (min < 60)
-    return `${min}分钟`
-
-  const h = Math.floor(min / 60)
-  const m = min % 60
-  return m ? `${h}小时${m}分钟` : `${h}小时`
-}
-
-/** ✅ 解析 userName：支持 JSON 字符串 / 数组 / 逗号字符串 */
-function parseUserName(input: any): string[] {
-  if (input === null || input === undefined || input === '')
-    return []
-
-  if (Array.isArray(input))
-    return input.map((x: any) => String(x)).filter(Boolean)
-
-  if (typeof input === 'string') {
-    const str = input.trim()
-    if (!str)
-      return []
-
-    // JSON 数组字符串
-    if (str.startsWith('[')) {
-      try {
-        const arr = JSON.parse(str)
-        if (Array.isArray(arr))
-          return arr.map((x: any) => String(x)).filter(Boolean)
-      }
-      catch (e) {
-        // ignore
-      }
-    }
-
-    // 普通逗号分隔
-    return str.split(/[,，]/).map(s => s.trim()).filter(Boolean)
-  }
-
-  return [String(input)].filter(Boolean)
-}
-
 function applyMeetingToView(m: MeetingInfoApi) {
   const startSec = Number(m.meeting_start || 0)
   const durSec = Number(m.meeting_duration || 0)
@@ -152,7 +74,7 @@ function applyMeetingToView(m: MeetingInfoApi) {
   const end = startSec && durSec ? new Date((startSec + durSec) * 1000) : null
 
   meetingDetail.title = safeText(m.title)
-  meetingDetail.host = safeText(m.createUserName ?? m.admin_userid)
+  meetingDetail.host = parseHostUserName(m.hostUser) || safeText(m.createUserName ?? m.admin_userid)
   meetingDetail.meetingNo = safeText(m.meeting_code)
   meetingDetail.location = safeText(m.location)
   meetingDetail.description = safeText(m.description)
@@ -177,7 +99,7 @@ function applyMeetingToView(m: MeetingInfoApi) {
   meetingDetail.durationText = formatDuration(durSec)
 
   // ✅ userName 处理成 UI 可用数组
-  meetingDetail.userName = parseUserName(m.userName)
+  meetingDetail.userName = parseNameList(m.userName)
 
   const members = m.attendees?.member || []
   meetingDetail.attendees = members.map(i => i.userid).filter(Boolean)
@@ -205,15 +127,6 @@ onLoad((options) => {
   if (options?.meetingId) {
     meetingId.value = String(options.meetingId)
     pageId.value = String(options.id)
-    hostUser.value = options.hostUserStr
-      ? (() => {
-          try {
-            const arr = JSON.parse(options.hostUserStr).map((u: any) => u.realName)
-            return Array.isArray(arr) ? arr.join(',') : ''
-          }
-          catch { return '' }
-        })()
-      : ''
   }
 
   loadMeetingDetail()
@@ -230,7 +143,7 @@ onShow(() => {
 function goToEdit() {
   if (!meetingId.value)
     return
-  uni.navigateTo({ url: `/pages/meeting/edit?meetingId=${meetingId.value}&id=${pageId.value}` })
+  uni.navigateTo({ url: `/meeting-sub/edit?meetingId=${meetingId.value}&id=${pageId.value}` })
 }
 
 async function handleCancelMeeting() {

@@ -5,12 +5,12 @@
 
 type _LocationUrl =
   "/pages/index/index" |
-  "/pages/meeting/create" |
-  "/pages/meeting/detail" |
-  "/pages/meeting/edit" |
-  "/pages/meeting/history-detail" |
-  "/pages/meeting/history" |
   "/pages/meeting/index" |
+  "/meeting-sub/create" |
+  "/meeting-sub/detail" |
+  "/meeting-sub/edit" |
+  "/meeting-sub/history-detail" |
+  "/meeting-sub/history" |
   "/pages/settings/index";
 
 interface NavigateToOptions {

@@ -18,47 +18,6 @@ export default defineUniPages({
       navigationBarTitleText: '登录',
     },
   }, {
-    path: 'pages/meeting/create',
-    type: 'page',
-    name: 'meeting-create',
-    style: {
-      navigationBarTitleText: '创建会议',
-      usingComponents: {
-        'wd-calendar': 'wot-design-uni/components/wd-calendar/wd-calendar',
-      },
-    },
-  }, {
-    path: 'pages/meeting/detail',
-    type: 'page',
-    name: 'meeting-detail',
-    style: {
-      navigationBarTitleText: '会议详情',
-    },
-  }, {
-    path: 'pages/meeting/edit',
-    type: 'page',
-    name: 'meeting-edit',
-    style: {
-      navigationBarTitleText: '编辑会议',
-      usingComponents: {
-        'wd-calendar': 'wot-design-uni/components/wd-calendar/wd-calendar',
-      },
-    },
-  }, {
-    path: 'pages/meeting/history-detail',
-    type: 'page',
-    name: 'meeting-history-detail',
-    style: {
-      navigationBarTitleText: '历史会议详情',
-    },
-  }, {
-    path: 'pages/meeting/history',
-    type: 'page',
-    name: 'meeting-history',
-    style: {
-      navigationBarTitleText: '历史会议',
-    },
-  }, {
     path: 'pages/meeting/index',
     type: 'page',
     name: 'meeting',
@@ -74,6 +33,51 @@ export default defineUniPages({
     style: {
       navigationBarTitleText: '我的',
     },
+  }],
+  subPackages: [{
+    root: 'meeting-sub',
+    pages: [{
+      path: 'create',
+      type: 'page',
+      name: 'meeting-create',
+      style: {
+        navigationBarTitleText: '创建会议',
+        usingComponents: {
+          'wd-calendar': 'wot-design-uni/components/wd-calendar/wd-calendar',
+        },
+      },
+    }, {
+      path: 'detail',
+      type: 'page',
+      name: 'meeting-detail',
+      style: {
+        navigationBarTitleText: '会议详情',
+      },
+    }, {
+      path: 'edit',
+      type: 'page',
+      name: 'meeting-edit',
+      style: {
+        navigationBarTitleText: '编辑会议',
+        usingComponents: {
+          'wd-calendar': 'wot-design-uni/components/wd-calendar/wd-calendar',
+        },
+      },
+    }, {
+      path: 'history-detail',
+      type: 'page',
+      name: 'meeting-history-detail',
+      style: {
+        navigationBarTitleText: '历史会议详情',
+      },
+    }, {
+      path: 'history',
+      type: 'page',
+      name: 'meeting-history',
+      style: {
+        navigationBarTitleText: '历史会议',
+      },
+    }],
   }],
   globalStyle: {
     // 导航栏配置

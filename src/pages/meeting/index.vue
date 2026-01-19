@@ -1,5 +1,17 @@
 <script setup lang="ts">
 import { getMeetingList } from '@/api/meeting'
+import {
+  buildTimeLabel,
+  deriveStatus,
+  deriveTip,
+  formatDateLabel,
+  getAmPmLabel,
+  getStatusMeta,
+  parseDate,
+  parseHostUserName,
+  parseNameList,
+  toMillis,
+} from './utils'
 
 definePage({
   name: 'meeting',
@@ -57,130 +69,6 @@ function forceScrollToTop() {
   })
 }
 
-const statusMeta = new Map<number, { label: string, className: string }>([
-  [1, { label: '待开始', className: 'bg-#fff4e5 text-#ff9f1a' }],
-  [2, { label: '会议中', className: 'bg-#e8f7f0 text-#1e8e5a' }],
-  [3, { label: '已结束', className: 'bg-#f1f2f4 text-#8a8f99' }],
-  [4, { label: '已取消', className: 'bg-#fdeaea text-#ff4d4f' }],
-  [5, { label: '已过期', className: 'bg-#f1f2f4 text-#8a8f99' }],
-])
-const statusLabelClass = new Map<string, string>([
-  ['待开始', 'bg-#fff4e5 text-#ff9f1a'],
-  ['待进入', 'bg-#e7edff text-#3f5fff'],
-])
-
-function getStatusMeta(status?: string | number) {
-  if (typeof status === 'number')
-    return statusMeta.get(status)
-  const parsed = Number(status)
-  if (!Number.isNaN(parsed))
-    return statusMeta.get(parsed)
-  if (typeof status === 'string') {
-    const className = statusLabelClass.get(status)
-    if (className)
-      return { label: status, className }
-  }
-  return null
-}
-
-function padTime(value: number) {
-  return String(value).padStart(2, '0')
-}
-
-function formatDateLabel(value: Date) {
-  const today = new Date()
-  const dayAfterTomorrow = new Date()
-  const tomorrow = new Date()
-  tomorrow.setDate(today.getDate() + 1)
-  dayAfterTomorrow.setDate(today.getDate() + 2)
-
-  const dateLabel = `${value.getMonth() + 1}月${value.getDate()}日`
-  const valueKey = value.toDateString()
-  if (valueKey === today.toDateString())
-    return `今天 ${dateLabel}`
-  if (valueKey === tomorrow.toDateString())
-    return `明天 ${dateLabel}`
-  if (valueKey === dayAfterTomorrow.toDateString())
-    return `后天 ${dateLabel}`
-  return dateLabel
-}
-
-function formatTimeRange(start: number, duration: number) {
-  const startDate = new Date(start * 1000)
-  const endDate = new Date(startDate.getTime() + duration * 1000)
-  const startLabel = `${padTime(startDate.getHours())}:${padTime(startDate.getMinutes())}`
-  const endLabel = `${padTime(endDate.getHours())}:${padTime(endDate.getMinutes())}`
-  return `${startLabel}-${endLabel}`
-}
-
-function parseDate(value?: string) {
-  if (!value)
-    return null
-  const parsed = new Date(value.replace(/-/g, '/'))
-  return Number.isNaN(parsed.getTime()) ? null : parsed
-}
-
-function buildTimeLabel(startTimestamp?: number, durationSeconds?: number, fallback?: string) {
-  if (typeof startTimestamp === 'number' && typeof durationSeconds === 'number') {
-    return formatTimeRange(startTimestamp, durationSeconds)
-  }
-  return fallback || ''
-}
-
-function deriveTip(startTimestamp?: number) {
-  if (typeof startTimestamp !== 'number')
-    return null
-  const nowSeconds = Math.floor(Date.now() / 1000)
-  const diffSeconds = startTimestamp - nowSeconds
-  if (diffSeconds > 0 && diffSeconds <= 30 * 60)
-    return '30分钟后开始'
-  return null
-}
-
-function deriveStatus(record: any, startTimestamp?: number) {
-  if (record?.status !== undefined && record?.status !== null)
-    return record.status
-  if (typeof startTimestamp !== 'number')
-    return null
-  const nowSeconds = Math.floor(Date.now() / 1000)
-  if (startTimestamp > nowSeconds)
-    return null
-  const isCreator = Boolean(record?.is_creator ?? record?.isCreator ?? record?.role === 'creator')
-  return isCreator ? '待开始' : '待进入'
-}
-
-function getAmPmLabel(item: MeetingItem) {
-  const ts = item.meetingStart
-  if (typeof ts === 'number') {
-    const d = new Date(ts * 1000)
-    return d.getHours() >= 12 ? '下午' : '上午'
-  }
-  const start = item.time?.split('-')?.[0]?.trim()
-  if (start) {
-    const hour = Number(start.split(':')?.[0])
-    if (!Number.isNaN(hour))
-      return hour >= 12 ? '下午' : '上午'
-  }
-  return ''
-}
-
-function toMillis(value: any) {
-  if (value === undefined || value === null || value === '')
-    return 0
-  const n = Number(value)
-  if (Number.isFinite(n)) {
-    if (n > 0 && n < 1e12)
-      return n * 1000
-    return n
-  }
-  if (typeof value === 'string') {
-    const d = new Date(value.replace(/-/g, '/'))
-    const t = d.getTime()
-    return Number.isNaN(t) ? 0 : t
-  }
-  return 0
-}
-
 function getRecordSortKey(record: any) {
   const createRaw
     = record?.create_time
@@ -230,24 +118,8 @@ function normalizeMeetingSections(list: any[]): MeetingSection[] {
       ? record.invitees.userid.join(' ')
       : record?.participants
 
-    const userName = record?.userName
-      ? (() => {
-          try {
-            const arr = JSON.parse(record.userName)
-            return Array.isArray(arr) ? arr.join(',') : ''
-          }
-          catch { return '' }
-        })()
-      : ''
-    const hostUser = record?.hostUser
-      ? (() => {
-          try {
-            const arr = JSON.parse(record.hostUser).map((u: any) => u.realName)
-            return Array.isArray(arr) ? arr.join(',') : ''
-          }
-          catch { return '' }
-        })()
-      : ''
+    const userName = parseNameList(record?.userName).join(',')
+    const hostUser = parseHostUserName(record?.hostUser)
 
     const item: MeetingItem = {
       id: record?.id,
@@ -349,10 +221,10 @@ async function handleRefresh() {
   }
 }
 
-function goToCreate() { uni.navigateTo({ url: '/pages/meeting/create' }) }
-function goToHistory() { uni.navigateTo({ url: '/pages/meeting/history' }) }
-function goToDetail(meetingId: string, id: string, hostUserStr: string) {
-  uni.navigateTo({ url: `/pages/meeting/detail?meetingId=${meetingId}&id=${id}&hostUserStr=${hostUserStr}` })
+function goToCreate() { uni.navigateTo({ url: '/meeting-sub/create' }) }
+function goToHistory() { uni.navigateTo({ url: '/meeting-sub/history' }) }
+function goToDetail(meetingId: string, id: string) {
+  uni.navigateTo({ url: `/meeting-sub/detail?meetingId=${meetingId}&id=${id}` })
 }
 function resetRefresher() {
   refresherTriggered.value = false
@@ -433,7 +305,7 @@ function handleRefresherAbort() {
                 v-for="item in section.items"
                 :key="item.id"
                 class="meet-card mb-3"
-                @click="goToDetail(item.meetingId as any, item.id as any, item.hostUserStr as any)"
+                @click="goToDetail(item.meetingId as any, item.id as any)"
               >
                 <!-- 标题行 -->
                 <view class="meet-card__header">
