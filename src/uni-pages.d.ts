@@ -6,12 +6,12 @@
 type _LocationUrl =
   "/pages/index/index" |
   "/pages/meeting/index" |
+  "/pages/settings/index" |
   "/meeting-sub/create" |
   "/meeting-sub/detail" |
   "/meeting-sub/edit" |
   "/meeting-sub/history-detail" |
-  "/meeting-sub/history" |
-  "/pages/settings/index";
+  "/meeting-sub/history";
 
 interface NavigateToOptions {
   url: _LocationUrl;
