@@ -145,6 +145,30 @@ const meetingRange = computed<[string, string]>({
   },
 })
 
+function validateRangeSelection(
+  value: Array<string | number>,
+  resolve: (isPass: boolean) => void,
+) {
+  if (!Array.isArray(value) || value.length < 2) {
+    resolve(false)
+    return
+  }
+  const [startValue, endValue] = value
+  const startAt = parseDateTimeValue(startValue)
+  const endAt = parseDateTimeValue(endValue)
+  if (!startAt || !endAt) {
+    resolve(false)
+    return
+  }
+  const diff = endAt.getTime() - startAt.getTime()
+  if (diff < MIN_DURATION_MINUTES * 60 * 1000) {
+    uni.showToast({ title: `结束时间需晚于开始时间至少${MIN_DURATION_MINUTES}分钟`, icon: 'none' })
+    resolve(false)
+    return
+  }
+  resolve(true)
+}
+
 function ensureDateNotPast() {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
@@ -353,6 +377,7 @@ async function handleCreate() {
           :use-second="false"
           :min-date="minStartDateTime"
           :display-format="displayRangeFormat"
+          :before-confirm="validateRangeSelection"
         >
           <view class="flex items-center justify-center">
             <view class="flex items-center gap-6">
