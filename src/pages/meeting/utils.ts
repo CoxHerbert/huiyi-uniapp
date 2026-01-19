@@ -1,16 +1,16 @@
 export type StatusMeta = { label: string, className: string }
 
 const statusMeta = new Map<number, StatusMeta>([
-  [1, { label: '待开始', className: 'bg-#fff4e5 text-#ff9f1a' }],
-  [2, { label: '会议中', className: 'bg-#e8f7f0 text-#1e8e5a' }],
-  [3, { label: '已结束', className: 'bg-#f1f2f4 text-#8a8f99' }],
-  [4, { label: '已取消', className: 'bg-#fdeaea text-#ff4d4f' }],
-  [5, { label: '已过期', className: 'bg-#f1f2f4 text-#8a8f99' }],
+  [1, { label: '待开始', className: 'status-badge--pending' }],
+  [2, { label: '会议中', className: 'status-badge--ongoing' }],
+  [3, { label: '已结束', className: 'status-badge--finished' }],
+  [4, { label: '已取消', className: 'status-badge--canceled' }],
+  [5, { label: '已过期', className: 'status-badge--expired' }],
 ])
 
 const statusLabelClass = new Map<string, string>([
-  ['待开始', 'bg-#fff4e5 text-#ff9f1a'],
-  ['待进入', 'bg-#e7edff text-#3f5fff'],
+  ['待开始', 'status-badge--pending'],
+  ['待进入', 'status-badge--waiting'],
 ])
 
 export function getStatusMeta(status?: string | number): StatusMeta | null {
