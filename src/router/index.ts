@@ -50,7 +50,7 @@ router.beforeEach((to, from, next) => {
     setTimeout(() => {
       uni.showModal({
         title: '提示',
-        content: '未登录，请前往登录后访问',
+        content: '未登录或者登录已过期请重新登录',
         confirmText: '去登录',
         cancelText: '取消',
         success(res) {
