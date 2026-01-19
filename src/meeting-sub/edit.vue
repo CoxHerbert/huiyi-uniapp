@@ -73,15 +73,6 @@ function formatTime(value: Date) {
   return `${padTime(value.getHours())}:${padTime(value.getMinutes())}`
 }
 
-function formatDateTimeForPicker(value: Date) {
-  const year = value.getFullYear()
-  const month = padTime(value.getMonth() + 1)
-  const day = padTime(value.getDate())
-  const hour = padTime(value.getHours())
-  const minute = padTime(value.getMinutes())
-  return `${year}-${month}-${day} ${hour}:${minute}`
-}
-
 function formatTimeFromMinutes(totalMinutes: number) {
   const clamped = Math.min(Math.max(totalMinutes, 0), 23 * 60 + 59)
   const hour = Math.floor(clamped / 60)
@@ -143,13 +134,13 @@ function displayRangeFormat(items: Record<string, any>[]) {
   return `${year.label}/${month.label}/${date.label} ${hour.label}:${minute.label}`
 }
 
-const meetingRange = computed<[string, string]>({
+const meetingRange = computed<[number, number]>({
   get() {
     if (!meetingForm.date || !meetingForm.startTime || !meetingForm.endTime)
-      return ['', '']
+      return [0, 0]
     const startAt = new Date(`${meetingForm.date} ${meetingForm.startTime}`)
     const endAt = new Date(`${meetingForm.date} ${meetingForm.endTime}`)
-    return [formatDateTimeForPicker(startAt), formatDateTimeForPicker(endAt)]
+    return [startAt.getTime(), endAt.getTime()]
   },
   set(value) {
     if (!Array.isArray(value) || value.length < 2)
