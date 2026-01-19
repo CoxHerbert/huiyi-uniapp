@@ -28,7 +28,7 @@ export default defineUniPages({
   }, {
     path: 'pages/settings/index',
     type: 'page',
-    name: 'settings',
+    name: 'mine',
     layout: 'tabbar',
     style: {
       navigationBarTitleText: '我的',
