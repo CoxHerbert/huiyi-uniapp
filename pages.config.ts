@@ -35,7 +35,7 @@ export default defineUniPages({
     },
   }],
   subPackages: [{
-    root: 'pages/meeting',
+    root: 'pages/meeting-sub',
     pages: [{
       path: 'create',
       type: 'page',

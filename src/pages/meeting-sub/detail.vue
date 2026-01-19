@@ -8,7 +8,7 @@ import {
   parseHostUserName,
   parseNameList,
   safeText,
-} from './utils'
+} from '../meeting/utils'
 
 definePage({
   name: 'meeting-detail',
@@ -147,7 +147,7 @@ onShow(() => {
 function goToEdit() {
   if (!meetingId.value)
     return
-  uni.navigateTo({ url: `/pages/meeting/edit?meetingId=${meetingId.value}&id=${pageId.value}` })
+  uni.navigateTo({ url: `/pages/meeting-sub/edit?meetingId=${meetingId.value}&id=${pageId.value}` })
 }
 
 async function handleCancelMeeting() {
