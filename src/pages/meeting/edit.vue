@@ -123,7 +123,7 @@ const minStartTime = computed(() => {
     now.getHours() * 60 + now.getMinutes() + MIN_START_OFFSET_MINUTES,
     23 * 60 + 59,
   )
-  return { hour: Math.floor(minStartMinutes / 60), minute: minStartMinutes % 60 }
+  return { hour: Math.floor(minStartMinutes / 60), minute: 0 }
 })
 
 function parseDate(value: string) {
