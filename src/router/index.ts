@@ -46,7 +46,8 @@ router.beforeEach((to, from, next) => {
   if (!auth.isLogin && !isPublicRoute(to)) {
     const redirect = resolveRedirectPath(to)
 
-    return new Promise<void>((resolve, reject) => {
+    next(false)
+    setTimeout(() => {
       uni.showModal({
         title: '提示',
         content: '未登录，请前往登录后访问',
@@ -54,24 +55,15 @@ router.beforeEach((to, from, next) => {
         cancelText: '取消',
         success(res) {
           if (res.confirm) {
-            next({
+            router.replaceAll({
               path: '/pages/login/index',
-              navType: 'replaceAll',
               query: redirect ? { redirect } : undefined,
             })
-            resolve()
           }
-          else {
-            next(false)
-            reject(new Error('用户取消访问'))
-          }
-        },
-        fail() {
-          next(false)
-          reject(new Error('用户取消访问'))
         },
       })
-    })
+    }, 0)
+    return
   }
 
   // 继续导航
