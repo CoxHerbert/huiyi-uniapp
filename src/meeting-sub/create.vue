@@ -102,6 +102,10 @@ function parseDate(value: string) {
 }
 
 function parseDateTimeValue(value: string | number) {
+  if (typeof value === 'number') {
+    const parsed = new Date(value)
+    return Number.isNaN(parsed.getTime()) ? null : parsed
+  }
   const normalized = String(value).replace(/-/g, '/')
   const parsed = new Date(normalized)
   return Number.isNaN(parsed.getTime()) ? null : parsed
