@@ -5,8 +5,9 @@
 
 type _LocationUrl =
   "/pages/index/index" |
+  "/pages/login/index" |
   "/pages/meeting/index" |
-  "/pages/settings/index" |
+  "/pages/mine/index" |
   "/meeting-sub/create" |
   "/meeting-sub/detail" |
   "/meeting-sub/edit" |
@@ -19,7 +20,7 @@ interface NavigateToOptions {
 interface RedirectToOptions extends NavigateToOptions {}
 
 interface SwitchTabOptions {
-  url: "/pages/meeting/index" | "/pages/settings/index"
+  url: "/pages/meeting/index" | "/pages/mine/index"
 }
 
 type ReLaunchOptions = NavigateToOptions | SwitchTabOptions;

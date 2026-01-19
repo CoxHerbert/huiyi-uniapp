@@ -1,6 +1,7 @@
 import { Base64 } from 'js-base64'
 import website from '@/config/website'
 import { useAuthStore } from '@/store/auth'
+import { getCurrentPath } from '@/utils'
 import { getToken, removeRefreshToken, removeToken } from '@/utils/auth' // 你已改成 uni.getStorageSync 的版本也没问题
 import crypto from '@/utils/crypto'
 import { serialize, tansParams } from '@/utils/util'
@@ -15,10 +16,37 @@ function toastError(message, cfg) {
   uni.showToast({ title: resolvedMessage, icon: 'none', duration: 2000 })
 }
 
+function showLoginExpiredConfirm() {
+  if (isLoginModalShown)
+    return
+  isLoginModalShown = true
+  const rawRedirect = getCurrentPath()
+  const redirect = rawRedirect ? `/${rawRedirect}` : ''
+  const loginUrl = redirect
+    ? `/pages/login/index?redirect=${encodeURIComponent(redirect)}`
+    : '/pages/login/index'
+  uni.showModal({
+    title: '提示',
+    content: '用户令牌过期，请重新登录',
+    confirmText: '去登录',
+    cancelText: '取消',
+    success(res) {
+      if (res.confirm) {
+        uni.reLaunch({ url: loginUrl })
+      }
+    },
+    complete() {
+      setTimeout(() => {
+        isLoginModalShown = false
+      }, 200)
+    },
+  })
+}
+
 // 全局只提示一次未授权
 let isErrorShown = false
-// 并发 401 导航去重
-let isRedirecting401 = false
+// 并发 401 弹窗去重
+let isLoginModalShown = false
 
 // ----------------- 小工具：合并 headers（大小写兼容） -----------------
 function mergeHeaders(base = {}, extra = {}) {
@@ -188,16 +216,7 @@ async function handleResponse(res) {
         removeToken()
         removeRefreshToken()
 
-        if (!isRedirecting401) {
-          isRedirecting401 = true
-          try {
-            console.log('401无权限之后的处理')
-            uni.reLaunch({ path: '/pages/index/index' })
-          }
-          finally {
-            setTimeout(() => (isRedirecting401 = false), 200)
-          }
-        }
+        showLoginExpiredConfirm()
 
         throw new Error(message)
       }
@@ -206,16 +225,12 @@ async function handleResponse(res) {
     // 已重试过仍 401
     if (!isErrorShown) {
       isErrorShown = true
-      toastError('用户令牌过期，请重新登录', config)
+      showLoginExpiredConfirm()
     }
     const auth = useAuthStore()
     auth.logout?.()
     removeToken()
     removeRefreshToken()
-
-    if (!isRedirecting401) {
-      isRedirecting401 = true
-    }
 
     throw new Error(message)
   }

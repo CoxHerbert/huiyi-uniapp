@@ -23,11 +23,20 @@ const router = createRouter({
   routes: generateRoutes(),
 })
 
-const publicRouteNames = new Set(['login'])
+const publicRouteNames = new Set(['login', 'index'])
 function isPublicRoute(route: { name?: string | null, path?: string | null }) {
   if (route.name && publicRouteNames.has(String(route.name)))
     return true
-  return Boolean(route.path && route.path.startsWith('/pages/login'))
+  return Boolean(route.path && (route.path.startsWith('/pages/login') || route.path.startsWith('/pages/index')))
+}
+
+function resolveRedirectPath(route: { path?: string | null, query?: Record<string, any> | null }) {
+  const path = route.path || ''
+  const query = route.query || {}
+  const queryString = Object.entries(query)
+    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value ?? ''))}`)
+    .join('&')
+  return queryString ? `${path}?${queryString}` : path
 }
 
 router.beforeEach((to, from, next) => {
@@ -35,24 +44,26 @@ router.beforeEach((to, from, next) => {
 
   // 演示：对受保护页面的简单拦截
   if (!auth.isLogin && !isPublicRoute(to)) {
-    const { confirm: showConfirm } = useGlobalMessage()
+    const redirect = resolveRedirectPath(to)
 
-    return new Promise<void>((resolve, reject) => {
-      showConfirm({
+    next(false)
+    setTimeout(() => {
+      uni.showModal({
         title: '提示',
-        msg: '未登录，请前往登录后访问',
-        confirmButtonText: '去登录',
-        cancelButtonText: '取消',
-        success() {
-          next({ path: '/pages/index/index', navType: 'replaceAll' })
-          resolve()
-        },
-        fail() {
-          next(false)
-          reject(new Error('用户取消访问'))
+        content: '未登录或者登录已过期请重新登录',
+        confirmText: '去登录',
+        cancelText: '取消',
+        success(res) {
+          if (res.confirm) {
+            router.replaceAll({
+              path: '/pages/login/index',
+              query: redirect ? { redirect } : undefined,
+            })
+          }
         },
       })
-    })
+    }, 0)
+    return
   }
 
   // 继续导航

@@ -11,3 +11,14 @@ export function getUserList(params?: Record<string, any>) {
     },
   })
 }
+
+export function sendSms(tenantId: string, phone: string) {
+  return request({
+    url: '/blade-auth/oauth/sms/send-validate',
+    method: 'post',
+    params: {
+      tenantId,
+      phone,
+    },
+  })
+}

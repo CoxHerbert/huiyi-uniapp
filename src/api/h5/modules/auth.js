@@ -56,6 +56,23 @@ export default {
       },
     })
   },
+  loginByPhone(tenantId, phone, code, smsId) {
+    return request({
+      url: '/blade-auth/oauth/token',
+      method: 'post',
+      headers: {
+        'Tenant-Id': tenantId,
+      },
+      params: {
+        tenantId,
+        phone,
+        code,
+        grant_type: 'sms',
+        scope: 'all',
+        smsId,
+      },
+    })
+  },
   // 刷新token
   refreshToken(refresh_token, tenantId = '000000', deptId, roleId) {
     return request({

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 definePage({
-  name: 'settings',
+  name: 'mine',
   layout: 'tabbar',
   style: {
     navigationBarTitleText: '我的',
