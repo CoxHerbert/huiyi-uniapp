@@ -1,5 +1,13 @@
 <script setup lang="ts">
 import { getMeetingList } from '@/api/meeting'
+import {
+  buildTimeLabel,
+  formatDateTime,
+  getAmPmLabel,
+  getStatusMeta,
+  parseHostUserName,
+  toMillis,
+} from './utils'
 
 definePage({
   name: 'meeting-history',
@@ -33,100 +41,6 @@ const historyList = ref<HistoryItem[]>([])
 const filteredList = ref<HistoryItem[]>([])
 
 const keyword = ref('') // 搜索关键字（仅支持：会议名称 + 发起人）
-
-/** ✅ meeting 列表页同款：状态映射 */
-const statusMeta = new Map<number, { label: string, className: string }>([
-  [1, { label: '待开始', className: 'bg-#fff4e5 text-#ff9f1a' }],
-  [2, { label: '会议中', className: 'bg-#e8f7f0 text-#1e8e5a' }],
-  [3, { label: '已结束', className: 'bg-#f1f2f4 text-#8a8f99' }],
-  [4, { label: '已取消', className: 'bg-#fdeaea text-#ff4d4f' }],
-  [5, { label: '已过期', className: 'bg-#f1f2f4 text-#8a8f99' }],
-])
-const statusLabelClass = new Map<string, string>([
-  ['待开始', 'bg-#fff4e5 text-#ff9f1a'],
-  ['待进入', 'bg-#e7edff text-#3f5fff'],
-])
-
-function getStatusMeta(status?: string | number) {
-  if (typeof status === 'number')
-    return statusMeta.get(status)
-  const parsed = Number(status)
-  if (!Number.isNaN(parsed))
-    return statusMeta.get(parsed)
-  if (typeof status === 'string') {
-    const className = statusLabelClass.get(status)
-    if (className)
-      return { label: status, className }
-  }
-  return null
-}
-
-function padTime(value: number) {
-  return String(value).padStart(2, '0')
-}
-
-function formatTimeRange(start: number, duration: number) {
-  const startDate = new Date(start * 1000)
-  const endDate = new Date(startDate.getTime() + duration * 1000)
-  const startLabel = `${padTime(startDate.getHours())}:${padTime(startDate.getMinutes())}`
-  const endLabel = `${padTime(endDate.getHours())}:${padTime(endDate.getMinutes())}`
-  return `${startLabel}-${endLabel}`
-}
-
-function buildTimeLabel(startTimestamp?: number, durationSeconds?: number, fallback?: string) {
-  if (typeof startTimestamp === 'number' && typeof durationSeconds === 'number') {
-    return formatTimeRange(startTimestamp, durationSeconds)
-  }
-  return fallback || ''
-}
-
-function getAmPmLabel(item: HistoryItem) {
-  const ts = item.meetingStart
-  if (typeof ts === 'number') {
-    const d = new Date(ts * 1000)
-    return d.getHours() >= 12 ? '下午' : '上午'
-  }
-  const start = item.time?.split('-')?.[0]?.trim()
-  if (start) {
-    const hour = Number(start.split(':')?.[0])
-    if (!Number.isNaN(hour))
-      return hour >= 12 ? '下午' : '上午'
-  }
-  return ''
-}
-
-/** ✅ 将各种时间字段统一转成毫秒时间戳（支持：秒/毫秒/字符串时间） */
-function toMillis(value: any) {
-  if (value === undefined || value === null || value === '')
-    return 0
-
-  const n = Number(value)
-  if (Number.isFinite(n)) {
-    if (n > 0 && n < 1e12)
-      return n * 1000
-    return n
-  }
-
-  if (typeof value === 'string') {
-    const d = new Date(value.replace(/-/g, '/'))
-    const t = d.getTime()
-    return Number.isNaN(t) ? 0 : t
-  }
-
-  return 0
-}
-
-function formatDateTime(ms: number) {
-  if (!ms)
-    return ''
-  const d = new Date(ms)
-  const y = d.getFullYear()
-  const m = padTime(d.getMonth() + 1)
-  const day = padTime(d.getDate())
-  const hh = padTime(d.getHours())
-  const mm = padTime(d.getMinutes())
-  return `${y}-${m}-${day} ${hh}:${mm}`
-}
 
 /** ✅ 排序键：优先创建时间(createTime / create_time)，其次用会议开始时间兜底 */
 function getRecordSortKey(record: any) {
@@ -171,15 +85,7 @@ function normalizeHistoryList(list: any[]): HistoryItem[] {
 
     const createTimeMs = toMillis(record?.createTime)
     const createTimeLabel = createTimeMs ? formatDateTime(createTimeMs) : ''
-    const hostUser = record?.hostUser
-      ? (() => {
-          try {
-            const arr = JSON.parse(record.hostUser).map((u: any) => u.realName)
-            return Array.isArray(arr) ? arr.join(',') : ''
-          }
-          catch { return '' }
-        })()
-      : ''
+    const hostUser = parseHostUserName(record?.hostUser)
     const item: HistoryItem = {
       id: record?.id,
       status: record?.status,
