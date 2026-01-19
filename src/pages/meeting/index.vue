@@ -221,10 +221,10 @@ async function handleRefresh() {
   }
 }
 
-function goToCreate() { uni.navigateTo({ url: '/pages/meeting-sub/create' }) }
-function goToHistory() { uni.navigateTo({ url: '/pages/meeting-sub/history' }) }
+function goToCreate() { uni.navigateTo({ url: '/meeting-sub/create' }) }
+function goToHistory() { uni.navigateTo({ url: '/meeting-sub/history' }) }
 function goToDetail(meetingId: string, id: string) {
-  uni.navigateTo({ url: `/pages/meeting-sub/detail?meetingId=${meetingId}&id=${id}` })
+  uni.navigateTo({ url: `/meeting-sub/detail?meetingId=${meetingId}&id=${id}` })
 }
 function resetRefresher() {
   refresherTriggered.value = false

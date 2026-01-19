@@ -7,7 +7,7 @@ import {
   getStatusMeta,
   parseHostUserName,
   toMillis,
-} from '../meeting/utils'
+} from '../pages/meeting/utils'
 
 definePage({
   name: 'meeting-history',
@@ -171,7 +171,7 @@ onLoad(() => {
 })
 
 function goToHistoryDetail(meetingId: number | string) {
-  uni.navigateTo({ url: `/pages/meeting-sub/history-detail?meetingId=${meetingId}` })
+  uni.navigateTo({ url: `/meeting-sub/history-detail?meetingId=${meetingId}` })
 }
 </script>
 
