@@ -23,8 +23,8 @@ function showLoginExpiredConfirm() {
   const rawRedirect = getCurrentPath()
   const redirect = rawRedirect ? `/${rawRedirect}` : ''
   const loginUrl = redirect
-    ? `/pages/index/index?redirect=${encodeURIComponent(redirect)}`
-    : '/pages/index/index'
+    ? `/pages/login/index?redirect=${encodeURIComponent(redirect)}`
+    : '/pages/login/index'
   uni.showModal({
     title: '提示',
     content: '用户令牌过期，请重新登录',

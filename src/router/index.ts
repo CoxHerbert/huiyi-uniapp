@@ -23,11 +23,11 @@ const router = createRouter({
   routes: generateRoutes(),
 })
 
-const publicRouteNames = new Set(['login'])
+const publicRouteNames = new Set(['login', 'index'])
 function isPublicRoute(route: { name?: string | null, path?: string | null }) {
   if (route.name && publicRouteNames.has(String(route.name)))
     return true
-  return Boolean(route.path && route.path.startsWith('/pages/login'))
+  return Boolean(route.path && (route.path.startsWith('/pages/login') || route.path.startsWith('/pages/index')))
 }
 
 function resolveRedirectPath(route: { path?: string | null, query?: Record<string, any> | null }) {
@@ -55,7 +55,7 @@ router.beforeEach((to, from, next) => {
         cancelButtonText: '取消',
         success() {
           next({
-            path: '/pages/index/index',
+            path: '/pages/login/index',
             navType: 'replaceAll',
             query: redirect ? { redirect } : undefined,
           })

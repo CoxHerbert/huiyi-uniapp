@@ -52,9 +52,12 @@ export async function handleAlovaResponse(
     const redirect = rawRedirect ? `/${rawRedirect}` : ''
     const timer = setTimeout(() => {
       clearTimeout(timer)
+      const shouldAttachRedirect = redirect
+        && !redirect.startsWith('/pages/login/index')
+        && !redirect.startsWith('/pages/index/index')
       router.replaceAll({
         name: 'login',
-        query: redirect && !redirect.startsWith('/pages/index/index') ? { redirect } : undefined,
+        query: shouldAttachRedirect ? { redirect } : undefined,
       })
     }, 500)
 
@@ -96,9 +99,12 @@ export function handleAlovaError(error: any, method: Method) {
     const redirect = rawRedirect ? `/${rawRedirect}` : ''
     const timer = setTimeout(() => {
       clearTimeout(timer)
+      const shouldAttachRedirect = redirect
+        && !redirect.startsWith('/pages/login/index')
+        && !redirect.startsWith('/pages/index/index')
       router.replaceAll({
         name: 'login',
-        query: redirect && !redirect.startsWith('/pages/index/index') ? { redirect } : undefined,
+        query: shouldAttachRedirect ? { redirect } : undefined,
       })
     }, 500)
     throw new ApiError('登录已过期，请重新登录！', error.code, error.data)

@@ -13,6 +13,13 @@ export default defineUniPages({
   pages: [{
     path: 'pages/index/index',
     type: 'page',
+    name: 'index',
+    style: {
+      navigationBarTitleText: '登录',
+    },
+  }, {
+    path: 'pages/login/index',
+    type: 'page',
     name: 'login',
     style: {
       navigationBarTitleText: '登录',
