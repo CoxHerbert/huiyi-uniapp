@@ -30,12 +30,22 @@ function isPublicRoute(route: { name?: string | null, path?: string | null }) {
   return Boolean(route.path && route.path.startsWith('/pages/login'))
 }
 
+function resolveRedirectPath(route: { path?: string | null, query?: Record<string, any> | null }) {
+  const path = route.path || ''
+  const query = route.query || {}
+  const queryString = Object.entries(query)
+    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value ?? ''))}`)
+    .join('&')
+  return queryString ? `${path}?${queryString}` : path
+}
+
 router.beforeEach((to, from, next) => {
   const auth = useAuthStore()
 
   // 演示：对受保护页面的简单拦截
   if (!auth.isLogin && !isPublicRoute(to)) {
     const { confirm: showConfirm } = useGlobalMessage()
+    const redirect = resolveRedirectPath(to)
 
     return new Promise<void>((resolve, reject) => {
       showConfirm({
@@ -44,7 +54,11 @@ router.beforeEach((to, from, next) => {
         confirmButtonText: '去登录',
         cancelButtonText: '取消',
         success() {
-          next({ path: '/pages/index/index', navType: 'replaceAll' })
+          next({
+            path: '/pages/index/index',
+            navType: 'replaceAll',
+            query: redirect ? { redirect } : undefined,
+          })
           resolve()
         },
         fail() {

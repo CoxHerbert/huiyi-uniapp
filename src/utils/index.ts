@@ -5,5 +5,10 @@
 export function getCurrentPath() {
   const pages = getCurrentPages()
   const currentPage = pages[pages.length - 1]
-  return currentPage.route || ''
+  const route = currentPage?.route || ''
+  const options = currentPage?.options || {}
+  const query = Object.entries(options)
+    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value ?? ''))}`)
+    .join('&')
+  return query ? `${route}?${query}` : route
 }

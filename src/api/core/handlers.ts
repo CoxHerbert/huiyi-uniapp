@@ -8,6 +8,8 @@
  */
 import type { Method } from 'alova'
 import router from '@/router'
+import { useAuthStore } from '@/store/auth'
+import { getCurrentPath } from '@/utils'
 
 // Custom error class for API errors
 export class ApiError extends Error {
@@ -37,6 +39,7 @@ export async function handleAlovaResponse(
   response: UniApp.RequestSuccessCallbackResult | UniApp.UploadFileSuccessCallbackResult | UniApp.DownloadSuccessData,
 ) {
   const globalToast = useGlobalToast()
+  const authStore = useAuthStore()
   // Extract status code and data from UniApp response
   const { statusCode, data } = response as UniNamespace.RequestSuccessCallbackResult
 
@@ -44,9 +47,15 @@ export async function handleAlovaResponse(
   if ((statusCode === 401 || statusCode === 403)) {
     // 如果是未授权错误，清除用户信息并跳转到登录页
     globalToast.error({ msg: '登录已过期，请重新登录！', duration: 500 })
+    authStore.logout()
+    const rawRedirect = getCurrentPath()
+    const redirect = rawRedirect ? `/${rawRedirect}` : ''
     const timer = setTimeout(() => {
       clearTimeout(timer)
-      router.replaceAll({ name: 'login' })
+      router.replaceAll({
+        name: 'login',
+        query: redirect && !redirect.startsWith('/pages/index/index') ? { redirect } : undefined,
+      })
     }, 500)
 
     throw new ApiError('登录已过期，请重新登录！', statusCode, data)
@@ -72,6 +81,7 @@ export async function handleAlovaResponse(
 // Handle request errors
 export function handleAlovaError(error: any, method: Method) {
   const globalToast = useGlobalToast()
+  const authStore = useAuthStore()
   // Log error in development
   if (import.meta.env.MODE === 'development') {
     console.error('[Alova Error]', error, method)
@@ -81,9 +91,15 @@ export function handleAlovaError(error: any, method: Method) {
   if (error instanceof ApiError && (error.code === 401 || error.code === 403)) {
     // 如果是未授权错误，清除用户信息并跳转到登录页
     globalToast.error({ msg: '登录已过期，请重新登录！', duration: 500 })
+    authStore.logout()
+    const rawRedirect = getCurrentPath()
+    const redirect = rawRedirect ? `/${rawRedirect}` : ''
     const timer = setTimeout(() => {
       clearTimeout(timer)
-      router.replaceAll({ name: 'login' })
+      router.replaceAll({
+        name: 'login',
+        query: redirect && !redirect.startsWith('/pages/index/index') ? { redirect } : undefined,
+      })
     }, 500)
     throw new ApiError('登录已过期，请重新登录！', error.code, error.data)
   }

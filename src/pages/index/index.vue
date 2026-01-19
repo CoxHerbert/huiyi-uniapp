@@ -35,7 +35,8 @@ const formData = reactive({
 })
 
 onLoad((option) => {
-  redirectPath.value = option?.redirect || ''
+  const redirect = option?.redirect ? decodeURIComponent(option.redirect) : ''
+  redirectPath.value = redirect || ''
   const cachedUsername = uni.getStorageSync(KEYS.LAST_USERNAME)
   if (cachedUsername) {
     formData.username = cachedUsername
