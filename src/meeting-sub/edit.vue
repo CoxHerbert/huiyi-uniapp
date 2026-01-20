@@ -97,17 +97,6 @@ function addMinutesToTime(time: string, minutes: number) {
   return formatTimeFromMinutes(toMinutes(time) + minutes)
 }
 
-function initDefaultDateTime() {
-  const now = new Date()
-  const nowMinutes = now.getHours() * 60 + now.getMinutes()
-  const startMinutes = Math.min(nowMinutes + MIN_START_OFFSET_MINUTES, 23 * 60 + 59)
-  meetingForm.date = formatDate(now)
-  meetingForm.startTime = formatTimeFromMinutes(startMinutes)
-  meetingForm.endTime = addMinutesToTime(meetingForm.startTime, MIN_DURATION_MINUTES)
-}
-
-initDefaultDateTime()
-
 const minStartDateTime = computed(() => {
   const now = new Date()
   now.setSeconds(0, 0)
@@ -194,6 +183,8 @@ function ensureDateNotPast() {
 }
 
 function ensureStartNotPast() {
+  if (!meetingForm.startTime)
+    return
   const now = new Date()
   const todayLabel = formatDate(now)
   if (meetingForm.date !== todayLabel)
@@ -206,6 +197,8 @@ function ensureStartNotPast() {
 }
 
 function ensureMinimumDuration() {
+  if (!meetingForm.startTime || !meetingForm.endTime)
+    return
   const minEndMinutes = Math.min(
     toMinutes(meetingForm.startTime) + MIN_DURATION_MINUTES,
     23 * 60 + 59,
