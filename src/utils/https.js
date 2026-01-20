@@ -254,7 +254,6 @@ async function handleResponse(res) {
   if (cryptoData) {
     res.data = JSON.parse(crypto.decryptAES(res.data, crypto.aesKey))
   }
-  console.log(res)
   return res
 }
 
