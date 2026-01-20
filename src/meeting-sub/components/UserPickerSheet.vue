@@ -16,6 +16,8 @@ const props = defineProps<{
   title?: string
   /** single=单选(主持人) multiple=多选(参会人) */
   mode: PickMode
+  /** multiple 模式的最大可选人数 */
+  maxSelected?: number
   /** 默认选中的 account 列表 */
   defaultSelected?: string[]
   /** 默认选中的人员信息（用于回显姓名） */
@@ -173,6 +175,10 @@ function togglePick(account: string) {
     selectedUserMap.value.delete(account)
   }
   else {
+    if (props.maxSelected && selectedIds.value.length >= props.maxSelected) {
+      uni.showToast({ title: `最多可选择${props.maxSelected}人`, icon: 'none' })
+      return
+    }
     selectedIds.value = [...selectedIds.value, account]
     const option = userOptions.value.find(item => item.account === account)
     cacheUser(option ?? { account, name: account })
