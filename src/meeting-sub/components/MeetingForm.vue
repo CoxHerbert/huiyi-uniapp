@@ -69,7 +69,7 @@ function openHostSheet() {
   const hostIds = (props.meeting.hostUser || [])
     .map(user => user.account)
     .filter(Boolean)
-  selectedHostIds.value = (hostIds.length ? hostIds : props.meeting.hosts || []).slice(0, 1)
+  selectedHostIds.value = (hostIds.length ? hostIds : props.meeting.hosts || []).slice(0, 10)
   showHostSheet.value = true
 }
 
@@ -83,13 +83,13 @@ function openParticipantSheet() {
 
 /** 选择器确认：主持人 */
 function onHostConfirm(payload: { selectedIds: string[], selectedUsers: UserOption[] }) {
-  const ids = (payload.selectedIds || []).slice(0, 1)
+  const ids = (payload.selectedIds || []).slice(0, 10)
   selectedHostIds.value = ids
 
   updateField('hosts', ids)
   updateField(
     'hostUser',
-    (payload.selectedUsers || []).slice(0, 1).map(u => ({ realName: u.name, account: u.account })),
+    (payload.selectedUsers || []).slice(0, 10).map(u => ({ realName: u.name, account: u.account })),
   )
 }
 
@@ -295,11 +295,12 @@ const participantDisplayText = computed(() => {
       <wd-gap :height="50" />
     </wd-action-sheet>
 
-    <!-- ✅ 主持人选择器（单选） -->
+    <!-- ✅ 主持人选择器（最多 10 人） -->
     <UserPickerSheet
       v-model="showHostSheet"
       title="选择主持人"
-      mode="single"
+      mode="multiple"
+      :max-selected="10"
       :default-selected="selectedHostIds"
       :default-selected-users="(meeting.hostUser || []).map(user => ({ account: user.account, name: user.realName || user.account }))"
       @confirm="onHostConfirm"
