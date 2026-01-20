@@ -48,6 +48,7 @@ const userHasMore = ref(true)
 const userPageSize = 20
 
 const selectedIds = ref<string[]>([])
+const selectedUserMap = ref<Map<string, UserOption>>(new Map())
 const expanded = ref(false)
 let searchTimer: ReturnType<typeof setTimeout> | null = null
 
@@ -67,6 +68,23 @@ function resetUserPaging() {
   userPage.value = 1
   userHasMore.value = true
   userOptions.value = []
+}
+
+function cacheUser(option?: UserOption | null) {
+  if (!option?.account)
+    return
+  const existing = selectedUserMap.value.get(option.account)
+  const name = option.name || existing?.name || option.account
+  selectedUserMap.value.set(option.account, { account: option.account, name })
+}
+
+function cacheAccount(account: string) {
+  if (!account)
+    return
+  const existing = selectedUserMap.value.get(account)
+  if (!existing) {
+    selectedUserMap.value.set(account, { account, name: account })
+  }
 }
 
 async function loadUsers(isLoadMore = false) {
@@ -137,34 +155,42 @@ function togglePick(account: string) {
     return
 
   if (props.mode === 'single') {
-    selectedIds.value = selectedIds.value.includes(account) ? [] : [account]
+    if (selectedIds.value.includes(account)) {
+      selectedIds.value = []
+      selectedUserMap.value.delete(account)
+    }
+    else {
+      selectedIds.value = [account]
+      const option = userOptions.value.find(item => item.account === account)
+      cacheUser(option ?? { account, name: account })
+    }
     return
   }
 
   // multiple
   if (selectedIds.value.includes(account)) {
     selectedIds.value = selectedIds.value.filter(id => id !== account)
+    selectedUserMap.value.delete(account)
   }
   else {
     selectedIds.value = [...selectedIds.value, account]
+    const option = userOptions.value.find(item => item.account === account)
+    cacheUser(option ?? { account, name: account })
   }
 }
 
 const selectedUsers = computed<UserOption[]>(() => {
   if (!selectedIds.value.length)
     return []
-  const map = new Map<string, UserOption>()
-  ;(props.defaultSelectedUsers || []).forEach((user) => {
-    if (user?.account)
-      map.set(user.account, user)
-  })
-  userOptions.value.forEach((option) => {
-    if (option?.account)
-      map.set(option.account, option)
-  })
   return selectedIds.value.map((account) => {
-    const option = map.get(account)
-    return { account, name: option?.name || account }
+    const cached = selectedUserMap.value.get(account)
+    if (cached?.name)
+      return { account, name: cached.name }
+    const option = userOptions.value.find(item => item.account === account)
+    if (option)
+      cacheUser(option)
+    const resolved = selectedUserMap.value.get(account)
+    return { account, name: resolved?.name || account }
   })
 })
 
@@ -206,10 +232,27 @@ watch(
     if (!v)
       return
     selectedIds.value = (props.defaultSelected || []).filter(Boolean)
+    selectedUserMap.value = new Map()
+    ;(props.defaultSelectedUsers || []).forEach((user) => {
+      if (user?.account)
+        selectedUserMap.value.set(user.account, { account: user.account, name: user.name || user.account })
+    })
+    selectedIds.value.forEach(account => cacheAccount(account))
     expanded.value = false
     resetUserPaging()
     loadUsers()
   },
+)
+
+watch(
+  () => userOptions.value,
+  (value) => {
+    value.forEach((option) => {
+      if (option?.account && option.name)
+        cacheUser(option)
+    })
+  },
+  { deep: true },
 )
 
 watch([userAccount, userName], () => {
