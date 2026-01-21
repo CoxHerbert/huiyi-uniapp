@@ -416,37 +416,48 @@ async function handleCreate() {
               </view>
             </wd-datetime-picker>
           </view>
-          <view class="time-picker-row">
-            <text class="time-label">开始时间</text>
-            <wd-datetime-picker
-              v-model="meetingForm.startTime"
-              type="time"
-              :filter="timeMinuteFilter"
-              :use-second="false"
-            >
-              <view class="time-picker-cell">
-                <text class="time-value">
-                  {{ meetingForm.startTime || '请选择时间' }}
+        </view>
+        <view class="mt-3">
+          <view class="flex items-center justify-center">
+            <view class="flex items-center gap-6">
+              <wd-datetime-picker
+                v-model="meetingForm.startTime"
+                type="time"
+                :filter="timeMinuteFilter"
+                :use-second="false"
+              >
+                <view class="text-center">
+                  <text class="block text-5 text-#2f2f2f font-600">
+                    {{ meetingForm.startTime || '--:--' }}
+                  </text>
+                  <text class="text-3 text-#9aa0a6">
+                    {{ meetingForm.date }}
+                  </text>
+                </view>
+              </wd-datetime-picker>
+              <view class="duration-wrap gap-3">
+                <view class="line" />
+                <text class="duration-text">
+                  {{ durationLabel }}
                 </text>
-                <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
+                <view class="line" />
               </view>
-            </wd-datetime-picker>
-          </view>
-          <view class="time-picker-row">
-            <text class="time-label">结束时间</text>
-            <wd-datetime-picker
-              v-model="meetingForm.endTime"
-              type="time"
-              :filter="timeMinuteFilter"
-              :use-second="false"
-            >
-              <view class="time-picker-cell">
-                <text class="time-value">
-                  {{ meetingForm.endTime || '请选择时间' }}
-                </text>
-                <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
-              </view>
-            </wd-datetime-picker>
+              <wd-datetime-picker
+                v-model="meetingForm.endTime"
+                type="time"
+                :filter="timeMinuteFilter"
+                :use-second="false"
+              >
+                <view class="text-center">
+                  <text class="block text-5 text-#2f2f2f font-600">
+                    {{ meetingForm.endTime || '--:--' }}
+                  </text>
+                  <text class="text-3 text-#9aa0a6">
+                    {{ meetingForm.date }}
+                  </text>
+                </view>
+              </wd-datetime-picker>
+            </view>
           </view>
         </view>
         <view class="mt-3 flex flex-col gap-2">
@@ -521,6 +532,31 @@ async function handleCreate() {
   font-size: 28rpx;
   color: #2f2f2f;
 }
+
+.duration-wrap {
+  padding: 0 16rpx;
+  display: flex;
+  align-items: center;
+}
+
+.line {
+  width: 56rpx;
+  height: 2rpx;
+  background: #DADBE0;
+}
+
+.duration-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 108rpx;
+  height: 56rpx;
+  background: #F6F8FA;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+  color: #333333;
+  line-height: 24rpx;
+}
 .duration-shortcuts {
   display: flex;
   align-items: center;
@@ -563,19 +599,6 @@ async function handleCreate() {
 .duration-unit {
   font-size: 24rpx;
   color: #9aa0a6;
-}
-
-.duration-summary {
-  display: flex;
-  align-items: center;
-  gap: 8rpx;
-  font-size: 24rpx;
-  color: #5f6368;
-}
-
-.duration-summary__value {
-  font-weight: 600;
-  color: #2f2f2f;
 }
 
 .duration-actions {
