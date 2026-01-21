@@ -173,6 +173,18 @@ function ensureMinimumDuration() {
   }
 }
 
+function ensureEndAfterStart() {
+  if (!meetingForm.startTime || !meetingForm.endTime)
+    return
+  if (toMinutes(meetingForm.endTime) <= toMinutes(meetingForm.startTime)) {
+    const minEndMinutes = Math.min(
+      toMinutes(meetingForm.startTime) + MIN_DURATION_MINUTES,
+      23 * 60 + 59,
+    )
+    meetingForm.endTime = formatTimeFromMinutes(minEndMinutes)
+  }
+}
+
 function resolveDefaultStartTime() {
   const now = new Date()
   const todayLabel = formatDate(now)
@@ -226,6 +238,7 @@ watch(
     ensureDateNotPast()
     ensureStartNotPast()
     ensureMinimumDuration()
+    ensureEndAfterStart()
   },
   { immediate: true },
 )
@@ -440,7 +453,7 @@ async function handleCreate() {
           <text class="text-3 text-#9aa0a6">
             时间以 5 分钟为单位，结束时间需晚于开始时间
           </text>
-          <view class="flex items-center justify-between">
+          <view class="duration-actions">
             <view class="duration-shortcuts">
               <text class="shortcut-label">快捷时长</text>
               <view class="shortcut-list">
@@ -455,6 +468,7 @@ async function handleCreate() {
               </view>
             </view>
             <view class="duration-input-wrap">
+              <text class="shortcut-label">自定义</text>
               <wd-input
                 :model-value="customDurationMinutes"
                 type="number"
@@ -538,6 +552,7 @@ async function handleCreate() {
   display: flex;
   align-items: center;
   gap: 8rpx;
+  justify-content: flex-end;
 }
 
 .duration-input :deep(.wd-input__inner) {
@@ -561,5 +576,11 @@ async function handleCreate() {
 .duration-summary__value {
   font-weight: 600;
   color: #2f2f2f;
+}
+
+.duration-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
 }
 </style>
