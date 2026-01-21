@@ -406,15 +406,15 @@ async function handleCreate() {
       <view class="mb-2 bg-white px-4 py-3">
         <view class="time-picker-grid">
           <view class="time-picker-row">
-            <text class="time-label">日期</text>
-            <wd-datetime-picker v-model="meetingDateValue" type="date" :min-date="minDate">
+            <text class="time-label">会议日期</text>
+            <wd-calendar v-model="meetingDateValue" :min-date="minDate">
               <view class="time-picker-cell">
                 <text class="time-value">
                   {{ meetingForm.date || '请选择日期' }}
                 </text>
                 <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
               </view>
-            </wd-datetime-picker>
+            </wd-calendar>
           </view>
         </view>
         <view class="mt-3">
