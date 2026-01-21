@@ -36,6 +36,7 @@ const meetingForm = reactive({
 
 const MIN_DURATION_MINUTES = 5
 const MIN_START_OFFSET_MINUTES = 5
+const QUICK_DURATION_OPTIONS = [30, 60, 90, 120]
 
 function padTime(value: number) {
   return String(value).padStart(2, '0')
@@ -80,6 +81,12 @@ function initDefaultDateTime() {
   const now = new Date()
   meetingForm.date = formatDate(now)
   meetingForm.name = `${loginInfo.value?.real_name || ''}预定的会议`
+
+  const startAt = new Date(now)
+  startAt.setSeconds(0, 0)
+  startAt.setMinutes(startAt.getMinutes() + MIN_START_OFFSET_MINUTES)
+  meetingForm.startTime = formatTime(startAt)
+  meetingForm.endTime = addMinutesToTime(meetingForm.startTime, 30)
 }
 
 initDefaultDateTime()
@@ -193,6 +200,25 @@ function ensureMinimumDuration() {
   if (toMinutes(meetingForm.endTime) < minEndMinutes) {
     meetingForm.endTime = formatTimeFromMinutes(minEndMinutes)
   }
+}
+
+function resolveDefaultStartTime() {
+  const now = new Date()
+  const todayLabel = formatDate(now)
+  if (meetingForm.date === todayLabel) {
+    now.setSeconds(0, 0)
+    now.setMinutes(now.getMinutes() + MIN_START_OFFSET_MINUTES)
+    return formatTime(now)
+  }
+  return '09:00'
+}
+
+function applyDuration(minutes: number) {
+  if (!meetingForm.date)
+    meetingForm.date = formatDate(new Date())
+  if (!meetingForm.startTime)
+    meetingForm.startTime = resolveDefaultStartTime()
+  meetingForm.endTime = addMinutesToTime(meetingForm.startTime, minutes)
 }
 
 watch(
@@ -377,6 +403,9 @@ async function handleCreate() {
           <view class="flex items-center justify-center">
             <view class="flex items-center gap-6">
               <view class="text-center">
+                <text class="block text-3 text-#9aa0a6">
+                  开始
+                </text>
                 <text class="block text-5 text-#2f2f2f font-600">
                   {{ meetingForm.startTime }}
                 </text>
@@ -393,6 +422,9 @@ async function handleCreate() {
               </view>
 
               <view class="text-center">
+                <text class="block text-3 text-#9aa0a6">
+                  结束
+                </text>
                 <text class="block text-5 text-#2f2f2f font-600">
                   {{ meetingForm.endTime }}
                 </text>
@@ -403,6 +435,24 @@ async function handleCreate() {
             </view>
           </view>
         </wd-datetime-picker>
+        <view class="mt-3 flex items-center justify-between">
+          <text class="text-3 text-#9aa0a6">
+            轻触时间区域可调整开始/结束时间
+          </text>
+          <view class="duration-shortcuts">
+            <text class="shortcut-label">快捷时长</text>
+            <view class="shortcut-list">
+              <view
+                v-for="minutes in QUICK_DURATION_OPTIONS"
+                :key="minutes"
+                class="shortcut-item"
+                @click.stop="applyDuration(minutes)"
+              >
+                {{ minutes }}分钟
+              </view>
+            </view>
+          </view>
+        </view>
       </view>
     </template>
   </MeetingForm>
@@ -430,5 +480,30 @@ async function handleCreate() {
   font-size: 24rpx;
   color: #333333;
   line-height: 24rpx;
+}
+.duration-shortcuts {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.shortcut-label {
+  font-size: 24rpx;
+  color: #9aa0a6;
+}
+
+.shortcut-list {
+  display: flex;
+  gap: 12rpx;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.shortcut-item {
+  padding: 8rpx 16rpx;
+  border-radius: 999rpx;
+  background: #eef2ff;
+  font-size: 24rpx;
+  color: #4f7bff;
 }
 </style>
