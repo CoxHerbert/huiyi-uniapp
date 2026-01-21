@@ -130,9 +130,16 @@ const minDate = computed(() => {
   return today.getTime()
 })
 
-const timeMinuteFilter = (type: string, values: number[]) => {
+const timePickerFilter = (type: string, values: number[]) => {
   if (type === 'minute')
     return values.filter(value => value % 5 === 0)
+  if (type === 'hour') {
+    const todayLabel = formatDate(new Date())
+    if (meetingForm.date === todayLabel) {
+      const nowHour = new Date().getHours()
+      return values.filter(value => value >= nowHour)
+    }
+  }
   return values
 }
 
@@ -423,7 +430,7 @@ async function handleCreate() {
               <wd-datetime-picker
                 v-model="meetingForm.startTime"
                 type="time"
-                :filter="timeMinuteFilter"
+                :filter="timePickerFilter"
                 :use-second="false"
               >
                 <view class="text-center">
@@ -445,7 +452,7 @@ async function handleCreate() {
               <wd-datetime-picker
                 v-model="meetingForm.endTime"
                 type="time"
-                :filter="timeMinuteFilter"
+                :filter="timePickerFilter"
                 :use-second="false"
               >
                 <view class="text-center">

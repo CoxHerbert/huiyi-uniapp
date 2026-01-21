@@ -137,9 +137,16 @@ const minDate = computed(() => {
   return today.getTime()
 })
 
-const timeMinuteFilter = (type: string, values: number[]) => {
+const timePickerFilter = (type: string, values: number[]) => {
   if (type === 'minute')
     return values.filter(value => value % 5 === 0)
+  if (type === 'hour') {
+    const todayLabel = formatDate(new Date())
+    if (meetingForm.date === todayLabel) {
+      const nowHour = new Date().getHours()
+      return values.filter(value => value >= nowHour)
+    }
+  }
   return values
 }
 
@@ -515,12 +522,12 @@ onLoad((options) => {
         <view class="mt-3">
           <view class="flex items-center justify-center">
             <view class="flex items-center gap-6">
-              <wd-datetime-picker
-                v-model="meetingForm.startTime"
-                type="time"
-                :filter="timeMinuteFilter"
-                :use-second="false"
-              >
+            <wd-datetime-picker
+              v-model="meetingForm.startTime"
+              type="time"
+              :filter="timePickerFilter"
+              :use-second="false"
+            >
                 <view class="text-center">
                   <text class="block text-5 text-#2f2f2f font-600">
                     {{ meetingForm.startTime || '--:--' }}
@@ -537,12 +544,12 @@ onLoad((options) => {
                 </text>
                 <view class="line" />
               </view>
-              <wd-datetime-picker
-                v-model="meetingForm.endTime"
-                type="time"
-                :filter="timeMinuteFilter"
-                :use-second="false"
-              >
+            <wd-datetime-picker
+              v-model="meetingForm.endTime"
+              type="time"
+              :filter="timePickerFilter"
+              :use-second="false"
+            >
                 <view class="text-center">
                   <text class="block text-5 text-#2f2f2f font-600">
                     {{ meetingForm.endTime || '--:--' }}
