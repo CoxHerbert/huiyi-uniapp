@@ -595,10 +595,6 @@ onLoad((options) => {
               </wd-button>
             </view>
           </view>
-          <view class="duration-summary">
-            <text class="duration-summary__label">当前时长</text>
-            <text class="duration-summary__value">{{ durationLabel }}</text>
-          </view>
         </view>
       </view>
     </template>
