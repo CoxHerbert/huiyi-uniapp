@@ -137,9 +137,10 @@ const minDate = computed(() => {
   return today.getTime()
 })
 
-const timePickerFilter = (type: string, values: number[]) => {
+function timePickerFilter(type: string, values: number[]) {
   if (type === 'minute')
-    return values.filter(value => value % 5 === 0)
+    // return values.filter(value => value % 5 === 0)
+    return values
   if (type === 'hour') {
     const todayLabel = formatDate(new Date())
     if (meetingForm.date === todayLabel) {
@@ -508,7 +509,9 @@ onLoad((options) => {
       <view class="mb-2 border-#f0f1f2 bg-white px-4 py-3">
         <view class="time-picker-grid">
           <view class="time-picker-row">
-            <text class="time-label">日期</text>
+            <text class="time-label">
+              日期
+            </text>
             <wd-datetime-picker v-model="meetingDateValue" type="date" :min-date="minDate">
               <view class="time-picker-cell">
                 <text class="time-value">
@@ -522,12 +525,12 @@ onLoad((options) => {
         <view class="mt-3">
           <view class="flex items-center justify-center">
             <view class="flex items-center gap-6">
-            <wd-datetime-picker
-              v-model="meetingForm.startTime"
-              type="time"
-              :filter="timePickerFilter"
-              :use-second="false"
-            >
+              <wd-datetime-picker
+                v-model="meetingForm.startTime"
+                type="time"
+                :filter="timePickerFilter"
+                :use-second="false"
+              >
                 <view class="text-center">
                   <text class="block text-5 text-#2f2f2f font-600">
                     {{ meetingForm.startTime || '--:--' }}
@@ -544,12 +547,12 @@ onLoad((options) => {
                 </text>
                 <view class="line" />
               </view>
-            <wd-datetime-picker
-              v-model="meetingForm.endTime"
-              type="time"
-              :filter="timePickerFilter"
-              :use-second="false"
-            >
+              <wd-datetime-picker
+                v-model="meetingForm.endTime"
+                type="time"
+                :filter="timePickerFilter"
+                :use-second="false"
+              >
                 <view class="text-center">
                   <text class="block text-5 text-#2f2f2f font-600">
                     {{ meetingForm.endTime || '--:--' }}
@@ -563,12 +566,14 @@ onLoad((options) => {
           </view>
         </view>
         <view class="mt-3 flex flex-col gap-2">
-          <text class="text-3 text-#9aa0a6">
+          <!-- <text class="text-3 text-#9aa0a6">
             时间以 5 分钟为单位，结束时间需晚于开始时间
-          </text>
+          </text> -->
           <view class="duration-actions">
             <view class="duration-shortcuts">
-              <text class="shortcut-label">快捷时长</text>
+              <text class="shortcut-label">
+                快捷时长
+              </text>
               <view class="shortcut-list">
                 <view
                   v-for="minutes in QUICK_DURATION_OPTIONS"
@@ -581,7 +586,9 @@ onLoad((options) => {
               </view>
             </view>
             <view class="duration-input-wrap">
-              <text class="shortcut-label">自定义</text>
+              <text class="shortcut-label">
+                自定义
+              </text>
               <wd-input
                 :model-value="customDurationMinutes"
                 type="number"
@@ -589,7 +596,9 @@ onLoad((options) => {
                 custom-class="duration-input"
                 @update:model-value="(value) => customDurationMinutes = value"
               />
-              <text class="duration-unit">分钟</text>
+              <text class="duration-unit">
+                分钟
+              </text>
               <wd-button size="small" type="primary" @click.stop="applyCustomDuration">
                 应用
               </wd-button>
