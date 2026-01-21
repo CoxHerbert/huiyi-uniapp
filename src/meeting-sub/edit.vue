@@ -98,13 +98,6 @@ function addMinutesToTime(time: string, minutes: number) {
   return formatTimeFromMinutes(toMinutes(time) + minutes)
 }
 
-const minStartDateTime = computed(() => {
-  const now = new Date()
-  now.setSeconds(0, 0)
-  now.setMinutes(now.getMinutes() + MIN_START_OFFSET_MINUTES)
-  return now.getTime()
-})
-
 function parseDate(value: string) {
   const normalized = value.replace(/-/g, '/')
   const parsed = new Date(normalized)
@@ -121,58 +114,36 @@ function parseDateTimeValue(value: string | number) {
   return Number.isNaN(parsed.getTime()) ? null : parsed
 }
 
-function displayRangeFormat(items: Record<string, any>[]) {
-  if (!items.length)
-    return ''
-  const [year, month, date, hour, minute] = items
-  return `${year.label}/${month.label}/${date.label} ${hour.label}:${minute.label}`
-}
-
-const meetingRange = computed<[number, number]>({
+const meetingDateValue = computed<number>({
   get() {
-    if (!meetingForm.date || !meetingForm.startTime || !meetingForm.endTime)
-      return [0, 0]
-    const startAt = new Date(`${meetingForm.date} ${meetingForm.startTime}`)
-    const endAt = new Date(`${meetingForm.date} ${meetingForm.endTime}`)
-    return [startAt.getTime(), endAt.getTime()]
+    const parsed = parseDate(meetingForm.date)
+    if (parsed)
+      return parsed.getTime()
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    return today.getTime()
   },
   set(value) {
-    if (!Array.isArray(value) || value.length < 2)
+    const parsed = parseDateTimeValue(value)
+    if (!parsed)
       return
-    const [startValue, endValue] = value
-    const startAt = parseDateTimeValue(startValue)
-    const endAt = parseDateTimeValue(endValue)
-    if (!startAt || !endAt)
-      return
-    meetingForm.date = formatDate(startAt)
-    meetingForm.startTime = formatTime(startAt)
-    meetingForm.endTime = formatTime(endAt)
+    meetingForm.date = formatDate(parsed)
   },
 })
 
-function validateRangeSelection(
-  value: Array<string | number>,
-  resolve: (isPass: boolean) => void,
-) {
-  if (!Array.isArray(value) || value.length < 2) {
-    resolve(false)
-    return
-  }
-  const [startValue, endValue] = value
-  const startAt = parseDateTimeValue(startValue)
-  const endAt = parseDateTimeValue(endValue)
-  if (!startAt || !endAt) {
-    resolve(false)
-    return
-  }
-  const diff = endAt.getTime() - startAt.getTime()
-  if (diff < MIN_DURATION_MINUTES * 60 * 1000) {
-    uni.showToast({ title: `结束时间需晚于开始时间至少${MIN_DURATION_MINUTES}分钟`, icon: 'none' })
-    resolve(false)
-    return
-  }
-  resolve(true)
+const minDate = computed(() => {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return today.getTime()
+})
+
+const timeMinuteFilter = (type: string, values: number[]) => {
+  if (type === 'minute')
+    return values.filter(value => value % 5 === 0)
+  return values
 }
+
+const customDurationMinutes = ref('')
 
 function ensureDateNotPast() {
   const today = new Date()
@@ -220,12 +191,40 @@ function resolveDefaultStartTime() {
   return '09:00'
 }
 
+function normalizeDuration(minutes: number) {
+  if (!Number.isFinite(minutes))
+    return null
+  const clamped = Math.max(minutes, MIN_DURATION_MINUTES)
+  return Math.ceil(clamped / 5) * 5
+}
+
 function applyDuration(minutes: number) {
+  const normalized = normalizeDuration(minutes)
+  if (!normalized) {
+    uni.showToast({ title: '请输入有效时长', icon: 'none' })
+    return
+  }
   if (!meetingForm.date)
     meetingForm.date = formatDate(new Date())
   if (!meetingForm.startTime)
     meetingForm.startTime = resolveDefaultStartTime()
-  meetingForm.endTime = addMinutesToTime(meetingForm.startTime, minutes)
+  meetingForm.endTime = addMinutesToTime(meetingForm.startTime, normalized)
+}
+
+function applyCustomDuration() {
+  const raw = Number(customDurationMinutes.value)
+  if (!raw) {
+    uni.showToast({ title: '请输入时长（分钟）', icon: 'none' })
+    return
+  }
+  const normalized = normalizeDuration(raw)
+  if (!normalized)
+    return
+  if (normalized !== raw) {
+    uni.showToast({ title: `已自动调整为${normalized}分钟`, icon: 'none' })
+  }
+  customDurationMinutes.value = String(normalized)
+  applyDuration(normalized)
 }
 
 watch(
@@ -487,64 +486,86 @@ onLoad((options) => {
   >
     <template #time>
       <view class="mb-2 border-#f0f1f2 bg-white px-4 py-3">
-        <wd-datetime-picker
-          v-model="meetingRange"
-          type="datetime"
-          :use-second="false"
-          :min-date="minStartDateTime"
-          :display-format="displayRangeFormat"
-          :before-confirm="validateRangeSelection"
-        >
-          <view class="flex items-center justify-center">
-            <view class="flex items-center gap-6">
-              <view class="text-center">
-                <text class="block text-3 text-#9aa0a6">
-                  开始
+        <view class="time-picker-grid">
+          <view class="time-picker-row">
+            <text class="time-label">日期</text>
+            <wd-datetime-picker v-model="meetingDateValue" type="date" :min-date="minDate">
+              <view class="time-picker-cell">
+                <text class="time-value">
+                  {{ meetingForm.date || '请选择日期' }}
                 </text>
-                <text class="block text-5 text-#2f2f2f font-600">
-                  {{ meetingForm.startTime }}
-                </text>
-                <text class="text-3 text-#9aa0a6">
-                  {{ meetingForm.date }}
-                </text>
+                <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
               </view>
-              <view class="duration-label gap-4">
-                <view class="line" />
-                <text class="block bg-#F6F8FA px-1 py-2 text-3 text-#9aa0a6">
-                  {{ durationLabel }}
+            </wd-datetime-picker>
+          </view>
+          <view class="time-picker-row">
+            <text class="time-label">开始时间</text>
+            <wd-datetime-picker
+              v-model="meetingForm.startTime"
+              type="time"
+              :filter="timeMinuteFilter"
+              :use-second="false"
+            >
+              <view class="time-picker-cell">
+                <text class="time-value">
+                  {{ meetingForm.startTime || '请选择时间' }}
                 </text>
-                <view class="line" />
+                <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
               </view>
-              <view class="text-center">
-                <text class="block text-3 text-#9aa0a6">
-                  结束
+            </wd-datetime-picker>
+          </view>
+          <view class="time-picker-row">
+            <text class="time-label">结束时间</text>
+            <wd-datetime-picker
+              v-model="meetingForm.endTime"
+              type="time"
+              :filter="timeMinuteFilter"
+              :use-second="false"
+            >
+              <view class="time-picker-cell">
+                <text class="time-value">
+                  {{ meetingForm.endTime || '请选择时间' }}
                 </text>
-                <text class="block text-5 text-#2f2f2f font-600">
-                  {{ meetingForm.endTime }}
-                </text>
-                <text class="text-3 text-#9aa0a6">
-                  {{ meetingForm.date }}
-                </text>
+                <wd-icon name="arrow-right" size="14px" color="#c4c7cc" />
               </view>
+            </wd-datetime-picker>
+          </view>
+        </view>
+        <view class="mt-3 flex flex-col gap-2">
+          <text class="text-3 text-#9aa0a6">
+            时间以 5 分钟为单位，结束时间需晚于开始时间
+          </text>
+          <view class="flex items-center justify-between">
+            <view class="duration-shortcuts">
+              <text class="shortcut-label">快捷时长</text>
+              <view class="shortcut-list">
+                <view
+                  v-for="minutes in QUICK_DURATION_OPTIONS"
+                  :key="minutes"
+                  class="shortcut-item"
+                  @click.stop="applyDuration(minutes)"
+                >
+                  {{ minutes }}分钟
+                </view>
+              </view>
+            </view>
+            <view class="duration-input-wrap">
+              <wd-input
+                :model-value="customDurationMinutes"
+                type="number"
+                placeholder="输入分钟"
+                custom-class="duration-input"
+                @update:model-value="(value) => customDurationMinutes = value"
+              />
+              <text class="duration-unit">分钟</text>
+              <wd-button size="small" type="primary" @click.stop="applyCustomDuration">
+                应用
+              </wd-button>
             </view>
           </view>
-        </wd-datetime-picker>
-        <view class="mt-3 flex items-center justify-between">
-          <text class="text-3 text-#9aa0a6">
-            轻触时间区域可调整开始/结束时间
-          </text>
-          <view class="duration-shortcuts">
-            <text class="shortcut-label">快捷时长</text>
-            <view class="shortcut-list">
-              <view
-                v-for="minutes in QUICK_DURATION_OPTIONS"
-                :key="minutes"
-                class="shortcut-item"
-                @click.stop="applyDuration(minutes)"
-              >
-                {{ minutes }}分钟
-              </view>
-            </view>
+          <view class="duration-summary">
+            <text class="duration-summary__label">当前时长</text>
+            <text class="duration-summary__value">{{ durationLabel }}</text>
           </view>
         </view>
       </view>
@@ -553,22 +574,40 @@ onLoad((options) => {
 </template>
 
 <style scoped>
-.duration-label {
-  padding: 0 16rpx;
+.time-picker-grid {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  gap: 18rpx;
 }
 
-.line {
-  width: 56rpx;
-  height: 2rpx;
-  background: #DADBE0;
+.time-picker-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24rpx;
+}
+
+.time-label {
+  font-size: 26rpx;
+  color: #8a8f99;
+}
+
+.time-picker-cell {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.time-value {
+  font-size: 28rpx;
+  color: #2f2f2f;
 }
 
 .duration-shortcuts {
   display: flex;
   align-items: center;
   gap: 12rpx;
+  flex-wrap: wrap;
 }
 
 .shortcut-label {
@@ -589,5 +628,34 @@ onLoad((options) => {
   background: #eef2ff;
   font-size: 24rpx;
   color: #4f7bff;
+}
+
+.duration-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.duration-input :deep(.wd-input__inner) {
+  width: 140rpx;
+  text-align: right;
+}
+
+.duration-unit {
+  font-size: 24rpx;
+  color: #9aa0a6;
+}
+
+.duration-summary {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  font-size: 24rpx;
+  color: #5f6368;
+}
+
+.duration-summary__value {
+  font-weight: 600;
+  color: #2f2f2f;
 }
 </style>
