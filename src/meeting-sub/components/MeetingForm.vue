@@ -255,13 +255,13 @@ const participantDisplayText = computed(() => {
       </view>
 
       <!-- 描述 -->
-      <view class="bg-white px-3">
+      <view class="flex items-center justify-between bg-white">
         <wd-input
           :model-value="meeting.description"
           placeholder="请输入会议描述..."
           type="textarea"
           auto-height
-          custom-class="meeting-form-input w-full"
+          custom-class="meeting-form-input flex-1 w-full"
           :no-border="true"
           size="large"
           @update:model-value="(value) => updateField('description', value)"
