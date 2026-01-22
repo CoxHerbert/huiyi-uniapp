@@ -235,18 +235,7 @@ onUnmounted(() => {
           />
         </template>
         <template v-else>
-          <view class="phone-row">
-            <wd-input v-model="formData.phone" placeholder="请输入手机号" clearable />
-            <wd-button
-              size="small"
-              open-type="getPhoneNumber"
-              class="phone-button"
-              @getphonenumber="onGetPhoneNumber"
-              @click="onRequestPhone"
-            >
-              获取手机号
-            </wd-button>
-          </view>
+          <wd-input v-model="formData.phone" placeholder="请输入手机号" clearable />
           <text class="sms-tip">该功能暂未在小程序开放</text>
           <view class="code-row">
             <wd-input v-model="formData.code" placeholder="请输入验证码" clearable />
@@ -264,6 +253,16 @@ onUnmounted(() => {
 
       <wd-button block type="primary" :loading="loading" @click="onSubmit">
         登录
+      </wd-button>
+      <wd-button
+        v-if="loginMode === 'sms'"
+        block
+        class="phone-action"
+        open-type="getPhoneNumber"
+        @getphonenumber="onGetPhoneNumber"
+        @click="onRequestPhone"
+      >
+        获取手机号
       </wd-button>
     </view>
   </view>
@@ -353,22 +352,6 @@ onUnmounted(() => {
   align-items: center;
 }
 
-.phone-row {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
-
-.phone-row :deep(.wd-input) {
-  flex: 1;
-}
-
-.phone-row :deep(.wd-button) {
-  width: 120px;
-  padding: 0 6px;
-  font-size: 12px;
-}
-
 .code-row :deep(.wd-input) {
   flex: 1;
 }
@@ -386,6 +369,10 @@ onUnmounted(() => {
 
 .code-button--locked {
   opacity: 0.6;
+}
+
+.phone-action {
+  margin-top: 12px;
 }
 
 /* 关键：确保 wd-input 容器级别就 100% 宽度 */
