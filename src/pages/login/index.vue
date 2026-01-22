@@ -257,9 +257,6 @@ onUnmounted(() => {
         </template>
         <template v-else>
           <wd-input v-model="formData.phone" placeholder="请输入手机号" clearable />
-          <text class="sms-tip">
-            该功能暂未在小程序开放
-          </text>
           <view class="code-row">
             <wd-input v-model="formData.code" placeholder="请输入验证码" clearable />
             <wd-button
@@ -380,11 +377,6 @@ onUnmounted(() => {
   width: 120px;
   padding: 0 6px;
   font-size: 12px;
-}
-
-.sms-tip {
-  font-size: 12px;
-  color: #f59e0b;
 }
 
 .code-button--locked {
