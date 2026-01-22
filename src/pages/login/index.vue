@@ -87,6 +87,27 @@ function switchMode(mode: 'account' | 'sms') {
   }
 }
 
+function onRequestPhone() {
+  // #ifndef MP-WEIXIN
+  globalToast.error('请在小程序端使用一键获取手机号')
+  // #endif
+}
+
+function onGetPhoneNumber(event: any) {
+  const detail = event?.detail || {}
+  const phoneNumber = detail.phoneNumber || detail.purePhoneNumber
+  if (phoneNumber) {
+    formData.phone = phoneNumber
+    globalToast.success('已获取手机号')
+    return
+  }
+  if (detail.errMsg && detail.errMsg.includes('deny')) {
+    globalToast.error('已取消获取手机号')
+    return
+  }
+  globalToast.error('获取手机号失败，请手动输入')
+}
+
 async function onSendCode() {
   if (smsLocked.value)
     return
@@ -214,7 +235,18 @@ onUnmounted(() => {
           />
         </template>
         <template v-else>
-          <wd-input v-model="formData.phone" placeholder="请输入手机号" clearable />
+          <view class="phone-row">
+            <wd-input v-model="formData.phone" placeholder="请输入手机号" clearable />
+            <wd-button
+              size="small"
+              open-type="getPhoneNumber"
+              class="phone-button"
+              @getphonenumber="onGetPhoneNumber"
+              @click="onRequestPhone"
+            >
+              获取手机号
+            </wd-button>
+          </view>
           <text class="sms-tip">该功能暂未在小程序开放</text>
           <view class="code-row">
             <wd-input v-model="formData.code" placeholder="请输入验证码" clearable />
@@ -319,6 +351,22 @@ onUnmounted(() => {
   display: flex;
   gap: 12px;
   align-items: center;
+}
+
+.phone-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.phone-row :deep(.wd-input) {
+  flex: 1;
+}
+
+.phone-row :deep(.wd-button) {
+  width: 120px;
+  padding: 0 6px;
+  font-size: 12px;
 }
 
 .code-row :deep(.wd-input) {
