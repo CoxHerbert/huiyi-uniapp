@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { KEYS } from '@/constants/keys'
 import { sendSms } from '@/api/user'
+import { KEYS } from '@/constants/keys'
 import { encrypt } from '@/utils/sm2'
 import { isvalidatemobile } from '@/utils/validate'
 
@@ -120,6 +120,7 @@ async function onSendCode() {
   try {
     const response = await sendSms(formData.tenantId, encrypt(formData.phone))
     const payload = (response as UniApp.RequestSuccessCallbackResult)?.data || {}
+    console.log(response, 'response')
     if ((payload as Record<string, any>).success) {
       formData.codeId = (payload as Record<string, any>).data?.id || ''
       globalToast.success((payload as Record<string, any>).msg || '验证码已发送')
@@ -236,7 +237,9 @@ onUnmounted(() => {
         </template>
         <template v-else>
           <wd-input v-model="formData.phone" placeholder="请输入手机号" clearable />
-          <text class="sms-tip">该功能暂未在小程序开放</text>
+          <text class="sms-tip">
+            该功能暂未在小程序开放
+          </text>
           <view class="code-row">
             <wd-input v-model="formData.code" placeholder="请输入验证码" clearable />
             <wd-button

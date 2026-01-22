@@ -56,7 +56,7 @@ export default {
       },
     })
   },
-  loginByPhone(tenantId, phone, code, smsId) {
+  loginByPhone(tenantId, phone, value, id) {
     return request({
       url: '/blade-auth/oauth/token',
       method: 'post',
@@ -66,10 +66,10 @@ export default {
       params: {
         tenantId,
         phone,
-        code,
-        grant_type: 'sms',
+        value,
+        grant_type: 'sms_code',
         scope: 'all',
-        smsId,
+        id,
       },
     })
   },
