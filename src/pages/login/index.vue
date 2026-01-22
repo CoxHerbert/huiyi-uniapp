@@ -270,8 +270,17 @@ onUnmounted(() => {
           </view>
         </template>
       </view>
-
       <wd-button
+        block
+        type="primary"
+        :loading="loading"
+        :open-type="loginMode === 'sms' ? smsPrimaryOpenType : ''"
+        @click="onPrimaryAction"
+      >
+        登录
+      </wd-button>
+
+      <!-- <wd-button
         block
         type="primary"
         :loading="loading"
@@ -280,7 +289,7 @@ onUnmounted(() => {
         @click="onPrimaryAction"
       >
         {{ loginMode === 'sms' ? smsPrimaryLabel : '登录' }}
-      </wd-button>
+      </wd-button> -->
     </view>
   </view>
 </template>
