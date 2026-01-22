@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { KEYS } from '@/constants/keys'
 import { sendSms } from '@/api/user'
+import { KEYS } from '@/constants/keys'
 import { encrypt } from '@/utils/sm2'
 import { isvalidatemobile } from '@/utils/validate'
 
@@ -87,6 +87,27 @@ function switchMode(mode: 'account' | 'sms') {
   }
 }
 
+function onRequestPhone() {
+  // #ifndef MP-WEIXIN
+  globalToast.error('请在小程序端使用一键获取手机号')
+  // #endif
+}
+
+function onGetPhoneNumber(event: any) {
+  const detail = event?.detail || {}
+  const phoneNumber = detail.phoneNumber || detail.purePhoneNumber
+  if (phoneNumber) {
+    formData.phone = phoneNumber
+    globalToast.success('已获取手机号')
+    return
+  }
+  if (detail.errMsg && detail.errMsg.includes('deny')) {
+    globalToast.error('已取消获取手机号')
+    return
+  }
+  globalToast.error('获取手机号失败，请手动输入')
+}
+
 async function onSendCode() {
   if (smsLocked.value)
     return
@@ -99,8 +120,11 @@ async function onSendCode() {
   try {
     const response = await sendSms(formData.tenantId, encrypt(formData.phone))
     const payload = (response as UniApp.RequestSuccessCallbackResult)?.data || {}
+    console.log(response, 'response')
+    console.log(payload, 'payload')
     if ((payload as Record<string, any>).success) {
       formData.codeId = (payload as Record<string, any>).data?.id || ''
+      console.log(formData.codeId, 'codeId')
       globalToast.success((payload as Record<string, any>).msg || '验证码已发送')
       startSmsTimer()
       return
@@ -215,7 +239,9 @@ onUnmounted(() => {
         </template>
         <template v-else>
           <wd-input v-model="formData.phone" placeholder="请输入手机号" clearable />
-          <text class="sms-tip">该功能暂未在小程序开放</text>
+          <text class="sms-tip">
+            该功能暂未在小程序开放
+          </text>
           <view class="code-row">
             <wd-input v-model="formData.code" placeholder="请输入验证码" clearable />
             <wd-button
@@ -232,6 +258,16 @@ onUnmounted(() => {
 
       <wd-button block type="primary" :loading="loading" @click="onSubmit">
         登录
+      </wd-button>
+      <wd-button
+        v-if="loginMode === 'sms'"
+        block
+        class="phone-action"
+        open-type="getPhoneNumber"
+        @getphonenumber="onGetPhoneNumber"
+        @click="onRequestPhone"
+      >
+        获取手机号
       </wd-button>
     </view>
   </view>
@@ -338,6 +374,10 @@ onUnmounted(() => {
 
 .code-button--locked {
   opacity: 0.6;
+}
+
+.phone-action {
+  margin-top: 12px;
 }
 
 /* 关键：确保 wd-input 容器级别就 100% 宽度 */
