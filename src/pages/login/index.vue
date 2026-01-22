@@ -121,8 +121,10 @@ async function onSendCode() {
     const response = await sendSms(formData.tenantId, encrypt(formData.phone))
     const payload = (response as UniApp.RequestSuccessCallbackResult)?.data || {}
     console.log(response, 'response')
+    console.log(payload, 'payload')
     if ((payload as Record<string, any>).success) {
       formData.codeId = (payload as Record<string, any>).data?.id || ''
+      console.log(formData.codeId, 'codeId')
       globalToast.success((payload as Record<string, any>).msg || '验证码已发送')
       startSmsTimer()
       return
