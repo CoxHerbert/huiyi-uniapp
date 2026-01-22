@@ -23,6 +23,12 @@ const smsText = ref('获取验证码')
 const smsTime = ref(60)
 const smsLocked = ref(false)
 let smsTimer: ReturnType<typeof setInterval> | null = null
+const isPhoneValid = computed(() => {
+  const [hasError] = isvalidatemobile(formData.phone)
+  return !hasError
+})
+const smsPrimaryLabel = computed(() => (isPhoneValid.value ? '登录' : '获取手机号'))
+const smsPrimaryOpenType = computed(() => (isPhoneValid.value ? '' : 'getPhoneNumber'))
 
 const formData = reactive({
   username: '',
@@ -106,6 +112,18 @@ function onGetPhoneNumber(event: any) {
     return
   }
   globalToast.error('获取手机号失败，请手动输入')
+}
+
+function onPrimaryAction() {
+  if (loginMode.value === 'account') {
+    onSubmit()
+    return
+  }
+  if (isPhoneValid.value) {
+    onSubmit()
+    return
+  }
+  onRequestPhone()
 }
 
 async function onSendCode() {
@@ -239,9 +257,6 @@ onUnmounted(() => {
         </template>
         <template v-else>
           <wd-input v-model="formData.phone" placeholder="请输入手机号" clearable />
-          <text class="sms-tip">
-            该功能暂未在小程序开放
-          </text>
           <view class="code-row">
             <wd-input v-model="formData.code" placeholder="请输入验证码" clearable />
             <wd-button
@@ -256,18 +271,15 @@ onUnmounted(() => {
         </template>
       </view>
 
-      <wd-button block type="primary" :loading="loading" @click="onSubmit">
-        登录
-      </wd-button>
       <wd-button
-        v-if="loginMode === 'sms'"
         block
-        class="phone-action"
-        open-type="getPhoneNumber"
+        type="primary"
+        :loading="loading"
+        :open-type="loginMode === 'sms' ? smsPrimaryOpenType : ''"
         @getphonenumber="onGetPhoneNumber"
-        @click="onRequestPhone"
+        @click="onPrimaryAction"
       >
-        获取手机号
+        {{ loginMode === 'sms' ? smsPrimaryLabel : '登录' }}
       </wd-button>
     </view>
   </view>
@@ -365,11 +377,6 @@ onUnmounted(() => {
   width: 120px;
   padding: 0 6px;
   font-size: 12px;
-}
-
-.sms-tip {
-  font-size: 12px;
-  color: #f59e0b;
 }
 
 .code-button--locked {
