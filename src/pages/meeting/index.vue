@@ -225,6 +225,14 @@ function goToHistory() { uni.navigateTo({ url: '/meeting-sub/history' }) }
 function goToDetail(meetingId: string, id: string) {
   uni.navigateTo({ url: `/meeting-sub/detail?meetingId=${meetingId}&id=${id}` })
 }
+function handleRecreate(item: MeetingItem) {
+  const meetingId = item.meetingId ?? item.id
+  if (!meetingId) {
+    uni.showToast({ title: '无法获取会议标识', icon: 'none' })
+    return
+  }
+  uni.navigateTo({ url: `/meeting-sub/create?meetingId=${meetingId}` })
+}
 function resetRefresher() {
   refresherTriggered.value = false
   forceScrollToTop()
@@ -368,6 +376,12 @@ function handleRefresherAbort() {
                     <text class="meet-kv__v">
                       {{ item.meetingNo }}
                     </text>
+                  </view>
+                </view>
+
+                <view class="meet-actions">
+                  <view class="meet-action" @click.stop="handleRecreate(item)">
+                    重新发起
                   </view>
                 </view>
               </view>
@@ -551,5 +565,19 @@ page {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+.meet-actions {
+  margin-top: 16rpx;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.meet-action {
+  padding: 10rpx 20rpx;
+  border-radius: 18rpx;
+  font-size: 26rpx;
+  color: #3f5fff;
+  background: rgba(63, 95, 255, 0.08);
 }
 </style>
