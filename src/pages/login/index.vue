@@ -47,6 +47,10 @@ onLoad((option) => {
   if (cachedUsername) {
     formData.username = cachedUsername
   }
+  const cachedPhone = uni.getStorageSync(KEYS.LAST_PHONE)
+  if (cachedPhone) {
+    formData.phone = cachedPhone
+  }
 })
 
 onShow(() => {
@@ -104,6 +108,7 @@ function onGetPhoneNumber(event: any) {
   const phoneNumber = detail.phoneNumber || detail.purePhoneNumber
   if (phoneNumber) {
     formData.phone = phoneNumber
+    uni.setStorageSync(KEYS.LAST_PHONE, phoneNumber)
     globalToast.success('已获取手机号')
     return
   }
@@ -207,6 +212,19 @@ async function onSubmit() {
     loading.value = false
   }
 }
+
+watch(
+  () => formData.phone,
+  (value) => {
+    if (!value) {
+      return
+    }
+    const [hasError] = isvalidatemobile(value)
+    if (!hasError) {
+      uni.setStorageSync(KEYS.LAST_PHONE, value)
+    }
+  },
+)
 
 onUnmounted(() => {
   resetSmsTimer()
