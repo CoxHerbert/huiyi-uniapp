@@ -1,5 +1,9 @@
 <script setup lang="ts">
-onLaunch(() => {})
+import { checkMiniProgramUpdate } from '@/utils/update'
+
+onLaunch(() => {
+  checkMiniProgramUpdate()
+})
 </script>
 
 <style lang="scss">
