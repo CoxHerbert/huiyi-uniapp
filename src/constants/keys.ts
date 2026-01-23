@@ -4,6 +4,7 @@ export const KEYS = {
   USER_INFO: 'app-user-info',
   LOGIN_INFO: 'app-login-info',
   LAST_USERNAME: 'app-last-username',
+  LAST_PHONE: 'app-last-phone',
   PERMISSION: 'app-permission',
   BTN_PERMISSION: 'app-btn-permission',
   DEPT_INFO: 'app-dept-info',
