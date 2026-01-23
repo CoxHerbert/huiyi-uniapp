@@ -72,6 +72,7 @@ export const useAuthStore = defineStore('auth', {
     logout() {
       this.clearToken()
       this.clearRefreshToken()
+      uni.removeStorageSync(KEYS.LAST_PHONE)
       const userStore = useUserStore()
       userStore.reset()
       this.refreshingPromise = null
