@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { checkMiniProgramUpdate } from '@/utils/update'
+
 definePage({
   name: 'mine',
   layout: 'tabbar',
@@ -112,6 +114,10 @@ function handleLogout() {
     },
   })
 }
+
+function handleCheckUpdate() {
+  checkMiniProgramUpdate({ showNoUpdateToast: true })
+}
 </script>
 
 <template>
@@ -214,6 +220,11 @@ function handleLogout() {
         账号
       </view>
       <wd-cell-group border custom-class="section__group">
+        <wd-cell title="检查更新" is-link @click="handleCheckUpdate">
+          <template #icon>
+            <wd-icon name="refresh" size="18px" />
+          </template>
+        </wd-cell>
         <wd-cell title="退出登录" is-link @click="handleLogout">
           <template #icon>
             <wd-icon name="logout" size="18px" />
