@@ -5,6 +5,7 @@ import {
   formatDateTime,
   getAmPmLabel,
   getStatusMeta,
+  parseNameList,
   parseHostUserName,
   toMillis,
 } from '../pages/meeting/utils'
@@ -35,6 +36,8 @@ interface HistoryItem {
   meetingDuration?: number // 秒
 
   _sortKey?: number
+
+  userName?: string
 }
 
 const historyList = ref<HistoryItem[]>([])
@@ -86,6 +89,9 @@ function normalizeHistoryList(list: any[]): HistoryItem[] {
     const createTimeMs = toMillis(record?.createTime)
     const createTimeLabel = createTimeMs ? formatDateTime(createTimeMs) : ''
     const hostUser = parseHostUserName(record?.hostUser)
+    const userName = parseNameList(
+      record?.userName ?? record?.participantNames ?? record?.participants,
+    ).join(',')
     const item: HistoryItem = {
       id: record?.id,
       status: record?.status,
@@ -103,6 +109,7 @@ function normalizeHistoryList(list: any[]): HistoryItem[] {
       meetingDuration: typeof duration === 'number' ? duration : undefined,
       hostUser,
       hostUserStr: record.hostUser,
+      userName,
       _sortKey: sortKey,
     }
 
@@ -267,7 +274,7 @@ function handleRecreate(item: HistoryItem) {
                 参会人
               </text>
               <text class="meet-kv__v meet-kv__v--truncate">
-                {{ item.createTime || '-' }}
+                {{ item.userName || '-' }}
               </text>
             </view>
 
