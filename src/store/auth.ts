@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import h5Apis from '@/api/h5'
 import { KEYS } from '@/constants/keys'
-import { setRefreshToken, setToken } from '@/utils/auth' // 你已改成 uni.getStorageSync 的版本也没问题
+import { removeRefreshToken, removeToken, setRefreshToken, setToken } from '@/utils/auth' // 你已改成 uni.getStorageSync 的版本也没问题
 import { extractLoginInfo } from '@/utils/login-info'
 import { encrypt } from '@/utils/sm2'
 import { useUserStore } from './user'
@@ -72,7 +72,8 @@ export const useAuthStore = defineStore('auth', {
     logout() {
       this.clearToken()
       this.clearRefreshToken()
-      uni.removeStorageSync(KEYS.LAST_PHONE)
+      removeToken()
+      removeRefreshToken()
       const userStore = useUserStore()
       userStore.reset()
       this.refreshingPromise = null
