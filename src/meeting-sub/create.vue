@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch, watchEffect } from 'vue'
-import { createMeeting } from '@/api/meeting'
+import { createMeeting, getMeetingInfo } from '@/api/meeting'
 import { useUserStore } from '@/store/user'
 import MeetingForm from './components/MeetingForm.vue'
 
@@ -33,6 +33,23 @@ const meetingForm = reactive({
   attachment: '',
   description: '',
 })
+
+interface MeetingMember {
+  userid?: string
+}
+
+interface MeetingInfoApi {
+  title?: string
+  meeting_start?: number
+  meeting_duration?: number
+  location?: string
+  description?: string
+  attendees?: { member?: MeetingMember[] }
+  settings?: { password?: string, host?: string[] }
+  userName?: any
+  users?: any
+  hostUser?: any
+}
 
 const MIN_DURATION_MINUTES = 5
 const MIN_START_OFFSET_MINUTES = 5
@@ -242,6 +259,147 @@ function applyCustomDuration() {
   applyDuration(normalized)
 }
 
+function parseUserNames(input: any): string[] {
+  if (input === null || input === undefined || input === '')
+    return []
+
+  if (Array.isArray(input))
+    return input.map((x: any) => String(x)).filter(Boolean)
+
+  if (typeof input === 'string') {
+    const str = input.trim()
+    if (!str)
+      return []
+
+    if (str.startsWith('[')) {
+      try {
+        const arr = JSON.parse(str)
+        if (Array.isArray(arr))
+          return arr.map((x: any) => String(x)).filter(Boolean)
+      }
+      catch (e) {
+        // ignore
+      }
+    }
+
+    return str.split(/[,，]/).map(s => s.trim()).filter(Boolean)
+  }
+
+  return [String(input)].filter(Boolean)
+}
+
+function parseUsers(input: any): Array<{ realName: string, account: string }> {
+  if (!input)
+    return []
+
+  if (Array.isArray(input)) {
+    return input
+      .map((item: any) => ({
+        realName: String(item?.realName ?? '').trim(),
+        account: String(item?.account ?? '').trim(),
+      }))
+      .filter(item => item.realName || item.account)
+  }
+
+  if (typeof input === 'string') {
+    const text = input.trim()
+    if (!text)
+      return []
+    try {
+      const parsed = JSON.parse(text)
+      if (Array.isArray(parsed)) {
+        return parsed
+          .map((item: any) => ({
+            realName: String(item?.realName ?? '').trim(),
+            account: String(item?.account ?? '').trim(),
+          }))
+          .filter(item => item.realName || item.account)
+      }
+    }
+    catch (error) {
+      return []
+    }
+  }
+
+  return []
+}
+
+function parseHostUsers(input: any): Array<{ realName: string, account: string }> {
+  return parseUsers(input)
+}
+
+function shouldFilterAttendee(userid?: string) {
+  return typeof userid === 'string' && /^EW-M[1-6]$/.test(userid)
+}
+
+function resolveAttendeeIds(attendees?: { member?: MeetingMember[] }) {
+  const members = attendees?.member ?? []
+  return Array.isArray(members)
+    ? members
+        .map(item => item?.userid)
+        .filter(userid => !shouldFilterAttendee(userid))
+        .filter((value): value is string => !!value)
+    : []
+}
+
+function applyMeetingToForm(data: MeetingInfoApi) {
+  meetingForm.name = data.title ?? meetingForm.name
+  meetingForm.location = data.location ?? ''
+  meetingForm.description = data.description ?? ''
+  meetingForm.password = data.settings?.password ?? ''
+
+  const hostUsers = parseHostUsers(data.hostUser)
+  if (hostUsers.length) {
+    meetingForm.hostUser = hostUsers
+    meetingForm.hosts = hostUsers.map(user => user.account).filter(Boolean)
+  }
+  else {
+    meetingForm.hosts = data.settings?.host ?? meetingForm.hosts
+    meetingForm.hostUser = meetingForm.hosts.map(account => ({
+      account,
+      realName: '',
+    }))
+  }
+
+  const users = parseUsers(data.users)
+  if (users.length) {
+    meetingForm.users = users
+    meetingForm.participants = users.map(user => user.account).filter(Boolean).join(',')
+    meetingForm.participantNames = users.map(user => user.realName).filter(Boolean)
+  }
+  else {
+    const attendeeIds = resolveAttendeeIds(data.attendees)
+    const names = parseUserNames(data.userName)
+    meetingForm.participants = attendeeIds.join(',')
+    meetingForm.participantNames = names
+    meetingForm.users = attendeeIds.map((account, index) => ({
+      account,
+      realName: names[index] || '',
+    }))
+  }
+
+  const durationSec = Number(data.meeting_duration || 0)
+  if (durationSec) {
+    meetingForm.date = formatDate(new Date())
+    meetingForm.startTime = resolveDefaultStartTime()
+    applyDuration(Math.max(Math.round(durationSec / 60), MIN_DURATION_MINUTES))
+  }
+}
+
+async function loadMeetingInfo(meetingId?: string) {
+  if (!meetingId)
+    return
+  try {
+    const res: any = await getMeetingInfo(meetingId)
+    const data: MeetingInfoApi = res?.data?.data || res?.data || {}
+    applyMeetingToForm(data)
+  }
+  catch (error) {
+    console.error('fetch meeting info failed', error)
+    uni.showToast({ title: '获取会议详情失败', icon: 'none' })
+  }
+}
+
 watch(
   () => [meetingForm.date, meetingForm.startTime, meetingForm.endTime],
   () => {
@@ -413,6 +571,11 @@ async function handleCreate() {
     console.error('create meeting failed', error)
   }
 }
+
+onLoad((options) => {
+  if (options?.meetingId)
+    loadMeetingInfo(String(options.meetingId))
+})
 </script>
 
 <template>

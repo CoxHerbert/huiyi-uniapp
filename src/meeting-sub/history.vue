@@ -172,6 +172,15 @@ onLoad(() => {
 function goToHistoryDetail(meetingId: number | string) {
   uni.navigateTo({ url: `/meeting-sub/history-detail?meetingId=${meetingId}` })
 }
+
+function handleRecreate(item: HistoryItem) {
+  const meetingId = item.meetingId ?? item.id
+  if (!meetingId) {
+    uni.showToast({ title: '无法获取会议标识', icon: 'none' })
+    return
+  }
+  uni.navigateTo({ url: `/meeting-sub/create?meetingId=${meetingId}` })
+}
 </script>
 
 <template>
@@ -263,6 +272,12 @@ function goToHistoryDetail(meetingId: number | string) {
             </view>
 
             <!-- meeting 页这里是 meetingNo；历史页没字段就不展示，但样式/结构已完全对齐 -->
+          </view>
+
+          <view class="meet-actions">
+            <view class="meet-action" @click.stop="handleRecreate(item)">
+              重新发起
+            </view>
           </view>
         </view>
       </view>
@@ -429,5 +444,19 @@ function goToHistoryDetail(meetingId: number | string) {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+.meet-actions {
+  margin-top: 16rpx;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.meet-action {
+  padding: 10rpx 20rpx;
+  border-radius: 18rpx;
+  font-size: 26rpx;
+  color: #3f5fff;
+  background: rgba(63, 95, 255, 0.08);
 }
 </style>
