@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { sendSms } from '@/api/user'
+import { getPhoneByCode, sendSms } from '@/api/user'
 import { KEYS } from '@/constants/keys'
 import { encrypt } from '@/utils/sm2'
 import { isvalidatemobile } from '@/utils/validate'
@@ -139,6 +139,7 @@ async function onGetPhoneNumber(event: any) {
     return
 
   const detail = event?.detail || {}
+  const phoneCode = detail.code
   const phoneNumber = detail.phoneNumber || detail.purePhoneNumber
 
   // 用户取消授权
@@ -152,6 +153,27 @@ async function onGetPhoneNumber(event: any) {
     formData.phone = phoneNumber
     globalToast.success('已获取手机号')
     return
+  }
+
+  if (phoneCode) {
+    try {
+      const response = await getPhoneByCode(phoneCode)
+      const payload = (response as UniApp.RequestSuccessCallbackResult)?.data || {}
+      const phone = (payload as Record<string, any>).data?.phone || (payload as Record<string, any>).data?.phoneNumber
+
+      if ((payload as Record<string, any>).success && phone) {
+        formData.phone = phone
+        globalToast.success('已获取手机号')
+        return
+      }
+
+      globalToast.error((payload as Record<string, any>).msg || '获取手机号失败，请手动输入')
+      return
+    }
+    catch (error: any) {
+      globalToast.error(error?.message || '获取手机号失败，请手动输入')
+      return
+    }
   }
 
   // 只有加密数据：需要后端解密
