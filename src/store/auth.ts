@@ -104,7 +104,7 @@ export const useAuthStore = defineStore('auth', {
       }
 
       userStore.mergeLoginInfo(loginInfo)
-      await userStore.refreshPermissionData()
+      await userStore.fetchUserInfo()
 
       return payload
     },
@@ -130,7 +130,7 @@ export const useAuthStore = defineStore('auth', {
       }
 
       userStore.mergeLoginInfo(loginInfo)
-      await userStore.refreshPermissionData()
+      await userStore.fetchUserInfo()
 
       return payload
     },
