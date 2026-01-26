@@ -75,26 +75,12 @@ const employeeNumber = computed(() => {
   )
 })
 
-/** 角色：loginInfo.role_name 形如 "administrator,基础用户,..." */
-const roleNames = computed<string[]>(() => {
-  const raw = loginInfo.value?.role_name
-  if (!raw)
-    return []
-  return String(raw)
-    .split(',')
-    .map(s => s.trim())
-    .filter(Boolean)
-})
-
 /** 头像：你给的 loginInfo.avatar 为空，这里给个兜底 */
 const avatarUrl = computed(() => {
   const user = userInfo.value
   const login = loginInfo.value
   return user.avatar || login.avatar || ''
 })
-
-const tenantId = computed(() => loginInfo.value?.tenant_id || userInfo.value?.tenant_id || '')
-const deptId = computed(() => loginInfo.value?.dept_id || userInfo.value?.dept_id || '')
 
 // 处理主题色选择
 function handleThemeColorSelect(option: any) {
@@ -180,19 +166,6 @@ function handleCheckUpdate() {
                 部门：{{ deptId }}
               </text>
             </view> -->
-          </view>
-        </view>
-
-        <view v-if="roleNames.length" class="profile-card__roles">
-          <view v-for="(r, idx) in roleNames.slice(0, 6)" :key="`${r}-${idx}`" class="role-tag">
-            <text class="role-tag__text">
-              {{ r }}
-            </text>
-          </view>
-          <view v-if="roleNames.length > 6" class="role-tag role-tag--more">
-            <text class="role-tag__text">
-              +{{ roleNames.length - 6 }}
-            </text>
           </view>
         </view>
       </view>
@@ -299,7 +272,8 @@ function handleCheckUpdate() {
 }
 
 .profile-card__content {
-  padding: 14px 14px 14px;
+  padding: 14px;
+  padding-bottom: 28px;
   margin-top: -44px; /* 头像压住渐变背景 */
 }
 
