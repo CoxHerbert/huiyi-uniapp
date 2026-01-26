@@ -75,6 +75,7 @@ declare global {
   const getMeetingList: typeof import('./api/meeting')['getMeetingList']
   const getNormalPath: typeof import('./utils/util.js')['getNormalPath']
   const getObjType: typeof import('./utils/util.js')['getObjType']
+  const getPhoneByCode: typeof import('./api/user')['getPhoneByCode']
   const getQueryString: typeof import('./utils/util.js')['getQueryString']
   const getRefreshToken: typeof import('./utils/auth.js')['getRefreshToken']
   const getScreen: typeof import('./utils/util.js')['getScreen']
@@ -504,6 +505,7 @@ declare module 'vue' {
     readonly getMeetingList: UnwrapRef<typeof import('./api/meeting')['getMeetingList']>
     readonly getNormalPath: UnwrapRef<typeof import('./utils/util.js')['getNormalPath']>
     readonly getObjType: UnwrapRef<typeof import('./utils/util.js')['getObjType']>
+    readonly getPhoneByCode: UnwrapRef<typeof import('./api/user')['getPhoneByCode']>
     readonly getQueryString: UnwrapRef<typeof import('./utils/util.js')['getQueryString']>
     readonly getRefreshToken: UnwrapRef<typeof import('./utils/auth.js')['getRefreshToken']>
     readonly getScreen: UnwrapRef<typeof import('./utils/util.js')['getScreen']>

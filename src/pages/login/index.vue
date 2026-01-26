@@ -138,12 +138,11 @@ async function onGetPhoneNumber(event: any) {
   if (!ensureAgreed())
     return
 
-  const detail = event?.detail || {}
-  const phoneCode = detail.code
-  const phoneNumber = detail.phoneNumber || detail.purePhoneNumber
-
+  const detail = event || {}
+  const phoneCode = event.code
+  const phoneNumber = event.phoneNumber || event.purePhoneNumber
   // 用户取消授权
-  if (detail?.errMsg && String(detail.errMsg).includes('deny')) {
+  if (event?.errMsg && String(event.errMsg).includes('deny')) {
     globalToast.error('已取消获取手机号')
     return
   }
@@ -159,8 +158,7 @@ async function onGetPhoneNumber(event: any) {
     try {
       const response = await getPhoneByCode(phoneCode)
       const payload = (response as UniApp.RequestSuccessCallbackResult)?.data || {}
-      const phone = (payload as Record<string, any>).data?.phone || (payload as Record<string, any>).data?.phoneNumber
-
+      const phone = (payload as Record<string, any>)?.data
       if ((payload as Record<string, any>).success && phone) {
         formData.phone = phone
         globalToast.success('已获取手机号')

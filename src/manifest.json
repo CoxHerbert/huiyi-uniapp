@@ -57,7 +57,10 @@
       "subPackages": true
     },
     "darkmode": true,
-    "themeLocation": "theme.json"
+    "themeLocation": "theme.json",
+    "requiredPrivateInfos": [
+      "phoneNumber"
+    ]
   },
   "mp-alipay": {
     "usingComponents": true,
