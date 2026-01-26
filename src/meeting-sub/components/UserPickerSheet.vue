@@ -118,7 +118,7 @@ async function loadUsers(isLoadMore = false) {
             account: resolveUserAccount(item),
             name: resolveUserName(item),
           }))
-          .filter(item => item.account)
+          .filter(item => item.account && item.account !== 'null')
       : []
 
     if (isLoadMore)
