@@ -8,7 +8,7 @@ import { serialize, tansParams } from '@/utils/util'
 import { isURL, validatenull } from '@/utils/validate'
 
 const baseUrl
-  = 'http://192.168.60.39'
+  = 'https://www.eastwinbip.com/api'
 function toastError(message, cfg) {
   if (cfg?.noErrorMsg)
     return
