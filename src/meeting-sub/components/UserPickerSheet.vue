@@ -56,7 +56,7 @@ let searchTimer: ReturnType<typeof setTimeout> | null = null
 
 function resolveUserAccount(record: any) {
   return String(
-    record?.account,
+    record?.wxCode,
   ).trim()
 }
 
@@ -118,7 +118,7 @@ async function loadUsers(isLoadMore = false) {
             account: resolveUserAccount(item),
             name: resolveUserName(item),
           }))
-          .filter(item => item.account || item.name)
+          .filter(item => item.account)
       : []
 
     if (isLoadMore)
