@@ -71,6 +71,7 @@ export default defineManifestConfig({
     usingComponents: true,
     darkmode: true,
     themeLocation: 'theme.json',
+    requiredPrivateInfos: ['phoneNumber'],
   },
   'app-harmony': {},
   'mp-harmony': {},

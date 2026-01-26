@@ -22,3 +22,17 @@ export function sendSms(tenantId: string, phone: string) {
     },
   })
 }
+
+export function getPhoneByCode(code: string) {
+  return request({
+    url: '/blade-bip/wx/skip-url/getPhone',
+    method: 'get',
+    params: {
+      code,
+    },
+    meta: {
+      isToken: false,
+      ignoreAuthRedirect: true,
+    },
+  })
+}
