@@ -5,8 +5,8 @@ import {
   formatDateTime,
   getAmPmLabel,
   getStatusMeta,
-  parseNameList,
   parseHostUserName,
+  parseNameList,
   toMillis,
 } from '../pages/meeting/utils'
 
@@ -266,7 +266,7 @@ function handleRecreate(item: HistoryItem) {
                 主持人
               </text>
               <text class="meet-kv__v meet-kv__v--truncate">
-                {{ item.createUserName || '-' }}
+                {{ item.hostUser || '-' }}
               </text>
             </view>
             <view class="meet-kv__row">
