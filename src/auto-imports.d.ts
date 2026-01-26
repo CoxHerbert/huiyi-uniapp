@@ -18,6 +18,7 @@ declare global {
   const blobValidate: typeof import('./utils/util.js')['blobValidate']
   const cancelMeeting: typeof import('./api/meeting')['cancelMeeting']
   const cardid: typeof import('./utils/validate.js')['cardid']
+  const checkMiniProgramUpdate: typeof import('./utils/update')['checkMiniProgramUpdate']
   const computed: typeof import('vue')['computed']
   const computedAsync: typeof import('@vueuse/core')['computedAsync']
   const computedEager: typeof import('@vueuse/core')['computedEager']
@@ -446,6 +447,7 @@ declare module 'vue' {
     readonly blobValidate: UnwrapRef<typeof import('./utils/util.js')['blobValidate']>
     readonly cancelMeeting: UnwrapRef<typeof import('./api/meeting')['cancelMeeting']>
     readonly cardid: UnwrapRef<typeof import('./utils/validate.js')['cardid']>
+    readonly checkMiniProgramUpdate: UnwrapRef<typeof import('./utils/update')['checkMiniProgramUpdate']>
     readonly computed: UnwrapRef<typeof import('vue')['computed']>
     readonly computedAsync: UnwrapRef<typeof import('@vueuse/core')['computedAsync']>
     readonly computedEager: UnwrapRef<typeof import('@vueuse/core')['computedEager']>
