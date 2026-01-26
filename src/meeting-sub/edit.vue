@@ -26,6 +26,7 @@ interface MeetingInfoApi {
   userName?: any
   users?: any
   hostUser?: any
+  hostUsers?: any
 }
 
 const meetingId = ref('')
@@ -391,10 +392,13 @@ function applyMeetingToForm(data: MeetingInfoApi) {
   }
 
   meetingForm.name = data.title ?? ''
-  const hostUsers = parseHostUsers(hostUserArr.value)
-  if (hostUsers.length) {
-    meetingForm.hostUser = hostUsers
-    meetingForm.hosts = hostUsers.map(user => user.account).filter(Boolean)
+  const hostUsersFromOptions = parseHostUsers(hostUserArr.value)
+  const hostUsersFromApi = hostUsersFromOptions.length
+    ? hostUsersFromOptions
+    : parseHostUsers(data.hostUsers ?? data.hostUser)
+  if (hostUsersFromApi.length) {
+    meetingForm.hostUser = hostUsersFromApi
+    meetingForm.hosts = hostUsersFromApi.map(user => user.account).filter(Boolean)
   }
   else {
     meetingForm.hosts = data.settings?.host ?? []
