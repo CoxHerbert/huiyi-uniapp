@@ -12,7 +12,7 @@ definePage({
 })
 
 const userStore = useUserStore()
-const loginInfo = computed(() => userStore.loginInfo)
+const userInfo = computed(() => userStore.userInfo)
 const MEETING_LIST_REFRESH_KEY = 'meeting-list-refresh'
 
 const meetingForm = reactive({
@@ -99,7 +99,7 @@ function initDefaultDateTime() {
 
   const now = new Date()
   meetingForm.date = formatDate(now)
-  meetingForm.name = `${loginInfo.value?.real_name || ''}预定的会议`
+  meetingForm.name = `${userInfo.value?.realName || ''}预定的会议`
 
   const startAt = new Date(now)
   startAt.setSeconds(0, 0)
@@ -435,31 +435,31 @@ watchEffect(() => {
 })
 
 watchEffect(() => {
-  if (!meetingForm.hosts.length && loginInfo.value?.account) {
-    meetingForm.hosts = [loginInfo.value.account]
+  if (!meetingForm.hosts.length && userInfo.value?.account) {
+    meetingForm.hosts = [userInfo.value.account]
   }
 })
 
 watchEffect(() => {
-  const loginAccount = loginInfo.value?.account
+  const loginAccount = userInfo.value?.wxCode
   if (!loginAccount)
     return
   if (!meetingForm.hostUser.length) {
     meetingForm.hostUser = [{
       account: loginAccount,
-      realName: loginInfo.value?.real_name || '',
+      realName: userInfo.value?.realName || '',
     }]
   }
 })
 
 watchEffect(() => {
-  const account = loginInfo.value?.account
+  const account = userInfo.value?.wxCode
   if (!account)
     return
   if (!meetingForm.users.some(user => user.account === account)) {
     meetingForm.users = [
       ...meetingForm.users,
-      { account, realName: loginInfo.value?.real_name || '' },
+      { account, realName: userInfo.value?.realName || '' },
     ]
   }
   const ids = meetingForm.users.map(user => user.account).filter(Boolean)
@@ -493,9 +493,9 @@ function buildUsers() {
       nameByAccount.set(account, name)
   })
 
-  const loginAccount = loginInfo.value?.account
+  const loginAccount = userInfo.value?.wxCode
   if (loginAccount && !nameByAccount.has(loginAccount))
-    nameByAccount.set(loginAccount, loginInfo.value?.real_name || '')
+    nameByAccount.set(loginAccount, userInfo.value?.realName || '')
 
   return ids.map(account => ({
     account,
@@ -512,9 +512,9 @@ function buildHostUsers() {
       nameByAccount.set(user.account, user.realName)
   })
 
-  const loginAccount = loginInfo.value?.account
+  const loginAccount = userInfo.value?.wxCode
   if (loginAccount && !nameByAccount.has(loginAccount))
-    nameByAccount.set(loginAccount, loginInfo.value?.real_name || '')
+    nameByAccount.set(loginAccount, userInfo.value?.realName || '')
 
   return accounts.map(account => ({
     account,

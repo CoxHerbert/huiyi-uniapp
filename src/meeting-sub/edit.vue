@@ -34,7 +34,7 @@ const hostUserArr = ref('')
 const MEETING_LIST_REFRESH_KEY = 'meeting-list-refresh'
 const MEETING_DETAIL_REFRESH_KEY = 'meeting-detail-refresh'
 const userStore = useUserStore()
-const loginInfo = computed(() => userStore.loginInfo)
+const userInfo = computed(() => userStore.userInfo)
 
 const meetingForm = reactive({
   name: '',
@@ -282,8 +282,8 @@ watchEffect(() => {
 })
 
 watchEffect(() => {
-  if (!meetingForm.hosts.length && loginInfo.value?.account) {
-    meetingForm.hosts = [loginInfo.value.account]
+  if (!meetingForm.hosts.length && userInfo.value?.wxCode) {
+    meetingForm.hosts = [userInfo.value.wxCode]
   }
 })
 
