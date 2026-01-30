@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { cancelMeeting, getMeetingInfo } from '@/api/meeting'
+import { useUserStore } from '@/store/user'
 import {
   formatCNDate,
   formatDuration,
@@ -38,6 +39,8 @@ interface MeetingInfoApi {
 
 const meetingId = ref('')
 const pageId = ref('')
+const userStore = useUserStore()
+const userInfo = computed(() => userStore.userInfo)
 
 const MEETING_DETAIL_REFRESH_KEY = 'meeting-detail-refresh'
 const MEETING_LIST_REFRESH_KEY = 'meeting-list-refresh'
@@ -57,6 +60,7 @@ const meetingDetail = reactive({
   location: '-',
   description: '-',
   password: '-',
+  createUserName: '',
 
   // ✅ 新增：动态时长文本
   durationText: '--',
@@ -81,6 +85,7 @@ function applyMeetingToView(m: MeetingInfoApi) {
   meetingDetail.location = safeText(m.location)
   meetingDetail.description = safeText(m.description)
   meetingDetail.password = safeText(m.settings?.password)
+  meetingDetail.createUserName = safeText(m.createUserName)
 
   const statusRaw = m.status
   const statusStyle = getStatusMeta(statusRaw)
@@ -108,6 +113,12 @@ function applyMeetingToView(m: MeetingInfoApi) {
   const members = m.attendees?.member || []
   meetingDetail.attendees = members.map(i => i.userid).filter(Boolean)
 }
+
+const canEditMeeting = computed(() => {
+  if (meetingDetail.status !== '待开始')
+    return false
+  return meetingDetail.createUserName === userInfo.value?.realName
+})
 
 async function loadMeetingDetail() {
   if (!meetingId.value)
@@ -313,7 +324,7 @@ async function handleCancelMeeting() {
       </text>
     </view>
     <view
-      v-if="meetingDetail.status === '待开始'"
+      v-if="canEditMeeting"
       class="btn-wrap fixed bottom-0 left-0 right-0 z-10 border-t border-#f0f1f2 bg-white px-4 py-3 pb-[calc(12px+env(safe-area-inset-bottom))]"
     >
       <wd-button
