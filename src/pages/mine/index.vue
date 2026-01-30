@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import manifest from '@/manifest.json'
 import { checkMiniProgramUpdate } from '@/utils/update'
 
 definePage({
@@ -74,6 +75,8 @@ const employeeNumber = computed(() => {
     || '-'
   )
 })
+
+const appVersion = computed(() => manifest?.versionName || '-')
 
 /** 头像：你给的 loginInfo.avatar 为空，这里给个兜底 */
 const avatarUrl = computed(() => {
@@ -193,6 +196,13 @@ function handleCheckUpdate() {
         账号
       </view>
       <wd-cell-group border custom-class="section__group">
+        <wd-cell title="版本号">
+          <view class="cell-right">
+            <text class="cell-right__text">
+              v{{ appVersion }}
+            </text>
+          </view>
+        </wd-cell>
         <wd-cell title="检查更新" is-link @click="handleCheckUpdate">
           <template #icon>
             <wd-icon name="refresh" size="18px" />
