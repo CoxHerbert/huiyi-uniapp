@@ -45,7 +45,7 @@ interface MeetingInfoApi {
   location?: string
   description?: string
   attendees?: { member?: MeetingMember[] }
-  settings?: { password?: string, host?: string[] }
+  settings?: { password?: string, hosts?: { userid?: string[] } }
   userName?: any
   users?: any
   hostUser?: any
@@ -354,7 +354,7 @@ function applyMeetingToForm(data: MeetingInfoApi) {
     meetingForm.hosts = hostUsers.map(user => user.account).filter(Boolean)
   }
   else {
-    meetingForm.hosts = data.settings?.host ?? meetingForm.hosts
+    meetingForm.hosts = data.settings?.hosts?.userid ?? meetingForm.hosts
     meetingForm.hostUser = meetingForm.hosts.map(account => ({
       account,
       realName: '',
@@ -542,7 +542,9 @@ function toServerPayload() {
     },
     settings: {
       password: meetingForm.password,
-      host: hostIds,
+      hosts: {
+        userid: hostIds,
+      },
       remind_scope: 1,
     },
   }
