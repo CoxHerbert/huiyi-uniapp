@@ -13,7 +13,7 @@ export default defineManifestConfig({
   'name': '联合东创科技',
   'appid': '__UNI__1208592',
   'description': '',
-  'versionName': '1.0.0',
+  'versionName': '1.0.9',
   'versionCode': '100',
   'transformPx': false,
   /* 5+App特有相关 */
