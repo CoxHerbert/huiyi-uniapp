@@ -522,11 +522,41 @@ function buildHostUsers() {
   }))
 }
 
+function mergeHostsIntoUsers(
+  users: Array<{ realName: string, account: string }>,
+  hostUser: Array<{ realName: string, account: string }>,
+) {
+  const merged = users.map(user => ({ ...user }))
+  const nameByAccount = new Map<string, { realName: string, account: string }>()
+
+  merged.forEach((user) => {
+    if (user.account)
+      nameByAccount.set(user.account, user)
+  })
+
+  hostUser.forEach((host) => {
+    if (!host.account)
+      return
+    const existing = nameByAccount.get(host.account)
+    if (existing) {
+      if (!existing.realName && host.realName)
+        existing.realName = host.realName
+      return
+    }
+    const next = { account: host.account, realName: host.realName || '' }
+    merged.push(next)
+    nameByAccount.set(host.account, next)
+  })
+
+  return merged
+}
+
 /** 转成服务端接收格式（统一在这里维护字段映射） */
 function toServerPayload() {
   const users = meetingForm.users.length ? meetingForm.users : buildUsers()
   const hostUser = meetingForm.hostUser.length ? meetingForm.hostUser : buildHostUsers()
-  const ids = users.map(user => user.account).filter(Boolean)
+  const mergedUsers = mergeHostsIntoUsers(users, hostUser)
+  const ids = mergedUsers.map(user => user.account).filter(Boolean)
   const hostIds = hostUser.map(user => user.account).filter(Boolean)
 
   return {
@@ -535,7 +565,7 @@ function toServerPayload() {
     meeting_duration: meetingDurationSeconds.value,
     description: meetingForm.description,
     location: meetingForm.location,
-    users: JSON.stringify(users),
+    users: JSON.stringify(mergedUsers),
     hostUser: JSON.stringify(hostUser),
     invitees: {
       userid: ids,
