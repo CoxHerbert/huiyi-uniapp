@@ -209,7 +209,7 @@ function handleRecreate(item: HistoryItem) {
     <!-- ✅ 列表区：完全复刻 meeting 列表页的容器样式 -->
     <view class="bg-white px-4 pb-4 pt-2">
       <view v-if="filteredList.length === 0" class="flex flex-col items-center justify-center py-14 text-center">
-        <image class="h-40 w-40 opacity-80" src="@/static/empty.png" mode="aspectFit" />
+        <image class="h-40 w-40 opacity-80" src="@/static/empty.svg" mode="aspectFit" />
         <text class="mt-3 text-3 text-#9aa0a6">
           暂无匹配的会议
         </text>

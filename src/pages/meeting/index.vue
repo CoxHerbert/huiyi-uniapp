@@ -295,7 +295,7 @@ function handleRefresherAbort() {
           </text>
 
           <view v-if="!hasMeetingData" class="flex flex-col items-center justify-center py-14 text-center">
-            <image class="h-40 w-40 opacity-80" src="@/static/empty.png" mode="aspectFit" />
+            <image class="h-40 w-40 opacity-80" src="@/static/empty.svg" mode="aspectFit" />
             <text class="mt-3 text-3 text-#9aa0a6">
               暂无数据
             </text>
