@@ -65,6 +65,62 @@ function parseUserIds(value: string) {
     .filter(Boolean)
 }
 
+function buildNameMap(
+  participantIds: string[],
+  participantUsers: Array<{ realName: string, account: string }>,
+  participantNames: string[] | undefined,
+  hostUsers: Array<{ account: string, name?: string, realName?: string }>,
+) {
+  const nameByAccount = new Map<string, string>()
+
+  participantUsers.forEach((user) => {
+    if (user.account && user.realName)
+      nameByAccount.set(user.account, user.realName)
+  })
+
+  participantNames?.forEach((name, index) => {
+    const account = participantIds[index]
+    if (account && name && !nameByAccount.has(account))
+      nameByAccount.set(account, name)
+  })
+
+  hostUsers.forEach((user) => {
+    const displayName = user.realName || user.name
+    if (user.account && displayName && !nameByAccount.has(user.account))
+      nameByAccount.set(user.account, displayName)
+  })
+
+  if (loginInfo.value?.account && loginInfo.value.real_name && !nameByAccount.has(loginInfo.value.account))
+    nameByAccount.set(loginInfo.value.account, loginInfo.value.real_name)
+
+  return nameByAccount
+}
+
+function syncParticipantsWithHosts(
+  participantIds: string[],
+  participantUsers: Array<{ realName: string, account: string }>,
+  participantNames: string[] | undefined,
+  hostIds: string[],
+  hostUsers: Array<{ account: string, name?: string, realName?: string }>,
+) {
+  const mergedIds = Array.from(new Set([...participantIds, ...hostIds])).filter(Boolean)
+  const nameByAccount = buildNameMap(participantIds, participantUsers, participantNames, hostUsers)
+  const mergedUsers = mergedIds.map(account => ({
+    account,
+    realName: nameByAccount.get(account) || '',
+  }))
+
+  selectedParticipantIds.value = mergedIds
+  updateField('participants', mergedIds.join(','))
+  updateField('participantNames', mergedUsers.map(user => user.realName).filter(Boolean))
+  updateField('users', mergedUsers)
+}
+
+function resolveParticipantIdsFromMeeting() {
+  const userIds = (props.meeting.users || []).map(user => user.account).filter(Boolean)
+  return userIds.length ? userIds : parseUserIds(props.meeting.participants)
+}
+
 function openHostSheet() {
   const hostIds = (props.meeting.hostUser || [])
     .map(user => user.account)
@@ -87,23 +143,27 @@ function onHostConfirm(payload: { selectedIds: string[], selectedUsers: UserOpti
   selectedHostIds.value = ids
 
   updateField('hosts', ids)
-  updateField(
-    'hostUser',
-    (payload.selectedUsers || []).slice(0, 10).map(u => ({ realName: u.name, account: u.account })),
+  const hostUsers = (payload.selectedUsers || []).slice(0, 10).map(u => ({ realName: u.name, account: u.account }))
+  updateField('hostUser', hostUsers)
+
+  syncParticipantsWithHosts(
+    resolveParticipantIdsFromMeeting(),
+    props.meeting.users || [],
+    props.meeting.participantNames,
+    ids,
+    hostUsers,
   )
 }
 
 /** 选择器确认：参会人 */
 function onParticipantConfirm(payload: { selectedIds: string[], selectedUsers: UserOption[] }) {
   const ids = payload.selectedIds || []
-  selectedParticipantIds.value = ids
-
-  updateField('participants', ids.join(','))
-  updateField('participantNames', (payload.selectedUsers || []).map(u => u.name))
-  updateField(
-    'users',
-    (payload.selectedUsers || []).map(u => ({ realName: u.name, account: u.account })),
-  )
+  const participantUsers = (payload.selectedUsers || []).map(u => ({ realName: u.name, account: u.account }))
+  const hostIds = (props.meeting.hostUser || []).length
+    ? (props.meeting.hostUser || []).map(user => user.account).filter(Boolean)
+    : (props.meeting.hosts || [])
+  const hostUsers = (props.meeting.hostUser || []).map(user => ({ account: user.account, realName: user.realName }))
+  syncParticipantsWithHosts(ids, participantUsers, (payload.selectedUsers || []).map(u => u.name), hostIds, hostUsers)
 }
 
 /** 展示：如果当前账号是登录人且有 real_name，优先展示登录人姓名 */
