@@ -551,6 +551,17 @@ function mergeHostsIntoUsers(
   return merged
 }
 
+function mergeIds(...groups: Array<Array<string | undefined>>) {
+  const merged = new Set<string>()
+  groups.forEach((group) => {
+    group.forEach((item) => {
+      if (item)
+        merged.add(item)
+    })
+  })
+  return Array.from(merged)
+}
+
 /** 转成服务端接收格式（统一在这里维护字段映射） */
 function toServerPayload() {
   const users = meetingForm.users.length ? meetingForm.users : buildUsers()
@@ -558,6 +569,7 @@ function toServerPayload() {
   const mergedUsers = mergeHostsIntoUsers(users, hostUser)
   const ids = mergedUsers.map(user => user.account).filter(Boolean)
   const hostIds = hostUser.map(user => user.account).filter(Boolean)
+  const mergedIds = mergeIds(ids, hostIds)
 
   return {
     title: meetingForm.name,
@@ -568,12 +580,12 @@ function toServerPayload() {
     users: JSON.stringify(mergedUsers),
     hostUser: JSON.stringify(hostUser),
     invitees: {
-      userid: ids,
+      userid: mergedIds,
     },
     settings: {
       password: meetingForm.password,
       hosts: {
-        userid: hostIds,
+        userid: mergedIds,
       },
       remind_scope: 1,
     },
