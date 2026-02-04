@@ -1,5 +1,25 @@
-<svg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="160" height="160" rx="24" fill="#F3F4F6"/>
-  <path d="M52 64h56v48H52z" fill="#E5E7EB"/>
-  <path d="M60 88h40" stroke="#CBD5F5" stroke-width="6" stroke-linecap="round"/>
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#F8FAFC"/>
+      <stop offset="100%" stop-color="#EEF2FF"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#E5E7EB"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(140 50) rotate(135) scale(80)">
+      <stop offset="0%" stop-color="#C7D2FE" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#C7D2FE" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="200" height="200" rx="32" fill="url(#bg)"/>
+  <circle cx="140" cy="50" r="60" fill="url(#glow)"/>
+  <rect x="52" y="58" width="96" height="110" rx="18" fill="url(#card)" stroke="#E2E8F0" stroke-width="2"/>
+  <rect x="70" y="78" width="60" height="10" rx="5" fill="#CBD5F5"/>
+  <rect x="70" y="100" width="48" height="8" rx="4" fill="#E2E8F0"/>
+  <rect x="70" y="118" width="56" height="8" rx="4" fill="#E2E8F0"/>
+  <rect x="70" y="136" width="36" height="8" rx="4" fill="#E2E8F0"/>
+  <path d="M130 82l10 10-24 24-10-10 24-24z" fill="#A5B4FC"/>
+  <path d="M122 114l8 8" stroke="#818CF8" stroke-width="4" stroke-linecap="round"/>
 </svg>
