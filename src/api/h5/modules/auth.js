@@ -24,6 +24,11 @@ export default {
     return request({
       url: '/blade-auth/oauth/token',
       method: 'post',
+      meta: {
+        isToken: false,
+        ignoreAuthRedirect: true,
+        noLoading: true,
+      },
       headers: {
         'Tenant-Id': '000000',
       },
@@ -39,6 +44,11 @@ export default {
     return request({
       url: '/blade-auth/oauth/token',
       method: 'post',
+      meta: {
+        isToken: false,
+        ignoreAuthRedirect: true,
+        noLoading: true,
+      },
       headers: {
         'Tenant-Id': tenantId,
         'Dept-Id': website.switchMode ? deptId : '',
@@ -60,6 +70,11 @@ export default {
     return request({
       url: '/blade-auth/oauth/token',
       method: 'post',
+      meta: {
+        isToken: false,
+        ignoreAuthRedirect: true,
+        noLoading: true,
+      },
       headers: {
         'Tenant-Id': tenantId,
       },
@@ -79,6 +94,11 @@ export default {
       url: '/blade-auth/oauth/token',
       method: 'post',
       noErrorMsg: true,
+      meta: {
+        isToken: false,
+        ignoreAuthRedirect: true,
+        noLoading: true,
+      },
       headers: {
         'Tenant-Id': tenantId,
         'Dept-Id': website.switchMode ? deptId : '',
